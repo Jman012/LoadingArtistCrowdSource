@@ -32,7 +32,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 				message,
 				email,
 				Configuration.GetValue<string>("LACS:FromEmailAddress"),
-				Configuration.GetValue<string>("MailJet:FromEmailName"));
+				Configuration.GetValue<string>("LACS:FromEmailName"));
 		}
 
 		public async Task Execute(string apiKey, string apiSecret, string subject, string message, string toEmailAddress, string fromEmailAddress, string fromEmailName)
