@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,9 @@ namespace LoadingArtistCrowdSource.Server
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
+			/*
+			 * Default Skeleton
+			 */
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseSqlServer(
 					Configuration.GetConnectionString("DefaultConnection")));
@@ -41,10 +45,23 @@ namespace LoadingArtistCrowdSource.Server
 				.AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
 			services.AddAuthentication()
-				.AddIdentityServerJwt();
+				.AddIdentityServerJwt()
+				// Custom: Add Discord OAuth
+				.AddDiscord(options =>
+				{
+					options.ClientId = Configuration.GetValue<string>("Discord:ClientId");
+					options.ClientSecret = Configuration.GetValue<string>("Discord:ClientSecret");
+				});
 
 			services.AddControllersWithViews();
 			services.AddRazorPages();
+
+			/*
+			 * Custom
+			 */
+
+			// Add IEmailSender for ASP.NET Core Identity services
+			services.AddTransient<IEmailSender, Services.MailJetEmailSender>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
