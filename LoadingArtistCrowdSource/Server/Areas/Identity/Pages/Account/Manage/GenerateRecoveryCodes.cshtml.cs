@@ -24,10 +24,10 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account.Manage
         }
 
         [TempData]
-        public string[] RecoveryCodes { get; set; }
+        public string[] RecoveryCodes { get; set; } = new string[] { };
 
         [TempData]
-        public string StatusMessage { get; set; }
+        public string StatusMessage { get; set; } = "";
 
         public async Task<IActionResult> OnGetAsync()
         {

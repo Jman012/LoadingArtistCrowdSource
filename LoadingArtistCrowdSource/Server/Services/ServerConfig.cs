@@ -25,7 +25,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			var missingFields = new List<string>();
 			foreach (var field in fields)
 			{
-				string configKey = field.GetValue(null) as string;
+				string configKey = (string)field.GetValue(null)!;
 				string configValue = configuration.GetValue<string>(configKey);
 				if (string.IsNullOrEmpty(configValue))
 				{
