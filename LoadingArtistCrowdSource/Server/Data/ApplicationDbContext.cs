@@ -258,9 +258,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			#endregion CrowdSourcedFieldVerifiedEntryValue
 
+			string user1Id = "432ea055-ea01-443d-a6f7-e97d2c18d275", user2Id = "432ea055-ea01-443d-a6f7-e97d2c18d276", user3Id = "432ea055-ea01-443d-a6f7-e97d2c18d277";
 			var adminUser = new ApplicationUser()
 			{
-				Id = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+				Id = user1Id,
 				UserName = "jman012guy@gmail.com",
 				NormalizedUserName = "JMAN012GUY@GMAIL.COM",
 				Email = "jman012guy@gmail.com",
@@ -276,8 +277,46 @@ namespace LoadingArtistCrowdSource.Server.Data
 				SecurityStamp = "",
 				TwoFactorEnabled = false,
 			};
-			adminUser.PasswordHash = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>().HashPassword(adminUser, "Desert12!");
-			builder.Entity<ApplicationUser>().HasData(adminUser);
+			adminUser.PasswordHash = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>().HashPassword(adminUser, "password");
+			builder.Entity<ApplicationUser>().HasData(
+				adminUser,
+				new ApplicationUser()
+				{
+					Id = user2Id,
+					UserName = "jamamp1",
+					NormalizedUserName = "JAMAMP1",
+					Email = "jman012guy+1@gmail.com",
+					NormalizedEmail = "JMAN012GUY+1@GMAIL.COM",
+					EmailConfirmed = true,
+					ConcurrencyStamp = "3acb17f1-65fe-4eac-bc2b-26403b23b998",
+					AccessFailedCount = 0,
+					LockoutEnabled = true,
+					LockoutEnd = null,
+					PasswordHash = "",
+					PhoneNumber = "",
+					PhoneNumberConfirmed = false,
+					SecurityStamp = "",
+					TwoFactorEnabled = false,
+				},
+				new ApplicationUser()
+				{
+					Id = user3Id,
+					UserName = "jamamp2",
+					NormalizedUserName = "JAMAMP2",
+					Email = "jman012guy+2@gmail.com",
+					NormalizedEmail = "JMAN012GUY+2@GMAIL.COM",
+					EmailConfirmed = true,
+					ConcurrencyStamp = "3acb17f1-65fe-4eac-bc2b-26403b23b997",
+					AccessFailedCount = 0,
+					LockoutEnabled = true,
+					LockoutEnd = null,
+					PasswordHash = "",
+					PhoneNumber = "",
+					PhoneNumberConfirmed = false,
+					SecurityStamp = "",
+					TwoFactorEnabled = false,
+				}
+			);
 			builder.Entity<Comic>().HasData(new Comic()
 			{
 				Id = 1,
@@ -307,7 +346,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				ShortDescription = "The number of panels in the comic",
 				LongDescription = "blah blah",
 				CreatedDate = DateTimeOffset.Now,
-				CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+				CreatedBy = user1Id,
 				LastUpdatedDate = null,
 				LastUpdatedBy = null,
 			});
@@ -322,23 +361,141 @@ namespace LoadingArtistCrowdSource.Server.Data
 				ShortDescription = "Which characters are present in the comic",
 				LongDescription = "blah blah blah blah",
 				CreatedDate = DateTimeOffset.Now,
-				CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+				CreatedBy = user1Id,
 				LastUpdatedDate = null,
 				LastUpdatedBy = null,
 			});
+			builder.Entity<CrowdSourcedFieldUserEntry>().HasData(
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user1Id,
+					CreatedDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user2Id,
+					CreatedDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user3Id,
+					CreatedDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user1Id,
+					CreatedDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user2Id,
+					CreatedDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldUserEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user3Id,
+					CreatedDate = DateTimeOffset.Now,
+				}
+			);
+			builder.Entity<CrowdSourcedFieldUserEntryValue>().HasData(
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user1Id,
+					Id = 0,
+					Value = "3",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user2Id,
+					Id = 0,
+					Value = "3",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					CreatedBy = user3Id,
+					Id = 0,
+					Value = "3",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user1Id,
+					Id = 0,
+					Value = "Hat Guy",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user2Id,
+					Id = 0,
+					Value = "Hat Guy",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user3Id,
+					Id = 0,
+					Value = "Hat Guy",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user1Id,
+					Id = 1,
+					Value = "Jes",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user2Id,
+					Id = 1,
+					Value = "Jes",
+				},
+				new CrowdSourcedFieldUserEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					CreatedBy = user3Id,
+					Id = 1,
+					Value = "Jes",
+				}
+			);
 			builder.Entity<CrowdSourcedFieldVerifiedEntry>().HasData(
 				new CrowdSourcedFieldVerifiedEntry()
 				{
 					ComicId = 1,
 					CrowdSourcedFieldDefinitionId = def1Id,
-					FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+					FirstCreatedBy = user1Id,
 					VerificationDate = DateTimeOffset.Now,
 				},
 				new CrowdSourcedFieldVerifiedEntry()
 				{
 					ComicId = 1,
 					CrowdSourcedFieldDefinitionId = def2Id,
-					FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+					FirstCreatedBy = user1Id,
 					VerificationDate = DateTimeOffset.Now,
 				});
 			builder.Entity<CrowdSourcedFieldVerifiedEntryValue>().HasData(

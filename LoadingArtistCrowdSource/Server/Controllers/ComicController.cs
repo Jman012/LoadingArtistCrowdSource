@@ -14,12 +14,12 @@ using Microsoft.Extensions.Logging;
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
 	[ApiController]
-	[Route("api/comics")]
+	[Route("api/comic")]
 	[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-	public class ComicListController : Controller
+	public class ComicController : Controller
 	{
 		private readonly ApplicationDbContext _context;
-		public ComicListController(ApplicationDbContext context)
+		public ComicController(ApplicationDbContext context)
 		{
 			this._context = context;
 		}
@@ -37,17 +37,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		[Route("/api/comics/{code}")]
+		[Route("/api/comic/{code}")]
 		public async Task<IActionResult> GetComic(string code)
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			Models.Comic? comic = await _context.Comics
 				.Include(c => c.ImportedByUser)
 				.Include(c => c.LastUpdatedByUser)
-				.Include(c => c.CrowdSourcedFieldVerifiedEntries)
-				.ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
-				.Include(c => c.CrowdSourcedFieldVerifiedEntries)
-				.ThenInclude(ve => ve.CrowdSourcedFieldDefinition)
+				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
+				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldDefinition)
+				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CrowdSourcedFieldUserEntryValues)
+				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CreatedByUser)
 				.FirstOrDefaultAsync(c => c.Code == code);
 
 			if (comic == null)
@@ -58,7 +58,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Json(modelMapper.MapComic(comic,
 				mapImportedByUser: true,
 				mapLastUpdatedUser: true,
-				mapVerifiedEntries: true));
+				mapVerifiedEntries: true,
+				mapVerifiedUserEntries: true));
 		}
 	}
 }

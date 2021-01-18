@@ -14,11 +14,23 @@
 			</HeaderContent>
 			<ChildContent>
 				<div>
-					<div><p>@entry.CrowdSourcedFieldDefinition.LongDescription</p></div>
-					<div>
-						<label>Date Verified:</label>
-						<span>@entry.VerificationDate</span>
-					</div>
+					<table class="table">
+						<tbody>
+							<tr>
+								<td colspan="2">
+									<p>@entry.CrowdSourcedFieldDefinition.LongDescription</p>
+								</td>
+							</tr>
+							<tr>
+								<th>Date Verified</th>
+								<td>@entry.VerificationDate.ToString("yyyy-MM-dd hh:mm:sstt zzz")</td>
+							</tr>
+							<tr>
+								<th>Submitters</th>
+								<td>@string.Join(", ", entry.CrowdSourcedUserEntries.Select(ue => ue.CreatedByUser.UserName))</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</ChildContent>
 		</Collapsible>

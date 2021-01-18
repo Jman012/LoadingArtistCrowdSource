@@ -15,7 +15,8 @@ namespace LoadingArtistCrowdSource.Server.Services
 			bool mapLastUpdatedUser = false, 
 			bool mapComicHistoryLogs = false, 
 			bool mapUserEntries = false, 
-			bool mapVerifiedEntries = false)
+			bool mapVerifiedEntries = false,
+			bool mapVerifiedUserEntries = false)
 		{
 			ComicViewModel comicVM = new ComicViewModel()
 			{
@@ -61,6 +62,22 @@ namespace LoadingArtistCrowdSource.Server.Services
 					.CrowdSourcedFieldVerifiedEntries
 					.Select(ve => this.MapCrowdSourcedFieldVerifiedEntry(ve, mapFieldDefinition: true))
 					.ToList();
+
+				if (mapVerifiedUserEntries)
+				{
+					var userEntriesLookup = comic.CrowdSourcedFieldUserEntries.ToLookup(ue => ue.CrowdSourcedFieldDefinitionId);
+					foreach (var ve in comicVM.CrowdSourcedFieldVerifiedEntries)
+					{
+						ve.CrowdSourcedUserEntries = userEntriesLookup[ve.CrowdSourcedFieldDefinition.Id]
+							.Select(ue => new CrowdSourcedFieldUserEntryViewModel()
+							{
+								CreatedDate = ue.CreatedDate,
+								Values = ue.CrowdSourcedFieldUserEntryValues.Select(v => v.Value).ToList(),
+								CreatedByUser = this.MapApplicationUser(ue.CreatedByUser),
+							})
+							.ToList();
+					}
+				}
 			}
 
 			return comicVM;
@@ -70,7 +87,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 		{
 			return new ApplicationUserViewModel()
 			{
-				Name = user.UserName,
+				UserName = user.UserName,
 			};
 		}
 

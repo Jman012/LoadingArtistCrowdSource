@@ -22,14 +22,25 @@ namespace LoadingArtistCrowdSource.Client.Services
 			_publicClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.PublicServerAPI");
 		}
 
-		#region ComicListController
+		#region ComicController
 		public async Task<ComicViewModel[]> GetComics()
 		{
-			return await _publicClient.GetFromJsonAsync<ComicViewModel[]>("api/comics") ?? new ComicViewModel[] { };
+			return await _publicClient.GetFromJsonAsync<ComicViewModel[]>("api/comic") ?? new ComicViewModel[] { };
 		}
 		public async Task<ComicViewModel> GetComic(string code)
 		{
-			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comics/{code}") ?? new ComicViewModel();
+			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{code}") ?? new ComicViewModel();
+		}
+		#endregion
+
+		#region FieldController
+		public async Task<CrowdSourcedFieldDefinitionViewModel[]> GetFields()
+		{
+			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionViewModel[]>("api/field") ?? new CrowdSourcedFieldDefinitionViewModel[] { };
+		}
+		public async Task<CrowdSourcedFieldDefinitionViewModel> GetField(string code)
+		{
+			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionViewModel>($"api/field/{code}") ?? new CrowdSourcedFieldDefinitionViewModel();
 		}
 		#endregion
 	}

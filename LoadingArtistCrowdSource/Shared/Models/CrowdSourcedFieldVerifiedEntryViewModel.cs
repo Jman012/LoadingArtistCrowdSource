@@ -13,5 +13,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 
 		public CrowdSourcedFieldDefinitionViewModel CrowdSourcedFieldDefinition { get; set; } = new CrowdSourcedFieldDefinitionViewModel();
 		public ApplicationUserViewModel FirstCreatedByUser { get; set; } = new ApplicationUserViewModel();
+		public List<CrowdSourcedFieldUserEntryViewModel> CrowdSourcedUserEntries { get; set; } = new List<CrowdSourcedFieldUserEntryViewModel>();
 	}
 }
