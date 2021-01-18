@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using Mailjet.Client;
 using Mailjet.Client.Resources;
@@ -17,10 +18,12 @@ namespace LoadingArtistCrowdSource.Server.Services
 	public class MailJetEmailSender : IEmailSender
 	{
 		public IConfiguration Configuration { get; }
+		private ILogger _logger { get; }
 
-		public MailJetEmailSender(IConfiguration configuration)
+		public MailJetEmailSender(IConfiguration configuration, ILogger<MailJetEmailSender> logger)
 		{
 			Configuration = configuration;
+			_logger = logger;
 		}
 
 		public Task SendEmailAsync(string email, string subject, string message)
@@ -37,6 +40,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 
 		public async Task Execute(string apiKey, string apiSecret, string subject, string message, string toEmailAddress, string fromEmailAddress, string fromEmailName)
 		{
+			_logger.LogWarning($"Sending email from {fromEmailAddress} to {toEmailAddress} with subject line {subject}");
 			var client = new MailjetClient(apiKey, apiSecret);
 			MailjetRequest request = new MailjetRequest
 			{

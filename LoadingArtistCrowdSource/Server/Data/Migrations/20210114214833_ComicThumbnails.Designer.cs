@@ -4,14 +4,16 @@ using LoadingArtistCrowdSource.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LoadingArtistCrowdSource.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210114214833_ComicThumbnails")]
+    partial class ComicThumbnails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,7 +199,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "JMAN012GUY@GMAIL.COM",
                             NormalizedUserName = "JMAN012GUY@GMAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEIrCen18mpal4mSrTc485Sb4u2WjU44TFsuqN7p4jEiwynmC/wO3w2GTTF6S9ENdQw==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEOB6XB5J+om08xKpZ0rghzJFwVhTWMCxHQEPssa2oxwWw4XtGVo8ydYrT9KeBQTVeQ==",
                             PhoneNumber = "",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
@@ -212,10 +214,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .UseIdentityColumn();
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTimeOffset>("ComicPublishedDate")
                         .HasColumnType("datetimeoffset");
@@ -260,9 +258,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
-
                     b.HasIndex("ImportedBy");
 
                     b.HasIndex("LastUpdatedBy");
@@ -273,12 +268,11 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Code = "born",
                             ComicPublishedDate = new DateTimeOffset(new DateTime(2011, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, -8, 0, 0, 0)),
                             ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
                             ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
                             ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            ImportedDate = new DateTimeOffset(new DateTime(2021, 1, 17, 14, 51, 26, 185, DateTimeKind.Unspecified).AddTicks(7517), new TimeSpan(0, -8, 0, 0, 0)),
+                            ImportedDate = new DateTimeOffset(new DateTime(2021, 1, 14, 13, 48, 33, 450, DateTimeKind.Unspecified).AddTicks(5575), new TimeSpan(0, -8, 0, 0, 0)),
                             Permalink = "https://loadingartist.com/comic/born/",
                             Title = "Born",
                             Tooltip = "Born"
@@ -372,34 +366,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("LastUpdatedBy");
 
                     b.ToTable("CrowdSourcedFieldDefinition");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("93d24f79-0d09-4a7b-9de7-05d311974e39"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 17, 14, 51, 26, 187, DateTimeKind.Unspecified).AddTicks(2855), new TimeSpan(0, -8, 0, 0, 0)),
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            IsDeleted = false,
-                            LongDescription = "blah blah",
-                            Name = "Panels",
-                            ShortDescription = "The number of panels in the comic",
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("1d4a64a1-0aa2-44b9-937f-e7398ce88664"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 17, 14, 51, 26, 187, DateTimeKind.Unspecified).AddTicks(4040), new TimeSpan(0, -8, 0, 0, 0)),
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            IsDeleted = false,
-                            LongDescription = "blah blah blah blah",
-                            Name = "Characters",
-                            ShortDescription = "Which characters are present in the comic",
-                            Type = 2
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionFeedback", b =>
@@ -542,22 +508,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("FirstCreatedBy");
 
                     b.ToTable("CrowdSourcedFieldVerifiedEntry");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("93d24f79-0d09-4a7b-9de7-05d311974e39"),
-                            FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            VerificationDate = new DateTimeOffset(new DateTime(2021, 1, 17, 14, 51, 26, 187, DateTimeKind.Unspecified).AddTicks(5239), new TimeSpan(0, -8, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("1d4a64a1-0aa2-44b9-937f-e7398ce88664"),
-                            FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            VerificationDate = new DateTimeOffset(new DateTime(2021, 1, 17, 14, 51, 26, 187, DateTimeKind.Unspecified).AddTicks(5513), new TimeSpan(0, -8, 0, 0, 0))
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldVerifiedEntryValue", b =>
@@ -580,29 +530,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("CrowdSourcedFieldVerifiedEntryValue");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("93d24f79-0d09-4a7b-9de7-05d311974e39"),
-                            Id = 0,
-                            Value = "3"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("1d4a64a1-0aa2-44b9-937f-e7398ce88664"),
-                            Id = 0,
-                            Value = "Blue"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("1d4a64a1-0aa2-44b9-937f-e7398ce88664"),
-                            Id = 1,
-                            Value = "Hat Guy"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

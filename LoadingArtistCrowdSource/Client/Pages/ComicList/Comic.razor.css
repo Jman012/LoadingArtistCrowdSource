@@ -1,0 +1,13 @@
+﻿.comic-image {
+	width: 550px;
+}
+
+@media(max-width: 598px) {
+	.comic-image {
+		width: 100%;
+	}
+}
+
+.container {
+	margin-bottom: 5em;
+}

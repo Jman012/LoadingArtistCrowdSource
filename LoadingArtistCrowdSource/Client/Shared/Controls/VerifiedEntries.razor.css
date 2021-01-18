@@ -1,0 +1,33 @@
+﻿.entry-list {
+}
+
+
+.entry-row {
+	margin: 0.5em 0;
+}
+
+	.entry-row:not(:last-child) {
+		border-bottom: 1px solid grey;
+	}
+
+.collapse-icon {
+	color: #444;
+	margin-right: 0.5em;
+	font-size: 1em;
+}
+
+.name {
+	/*font-size: small;*/
+	margin-bottom: 0;
+	font-weight: bold;
+}
+
+.subtitle {
+	font-size: small;
+	font-weight: normal;
+	color: #666;
+}
+
+.value {
+	/*font-weight: bold;*/
+}

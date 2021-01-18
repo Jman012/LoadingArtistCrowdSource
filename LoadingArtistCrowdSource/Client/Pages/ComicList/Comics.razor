@@ -1,0 +1,54 @@
+﻿@page "/comics"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using LoadingArtistCrowdSource.Shared
+@using LoadingArtistCrowdSource.Shared.Models
+@inject Services.LACSApi Api
+
+<h1>Comics</h1>
+
+@if (comics == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<BlazorTable.Table TableItem="ComicViewModel" Items="comics" PageSize="15">
+		<BlazorTable.Column TableItem="ComicViewModel" Title="Thumbnail" Field="@(c => c.ImageUrlSrc)" Sortable="true" Filterable="true">
+			<Template>
+				<img src="@context.ImageThumbnailUrlSrc" width="128" height="128" title="@context.Tooltip" alt="@context.Tooltip" />
+			</Template>
+		</BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicViewModel" Title="Id" Field="@(c => c.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicViewModel" Title="Published" Field="@(c => c.ComicPublishedDate)" Sortable="true" Filterable="true">
+			<Template>
+				@context.ComicPublishedDate.ToString("yyyy-MM-dd")
+			</Template>
+		</BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicViewModel" Field="@(c => c.Code)">
+			<Template>
+				<NavLink class="nav-link" href="@($"comics/{context.Code}")">
+					<span class="oi oi-plus" aria-hidden="true"></span> View
+				</NavLink>
+			</Template>
+		</BlazorTable.Column>
+		<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
+	</BlazorTable.Table>
+}
+
+@code {
+	private ComicViewModel[]? comics = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			comics = await Api.GetComics();
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+		}
+	}
+}

@@ -1,0 +1,12 @@
+﻿<a href="@Href" target="_blank" class="new-tab-link">
+	@ChildContent
+	<span class="oi oi-external-link" aria-hidden="true"></span>
+</a>
+
+@code {
+	[Parameter]
+	public string Href { get; set; } = "";
+
+	[Parameter]
+	public RenderFragment ChildContent { get; set; } = null!;
+}

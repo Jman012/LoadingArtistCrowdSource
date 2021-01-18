@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LoadingArtistCrowdSource.Server.Models
+namespace LoadingArtistCrowdSource.Shared.Enums
 {
 	public enum CrowdSourcedFieldDefinitionFeedbackCompletion
 	{

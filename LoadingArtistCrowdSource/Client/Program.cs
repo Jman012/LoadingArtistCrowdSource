@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using BlazorTable;
+
 namespace LoadingArtistCrowdSource.Client
 {
 	public class Program
@@ -26,6 +28,12 @@ namespace LoadingArtistCrowdSource.Client
 			builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("LoadingArtistCrowdSource.ServerAPI"));
 
 			builder.Services.AddApiAuthorization();
+
+			// Custom
+			builder.Services.AddHttpClient("LoadingArtistCrowdSource.PublicServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+			builder.Services.AddScoped<Services.LACSApi>();
+			builder.Services.AddBlazorTable();
+
 
 			await builder.Build().RunAsync();
 		}

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.Options;
 
 using LoadingArtistCrowdSource.Server.Models;
+using LoadingArtistCrowdSource.Shared.Enums;
 
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			base.OnModelCreating(builder);
 
 			#region ApplicationUser
-			
+
 			#endregion ApplicationUser
 
 			#region Comic
@@ -44,6 +45,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au.ComicsLastUpdated)
 				.HasForeignKey(c => c.LastUpdatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Indices
+			builder.Entity<Comic>()
+				.HasIndex(c => c.Code)
+				.IsUnique();
 			#endregion Comic
 
 			#region ComicHistoryLog
@@ -276,17 +281,88 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<Comic>().HasData(new Comic()
 			{
 				Id = 1,
+				Code = "born",
 				Permalink = "https://loadingartist.com/comic/born/",
 				ComicPublishedDate = DateTimeOffset.Parse("2011-01-04T00:00:00.000-0800"),
 				Title = "Born",
 				Tooltip = "Born",
 				Description = null,
 				ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
+				ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
+				ImageWideThumbnailUrlSrc = null,
 				ImportedDate = DateTimeOffset.Now,
 				ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
 				LastUpdatedByUser = null,
 				LastUpdatedBy = null,
 			});
+			Guid def1Id = Guid.NewGuid(), def2Id = Guid.NewGuid();
+			builder.Entity<CrowdSourcedFieldDefinition>().HasData(new CrowdSourcedFieldDefinition()
+			{
+				Id = def1Id,
+				IsActive = true,
+				IsDeleted = false,
+				Type = CrowdSourcedFieldType.Number,
+				DisplayOrder = 1,
+				Name = "Panels",
+				ShortDescription = "The number of panels in the comic",
+				LongDescription = "blah blah",
+				CreatedDate = DateTimeOffset.Now,
+				CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+				LastUpdatedDate = null,
+				LastUpdatedBy = null,
+			});
+			builder.Entity<CrowdSourcedFieldDefinition>().HasData(new CrowdSourcedFieldDefinition()
+			{
+				Id = def2Id,
+				IsActive = true,
+				IsDeleted = false,
+				Type = CrowdSourcedFieldType.FreeformText,
+				DisplayOrder = 2,
+				Name = "Characters",
+				ShortDescription = "Which characters are present in the comic",
+				LongDescription = "blah blah blah blah",
+				CreatedDate = DateTimeOffset.Now,
+				CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+				LastUpdatedDate = null,
+				LastUpdatedBy = null,
+			});
+			builder.Entity<CrowdSourcedFieldVerifiedEntry>().HasData(
+				new CrowdSourcedFieldVerifiedEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+					VerificationDate = DateTimeOffset.Now,
+				},
+				new CrowdSourcedFieldVerifiedEntry()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+					VerificationDate = DateTimeOffset.Now,
+				});
+			builder.Entity<CrowdSourcedFieldVerifiedEntryValue>().HasData(
+				new CrowdSourcedFieldVerifiedEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def1Id,
+					Id = 0,
+					Value = "3",
+				},
+				new CrowdSourcedFieldVerifiedEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					Id = 0,
+					Value = "Blue",
+				},
+				new CrowdSourcedFieldVerifiedEntryValue()
+				{
+					ComicId = 1,
+					CrowdSourcedFieldDefinitionId = def2Id,
+					Id = 1,
+					Value = "Hat Guy",
+				});
 		}
 
 		public DbSet<Comic> Comics => Set<Comic>();

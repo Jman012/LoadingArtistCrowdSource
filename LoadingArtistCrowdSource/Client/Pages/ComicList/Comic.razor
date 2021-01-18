@@ -1,0 +1,108 @@
+﻿@page "/comics/{Code}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject Services.LACSApi Api
+
+<div class="container">
+	@if (!loaded)
+	{
+		<div class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="sr-only">Loading...</span>
+			</div>
+		</div>
+	}
+	else
+	{
+		<h1>@comic.Title</h1>
+
+		<div class="row">
+			<div class="col-xl">
+				<h3>Metadata</h3>
+				<table class="table">
+					<tr>
+						<th>Identifier</th>
+						<td>@comic.Code</td>
+					</tr>
+					<tr>
+						<th>Number</th>
+						<td>@comic.Id</td>
+					</tr>
+					<tr>
+						<th>Permalink</th>
+						<td><NewTabLink Href="@comic.Permalink">@comic.Permalink</NewTabLink></td>
+					</tr>
+					<tr>
+						<th>Published</th>
+						<td>@comic.ComicPublishedDate.ToString("yyyy-MM-dd")</td>
+					</tr>
+					<tr>
+						<th>Tooltip</th>
+						<td>@comic.Tooltip</td>
+					</tr>
+					<tr>
+						<th>Image</th>
+						<td><NewTabLink Href="@comic.ImageUrlSrc">@comic.ImageUrlSrc</NewTabLink></td>
+					</tr>
+					<tr>
+						<th>Thumbnail</th>
+						<td><NewTabLink Href="@comic.ImageThumbnailUrlSrc"><img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" /></NewTabLink></td>
+					</tr>
+					<tr>
+						<th>Wide Thumbnail</th>
+						<td>
+							@if (comic.ImageWideThumbnailUrlSrc != null)
+							{
+								<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc"><img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" /></NewTabLink>
+							}
+							else
+							{
+								<text>N/A</text>
+							}
+						</td>
+					</tr>
+					<tr>
+						<th>Description</th>
+						<td><p>@comic.Description</p></td>
+					</tr>
+				</table>
+
+				<h3>Comic Image</h3>
+				<p>
+					<center>
+						<a href="@comic.ImageUrlSrc" target="_blank">
+							<img src="@comic.ImageUrlSrc" width="550" title="Comic image" alt="Comic image" class="comic-image" />
+						</a>
+					</center>
+				</p>
+			</div>
+			<div class="col-xl">
+				<h3>Crowd Sourced Data</h3>
+				<div class="entry-list">
+					<VerifiedEntries Entries="comic.CrowdSourcedFieldVerifiedEntries"></VerifiedEntries>
+				</div>
+			</div>
+		</div>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public string Code { get; set; } = "";
+
+	private bool loaded { get; set; }
+	private ComicViewModel comic { get; set; } = new ComicViewModel();
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			comic = await Api.GetComic(Code);
+			loaded = true;
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+		}
+	}
+}

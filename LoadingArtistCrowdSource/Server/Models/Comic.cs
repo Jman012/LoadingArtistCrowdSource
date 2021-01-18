@@ -20,6 +20,11 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public int Id { get; set; }
 
 		/// <summary>
+		/// The unqiue code for the comic. This is typically the URL path for the comic.
+		/// </summary>
+		public string Code { get; set; } = "";
+
+		/// <summary>
 		/// A permalink to the comic's website of origination.
 		/// This would be the URL a user normally uses to visit the website and view
 		/// this specific comic.
@@ -56,6 +61,17 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// single image to use, then the first shall be used.
 		/// </summary>
 		public string ImageUrlSrc { get; set; } = "";
+
+		/// <summary>
+		/// A URL to the thumbnail of the comic.
+		/// </summary>
+		public string ImageThumbnailUrlSrc { get; set; } = "";
+
+		/// <summary>
+		/// A URL to the wide version of the thumbnail of the comic.
+		/// This may not always be present.
+		/// </summary>
+		public string? ImageWideThumbnailUrlSrc { get; set; }
 
 		/// <summary>
 		/// The time at which this published comic was imported to the database.

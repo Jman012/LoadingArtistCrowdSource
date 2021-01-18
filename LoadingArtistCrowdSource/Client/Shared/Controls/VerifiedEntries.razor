@@ -1,0 +1,33 @@
+﻿<div class="list-group">
+	@foreach (var entry in Entries)
+	{
+		<Collapsible IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + entry.CrowdSourcedFieldDefinition.Id)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+			<HeaderContent>
+				<div class="d-flex w-100 justify-content-between">
+					<div class="d-flex">
+						<span class="collapse-icon oi @(context ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
+						<h5 class="mb-1">@entry.CrowdSourcedFieldDefinition.Name</h5>
+					</div>
+					<div class="h6 mb-1">@string.Join(", ", entry.Values)</div>
+				</div>
+				<small class="text-muted">@entry.CrowdSourcedFieldDefinition.ShortDescription</small>
+			</HeaderContent>
+			<ChildContent>
+				<div>
+					<div><p>@entry.CrowdSourcedFieldDefinition.LongDescription</p></div>
+					<div>
+						<label>Date Verified:</label>
+						<span>@entry.VerificationDate</span>
+					</div>
+				</div>
+			</ChildContent>
+		</Collapsible>
+	}
+</div>
+
+
+
+@code {
+	[Parameter]
+	public IEnumerable<CrowdSourcedFieldVerifiedEntryViewModel> Entries { get; set; } = new CrowdSourcedFieldVerifiedEntryViewModel[] { };
+}
