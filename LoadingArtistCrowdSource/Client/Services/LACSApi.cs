@@ -16,9 +16,10 @@ namespace LoadingArtistCrowdSource.Client.Services
 	{
 		private HttpClient _authClient { get; }
 		private HttpClient _publicClient { get; }
-		public LACSApi(IHttpClientFactory httpClientFactory)
+		public LACSApi(IHttpClientFactory httpClientFactory, HttpClient authClient)
 		{
-			_authClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.ServerAPI");
+			_authClient = authClient;
+			//_authClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.ServerAPI");
 			_publicClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.PublicServerAPI");
 		}
 

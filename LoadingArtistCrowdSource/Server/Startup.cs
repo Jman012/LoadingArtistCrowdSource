@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -39,10 +40,19 @@ namespace LoadingArtistCrowdSource.Server
 			services.AddDatabaseDeveloperPageExceptionFilter();
 
 			services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+				.AddRoles<IdentityRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>();
 
 			services.AddIdentityServer()
-				.AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+				.AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
+				{
+					options.IdentityResources["openid"].UserClaims.Add("role");
+					options.ApiResources.Single().UserClaims.Add("role");
+				});
+
+			System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler
+				.DefaultInboundClaimTypeMap.Remove("role");
+
 
 			services.AddAuthentication()
 				.AddIdentityServerJwt()
@@ -65,8 +75,9 @@ namespace LoadingArtistCrowdSource.Server
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 		{
+			Services.IdentitySeed.SeedData(userManager, roleManager);
 			Services.ServerConfig.AssertConfigAvailable(Configuration);
 
 			if (env.IsDevelopment())

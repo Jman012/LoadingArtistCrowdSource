@@ -140,7 +140,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			{
 				defVM.CreatedByUser = MapApplicationUser(def.CreatedByUser);
 			}
-			if (mapLastUpdatedByUser)
+			if (mapLastUpdatedByUser && def.LastUpdatedByUser != null)
 			{
 				defVM.LastUpdatedByUser = MapApplicationUser(def.LastUpdatedByUser);
 			}

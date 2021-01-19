@@ -11,8 +11,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
+using LoadingArtistCrowdSource.Shared.Enums;
+
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
+	[Authorize(Roles = Roles.Administrator)]
 	[ApiController]
 	[Route("api/field")]
 	[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

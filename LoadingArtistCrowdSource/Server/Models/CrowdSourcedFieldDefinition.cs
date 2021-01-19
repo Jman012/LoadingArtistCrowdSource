@@ -88,7 +88,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 
 		public List<ComicHistoryLog> ComicHistoryLogs { get; set; } = null!;
 		public ApplicationUser CreatedByUser { get; set; } = null!;
-		public ApplicationUser LastUpdatedByUser { get; set; } = null!;
+		public ApplicationUser? LastUpdatedByUser { get; set; }
 		public List<CrowdSourcedFieldDefinitionFeedback> CrowdSourcedFieldDefinitionFeedbacks { get; set; } = null!;
 		public List<CrowdSourcedFieldDefinitionHistoryLog> CrowdSourcedFieldDefinitionHistoryLogs { get; set; } = null!;
 		public List<CrowdSourcedFieldUserEntry> CrowdSourcedFieldUserEntries { get; set; } = null!;

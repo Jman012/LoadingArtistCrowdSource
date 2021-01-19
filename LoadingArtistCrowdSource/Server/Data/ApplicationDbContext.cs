@@ -89,7 +89,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<CrowdSourcedFieldDefinition>()
 				.HasOne(csfd => csfd.LastUpdatedByUser)
-				.WithMany(au => au.CrowdSourcedFieldDefinitionsLastUpdated)
+				.WithMany(au => au!.CrowdSourcedFieldDefinitionsLastUpdated)
 				.HasForeignKey(csfd => csfd.LastUpdatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
 			#endregion CrowdSourcedFieldDefinition
