@@ -39,9 +39,9 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionViewModel[]>("api/field") ?? new CrowdSourcedFieldDefinitionViewModel[] { };
 		}
-		public async Task<CrowdSourcedFieldDefinitionViewModel> GetField(string code)
+		public async Task<FieldDefinitionFormViewModel> GetField(string code)
 		{
-			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionViewModel>($"api/field/{code}") ?? new CrowdSourcedFieldDefinitionViewModel();
+			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{code}") ?? new FieldDefinitionFormViewModel();
 		}
 		#endregion
 	}

@@ -127,6 +127,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			{
 				Id = def.Id,
 				IsActive = def.IsActive,
+				IsDeleted = def.IsDeleted,
 				Type = def.Type,
 				DisplayOrder = def.DisplayOrder,
 				Name = def.Name,
@@ -146,6 +147,23 @@ namespace LoadingArtistCrowdSource.Server.Services
 			}
 
 			return defVM;
+		}
+
+		public FieldDefinitionFormViewModel MapFieldDefinitionForm(CrowdSourcedFieldDefinition def)
+		{
+			return new FieldDefinitionFormViewModel()
+			{
+				Code = def.Code,
+				Name = def.Name,
+				IsActive = def.IsActive,
+				Type = def.Type,
+				ShortDescription = def.ShortDescription,
+				LongDescription = def.LongDescription,
+				CreatedDate = def.CreatedDate,
+				CreatedBy = def.CreatedByUser.UserName,
+				LastUpdatedDate = def.LastUpdatedDate,
+				LastUpdatedBy = def.LastUpdatedByUser?.UserName,
+			};
 		}
 	}
 }

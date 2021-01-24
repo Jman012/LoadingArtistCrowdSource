@@ -12,6 +12,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	{
 		public Guid Id { get; set; }
 		public bool IsActive { get; set; } = true;
+		public bool IsDeleted { get; set; } = false;
 		public CrowdSourcedFieldType Type { get; set; }
 		public int DisplayOrder { get; set; }
 		public string Name { get; set; } = "";

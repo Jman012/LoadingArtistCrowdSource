@@ -39,30 +39,22 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Select(f => modelMapper.MapCrowdSourcedFieldDefinition(f, mapCreatedByUser: true, mapLastUpdatedByUser: true));
 		}
 
-		//[HttpGet]
-		//[Route("/api/field/{code}")]
-		//public async Task<IActionResult> GetComic(string code)
-		//{
-		//	Services.ModelMapper modelMapper = new Services.ModelMapper();
-		//	Models.Comic? comic = await _context.Comics
-		//		.Include(c => c.ImportedByUser)
-		//		.Include(c => c.LastUpdatedByUser)
-		//		.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
-		//		.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldDefinition)
-		//		.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CrowdSourcedFieldUserEntryValues)
-		//		.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CreatedByUser)
-		//		.FirstOrDefaultAsync(c => c.Code == code);
+		[HttpGet]
+		[Route("/api/field/{code}")]
+		public async Task<IActionResult> GetComic(string code)
+		{
+			Services.ModelMapper modelMapper = new Services.ModelMapper();
+			Models.CrowdSourcedFieldDefinition? fieldDef = await _context.CrowdSourcedFieldDefinitions
+				.Include(c => c.CreatedByUser)
+				.Include(c => c.LastUpdatedByUser)
+				.FirstOrDefaultAsync(c => c.Code == code);
 
-		//	if (comic == null)
-		//	{
-		//		return NotFound();
-		//	}
+			if (fieldDef == null)
+			{
+				return NotFound();
+			}
 
-		//	return Json(modelMapper.MapComic(comic,
-		//		mapImportedByUser: true,
-		//		mapLastUpdatedUser: true,
-		//		mapVerifiedEntries: true,
-		//		mapVerifiedUserEntries: true));
-		//}
+			return Json(modelMapper.MapFieldDefinitionForm(fieldDef));
+		}
 	}
 }

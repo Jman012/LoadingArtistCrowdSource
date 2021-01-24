@@ -1,0 +1,95 @@
+﻿@page "/field/{Code}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using LoadingArtistCrowdSource.Shared
+@using LoadingArtistCrowdSource.Shared.Models
+@inject Services.LACSApi Api
+
+<div class="container">
+	@if (!loaded)
+	{
+		<div class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="sr-only">Loading...</span>
+			</div>
+		</div>
+	}
+	else
+	{
+		@if (IsNew)
+		{
+			<h3>New Field: @fieldDef.Name</h3>
+		}
+		else
+		{
+			<h3>Edit Field: @fieldDef.Name</h3>
+		}
+
+		<EditForm Model="fieldDef" OnValidSubmit="HandleValidSubmit">
+			<div class="form-row">
+				<div class="col-md-4">
+					<FormCheckbox @bind-Value="fieldDef.IsActive"></FormCheckbox>
+				</div>
+				<div class="col-md-8">
+					<FormTextfield @bind-Value="fieldDef.Code" Disabled="true"></FormTextfield>
+				</div>
+			</div>
+			<FormTextfield @bind-Value="fieldDef.Name" @oninput="OnNameInput"></FormTextfield>
+			<FormTextarea @bind-Value="fieldDef.ShortDescription"></FormTextarea>
+			<FormTextarea @bind-Value="fieldDef.LongDescription"></FormTextarea>
+			<FormSelect @bind-Value="fieldDef.Type">
+				<SelectOptionsFromEnum Field="fieldDef.Type" IncludeEmpty="true"></SelectOptionsFromEnum>
+			</FormSelect>
+
+			<button type="submit" class="btn btn-primary">Create</button>
+
+		</EditForm>
+	}
+</div>
+
+
+
+@code {
+
+	[Parameter]
+	public string Code { get; set; } = "";
+
+	private bool loaded { get; set; } = true;
+
+	private FieldDefinitionFormViewModel fieldDef { get; set; } = new FieldDefinitionFormViewModel();
+
+	public bool IsNew { get; set; } = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (Code == "new")
+		{
+			fieldDef = new FieldDefinitionFormViewModel();
+			IsNew = true;
+		}
+		else
+		{
+			try
+			{
+				loaded = false;
+				fieldDef = await Api.GetField(Code);
+				loaded = true;
+			}
+			catch (AccessTokenNotAvailableException exception)
+			{
+				exception.Redirect();
+			}
+		}
+	}
+
+	private void OnNameInput(ChangeEventArgs ev)
+	{
+		fieldDef.Code = (ev.Value as string)!.ToLower().Replace(" ", "-");
+	}
+
+	private void HandleValidSubmit()
+	{
+
+	}
+
+}

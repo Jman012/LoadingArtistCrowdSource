@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using LoadingArtistCrowdSource.Server.Data;
-using LoadingArtistCrowdSource.Shared;
+using LoadingArtistCrowdSource.Shared.Enums;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -55,11 +55,18 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
-			return Json(modelMapper.MapComic(comic,
+			var comicVM = modelMapper.MapComic(comic,
 				mapImportedByUser: true,
 				mapLastUpdatedUser: true,
 				mapVerifiedEntries: true,
-				mapVerifiedUserEntries: true));
+				mapVerifiedUserEntries: true);
+
+			if (!User.IsInRole(Roles.Administrator))
+			{
+				comicVM.CrowdSourcedFieldVerifiedEntries.RemoveAll(ve => !ve.CrowdSourcedFieldDefinition.IsActive || ve.CrowdSourcedFieldDefinition.IsDeleted);
+			}
+
+			return Json(comicVM);
 		}
 	}
 }

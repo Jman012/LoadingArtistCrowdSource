@@ -1,0 +1,52 @@
+﻿@using System.Reflection
+@using System.ComponentModel
+@using System.Linq.Expressions
+
+@typeparam TValue
+
+<div class="form-group">
+	<DisplayName For="@memberName"
+				 ForField="@ValueExpression"></DisplayName>
+
+	<InputSelect id="@memberName"
+				 class="form-control"
+				 disabled="@Disabled"
+				 Value="@Value"
+				 ValueChanged="@ValueChanged"
+				 ValueExpression="@ValueExpression"
+				 @attributes="AdditionalAttributes">
+		@ChildContent
+	</InputSelect>
+
+	@if (!string.IsNullOrEmpty(memberDescription))
+	{
+		<small class="form-text text-muted">@memberDescription</small>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public TValue Value { get; set; } = default!;
+	[Parameter]
+	public EventCallback<TValue> ValueChanged { get; set; }
+	[Parameter]
+	public Expression<Func<TValue>>? ValueExpression { get; set; }
+
+	[Parameter]
+	public bool Disabled { get; set; }
+
+	[Parameter(CaptureUnmatchedValues = true)]
+	public IDictionary<string, object>? AdditionalAttributes { get; set; }
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+
+	private string memberName { get; set; } = "";
+	private string memberDescription { get; set; } = "";
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		memberName = Utilities.GetMemberName(ValueExpression!);
+		memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
+	}
+}

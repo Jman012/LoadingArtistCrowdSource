@@ -10,6 +10,7 @@ using LoadingArtistCrowdSource.Shared.Enums;
 
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
 
 namespace LoadingArtistCrowdSource.Server.Data
@@ -92,6 +93,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au!.CrowdSourcedFieldDefinitionsLastUpdated)
 				.HasForeignKey(csfd => csfd.LastUpdatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<CrowdSourcedFieldDefinition>()
+				.Property(csfd => csfd.Type)
+				.HasConversion(new EnumToStringConverter<CrowdSourcedFieldType>());
 			#endregion CrowdSourcedFieldDefinition
 
 			#region CrowdSourcedFieldDefinitionFeedback
@@ -118,6 +123,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au.CrowdSourcedFieldDefinitionFeedbacksCompleted)
 				.HasForeignKey(csfdf => csfdf.CompletedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<CrowdSourcedFieldDefinitionFeedback>()
+				.Property(csfdf => csfdf.CompletionType)
+				.HasConversion(new EnumToStringConverter<CrowdSourcedFieldDefinitionFeedbackCompletion>());
 			#endregion CrowdSourcedFieldDefinitionFeedback
 
 			#region CrowdSourcedFieldDefinitionHistoryLog

@@ -1,0 +1,47 @@
+﻿@using System.Reflection
+@using System.ComponentModel
+@using System.Linq.Expressions
+
+<div class="form-group">
+	<DisplayName For="@memberName"
+				 ForField="@ValueExpression"></DisplayName>
+
+	<InputTextArea id="@memberName"
+				   class="form-control"
+				   disabled="@Disabled"
+				   rows="3"
+				   Value="@Value"
+				   ValueChanged="@ValueChanged"
+				   ValueExpression="@ValueExpression"
+				   @attributes="AdditionalAttributes" />
+
+	@if (!string.IsNullOrEmpty(memberDescription))
+	{
+		<small class="form-text text-muted">@memberDescription</small>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public string Value { get; set; } = "";
+	[Parameter]
+	public EventCallback<string> ValueChanged { get; set; }
+	[Parameter]
+	public Expression<Func<string>>? ValueExpression { get; set; }
+
+	[Parameter]
+	public bool Disabled { get; set; }
+
+	[Parameter(CaptureUnmatchedValues = true)]
+	public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+	private string memberName { get; set; } = "";
+	private string memberDescription { get; set; } = "";
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		memberName = Utilities.GetMemberName(ValueExpression!);
+		memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
+	}
+}

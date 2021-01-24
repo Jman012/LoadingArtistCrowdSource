@@ -1,0 +1,30 @@
+﻿@typeparam TEnum
+
+@if (IncludeEmpty)
+{
+	<option value=""></option>
+}
+@foreach (var value in values)
+{
+	<option value="@value.Key">@value.Value</option>
+}
+
+@code {
+	[Parameter]
+	public TEnum Field { get; set; } = default!;
+	[Parameter]
+	public bool IncludeEmpty { get; set; }
+
+	private List<KeyValuePair<string, string>> values { get; set; } = new List<KeyValuePair<string, string>>();
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		var enumValues = System.Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
+		foreach (var value in enumValues)
+		{
+			values.Add(KeyValuePair.Create(value.ToString()!, Utilities.GetEnumDescription(value)));
+		}
+	}
+}

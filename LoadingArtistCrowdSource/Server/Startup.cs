@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.Json.Serialization;
 
 using LoadingArtistCrowdSource.Server.Data;
 using LoadingArtistCrowdSource.Server.Models;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 namespace LoadingArtistCrowdSource.Server
 {
@@ -63,7 +65,10 @@ namespace LoadingArtistCrowdSource.Server
 					options.ClientSecret = Configuration.GetValue<string>("Discord:ClientSecret");
 				});
 
-			services.AddControllersWithViews();
+			services.AddControllersWithViews()
+				.AddJsonOptions(options => {
+					options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+				});
 			services.AddRazorPages();
 
 			/*

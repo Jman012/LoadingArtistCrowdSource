@@ -21,6 +21,12 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public Guid Id { get; set; }
 
 		/// <summary>
+		/// A URL-friendly identifier. Usually similar to or derived from
+		/// the <see cref="Name"></see>
+		/// </summary>
+		public string Code { get; set; } = "";
+
+		/// <summary>
 		/// Disable a field definition by setting IsActive to false.
 		/// When inactive, will not appear on comics, but will still be 
 		/// editable for administrators
