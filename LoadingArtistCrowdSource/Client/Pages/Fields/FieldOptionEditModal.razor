@@ -1,0 +1,73 @@
+﻿<Modal @ref="modal">
+	<HeaderContent>
+		@(isNew ? "Add" : "Edit") Field Option
+	</HeaderContent>
+	<BodyContent>
+		<EditForm @ref="form" Model="optionVM">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+
+			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Code" Disabled="!isNew"></FormTextfield>
+			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Text"></FormTextfield>
+			<FormTextarea NamePrefix="namePrefix" @bind-Value="optionVM.Description"></FormTextarea>
+			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.URL"></FormTextfield>
+		</EditForm>
+	</BodyContent>
+	<FooterContent>
+		<button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save changes</button>
+		<button type="button" form="FieldOptionEditModal" class="btn btn-secondary" @onclick="() => Close()">Close</button>
+	</FooterContent>
+</Modal>
+
+@code {
+
+	public struct State
+	{
+		public CrowdSourcedFieldDefinitionOptionViewModel OptionVM { get; set; }
+		public int? Index { get; set; }
+	}
+
+	[Parameter]
+	public EventCallback<State> OnSubmit { get; set; }
+
+	private CrowdSourcedFieldDefinitionOptionViewModel optionVM { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel();
+	private int? index { get; set; }
+	private bool isNew => !index.HasValue;
+
+	private Modal modal { get; set; } = new Modal();
+	private EditForm form { get; set; } = new EditForm();
+	private string namePrefix => $"{(isNew ? "Add" : "Edit")}_Option_";
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+	}
+
+	public void Open(State state)
+	{
+		optionVM = state.OptionVM;
+		index = state.Index;
+		StateHasChanged();
+		modal.Open();
+	}
+
+	public void Close()
+	{
+		modal.Close();
+	}
+
+	private async Task HandleSubmit()
+	{
+		if (!form.EditContext!.Validate())
+		{
+			return;
+		}
+
+		await OnSubmit.InvokeAsync(new State()
+		{
+			OptionVM = optionVM,
+			Index = index,
+		});
+		modal.Close();
+	}
+}

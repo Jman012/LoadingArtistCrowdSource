@@ -150,6 +150,18 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			#endregion CrowdSourcedFieldDefinitionHistoryLog
 
+			#region CrowdSourcedFieldDefinitionOption
+			// Keys
+			builder.Entity<CrowdSourcedFieldDefinitionOption>()
+				.HasKey(csfdo => new { csfdo.CrowdSourcedFieldDefinitionId, csfdo.Id });
+			// Relationships
+			builder.Entity<CrowdSourcedFieldDefinitionOption>()
+				.HasOne(csfdo => csfdo.CrowdSourcedFieldDefinition)
+				.WithMany(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
+				.HasForeignKey(csfdo => csfdo.CrowdSourcedFieldDefinitionId)
+				.OnDelete(DeleteBehavior.NoAction);
+			#endregion CrowdSourcedFieldDefinitionOption
+
 			#region CrowdSourcedFieldUserEntry
 			// Keys
 			builder.Entity<CrowdSourcedFieldUserEntry>()
@@ -349,7 +361,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				Id = def1Id,
 				IsActive = true,
 				IsDeleted = false,
-				Type = CrowdSourcedFieldType.Number,
+				Type = CrowdSourcedFieldType.IntegerNumber,
 				DisplayOrder = 1,
 				Name = "Panels",
 				ShortDescription = "The number of panels in the comic",
@@ -364,7 +376,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				Id = def2Id,
 				IsActive = true,
 				IsDeleted = false,
-				Type = CrowdSourcedFieldType.FreeformText,
+				Type = CrowdSourcedFieldType.FreeformTextfield,
 				DisplayOrder = 2,
 				Name = "Characters",
 				ShortDescription = "Which characters are present in the comic",

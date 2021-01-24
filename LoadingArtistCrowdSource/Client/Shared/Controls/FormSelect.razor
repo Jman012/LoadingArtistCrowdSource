@@ -9,6 +9,7 @@
 				 ForField="@ValueExpression"></DisplayName>
 
 	<InputSelect id="@memberName"
+				 name="@memberName"
 				 class="form-control"
 				 disabled="@Disabled"
 				 Value="@Value"
@@ -25,6 +26,8 @@
 </div>
 
 @code {
+	[Parameter]
+	public string NamePrefix { get; set; } = "";
 	[Parameter]
 	public TValue Value { get; set; } = default!;
 	[Parameter]
@@ -46,7 +49,7 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		memberName = Utilities.GetMemberName(ValueExpression!);
+		memberName = NamePrefix + Utilities.GetMemberName(ValueExpression!);
 		memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
 	}
 }

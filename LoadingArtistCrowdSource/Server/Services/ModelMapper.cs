@@ -121,7 +121,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			return verifEntry;
 		}
 
-		public CrowdSourcedFieldDefinitionViewModel MapCrowdSourcedFieldDefinition(CrowdSourcedFieldDefinition def, bool mapCreatedByUser = false, bool mapLastUpdatedByUser = false)
+		public CrowdSourcedFieldDefinitionViewModel MapCrowdSourcedFieldDefinition(CrowdSourcedFieldDefinition def, bool mapCreatedByUser = false, bool mapLastUpdatedByUser = false, bool mapOptions = false)
 		{
 			CrowdSourcedFieldDefinitionViewModel defVM = new CrowdSourcedFieldDefinitionViewModel()
 			{
@@ -145,13 +145,30 @@ namespace LoadingArtistCrowdSource.Server.Services
 			{
 				defVM.LastUpdatedByUser = MapApplicationUser(def.LastUpdatedByUser);
 			}
+			if (mapOptions)
+			{
+				defVM.Options = def.CrowdSourcedFieldDefinitionOptions.Select(this.MapCrowdSourcedFieldDefinitionOption).ToList();
+			}
 
 			return defVM;
 		}
 
-		public FieldDefinitionFormViewModel MapFieldDefinitionForm(CrowdSourcedFieldDefinition def)
+		public CrowdSourcedFieldDefinitionOptionViewModel MapCrowdSourcedFieldDefinitionOption(CrowdSourcedFieldDefinitionOption option)
 		{
-			return new FieldDefinitionFormViewModel()
+			CrowdSourcedFieldDefinitionOptionViewModel optionVM = new CrowdSourcedFieldDefinitionOptionViewModel()
+			{
+				Code = option.Code,
+				Text = option.Text,
+				Description = option.Description,
+				URL = option.URL,
+			};
+
+			return optionVM;
+		}
+
+		public FieldDefinitionFormViewModel MapFieldDefinitionForm(CrowdSourcedFieldDefinition def, bool mapOptions = false)
+		{
+			FieldDefinitionFormViewModel vm = new FieldDefinitionFormViewModel()
 			{
 				Code = def.Code,
 				Name = def.Name,
@@ -164,6 +181,13 @@ namespace LoadingArtistCrowdSource.Server.Services
 				LastUpdatedDate = def.LastUpdatedDate,
 				LastUpdatedBy = def.LastUpdatedByUser?.UserName,
 			};
+
+			if (mapOptions)
+			{
+				vm.Options = def.CrowdSourcedFieldDefinitionOptions.Select(this.MapCrowdSourcedFieldDefinitionOption).ToList();
+			}
+
+			return vm;
 		}
 	}
 }

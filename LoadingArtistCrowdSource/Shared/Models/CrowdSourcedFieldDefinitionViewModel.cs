@@ -23,6 +23,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 
 		public ApplicationUserViewModel CreatedByUser { get; set; } = new ApplicationUserViewModel();
 		public ApplicationUserViewModel LastUpdatedByUser { get; set; } = new ApplicationUserViewModel();
-
+		public List<CrowdSourcedFieldDefinitionOptionViewModel> Options { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 	}
 }

@@ -4,6 +4,7 @@
 
 <div class="form-group form-check">
 	<InputCheckbox id="@memberName"
+				   name="@memberName"
 				   class="form-check-input"
 				   disabled="@Disabled"
 				   Value="@Value" ValueChanged="@ValueChanged" ValueExpression="@ValueExpression"
@@ -20,6 +21,8 @@
 </div>
 
 @code {
+	[Parameter]
+	public string NamePrefix { get; set; } = "";
 	[Parameter]
 	public bool Value { get; set; } = false;
 	[Parameter]
@@ -39,7 +42,7 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		memberName = Utilities.GetMemberName(ValueExpression!);
+		memberName = NamePrefix + Utilities.GetMemberName(ValueExpression!);
 		memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
 	}
 }

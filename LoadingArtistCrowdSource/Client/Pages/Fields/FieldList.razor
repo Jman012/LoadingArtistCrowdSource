@@ -17,12 +17,11 @@
 }
 else
 {
-	<h3>Active Fields</h3>
-
 	<NavLink class="btn btn-primary" href="field/new">
 		<span class="oi oi-plus" aria-hidden="true"></span> New Field
 	</NavLink>
 
+	<h3>Active Fields</h3>
 	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="activeFields" PageSize="15">
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Name" Field="@(c => c.Name)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Type" Field="@(c => c.Type)" Sortable="true" Filterable="true"></BlazorTable.Column>

@@ -101,5 +101,6 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public List<CrowdSourcedFieldUserEntryValue> CrowdSourcedFieldUserEntryValues { get; set; } = null!;
 		public List<CrowdSourcedFieldVerifiedEntry> CrowdSourcedFieldVerifiedEntries { get; set; } = null!;
 		public List<CrowdSourcedFieldVerifiedEntryValue> CrowdSourcedFieldVerifiedEntryValues { get; set; } = null!;
+		public List<CrowdSourcedFieldDefinitionOption> CrowdSourcedFieldDefinitionOptions { get; set; } = null!;
 	}
 }
