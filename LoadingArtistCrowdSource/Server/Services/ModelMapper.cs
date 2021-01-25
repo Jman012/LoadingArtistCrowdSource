@@ -126,6 +126,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			CrowdSourcedFieldDefinitionViewModel defVM = new CrowdSourcedFieldDefinitionViewModel()
 			{
 				Id = def.Id,
+				Code = def.Code,
 				IsActive = def.IsActive,
 				IsDeleted = def.IsDeleted,
 				Type = def.Type,

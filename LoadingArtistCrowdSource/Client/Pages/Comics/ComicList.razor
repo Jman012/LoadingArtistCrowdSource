@@ -1,4 +1,4 @@
-﻿@page "/comics"
+﻿@page "/comic"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LoadingArtistCrowdSource.Shared
@@ -32,7 +32,7 @@ else
 		<BlazorTable.Column TableItem="ComicViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicViewModel" Field="@(c => c.Code)">
 			<Template>
-				<NavLink class="nav-link" href="@($"comics/{context.Code}")">
+				<NavLink class="nav-link" href="@($"comic/{context.Code}")">
 					<span class="oi oi-plus" aria-hidden="true"></span> View
 				</NavLink>
 			</Template>

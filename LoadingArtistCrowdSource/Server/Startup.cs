@@ -77,6 +77,12 @@ namespace LoadingArtistCrowdSource.Server
 
 			// Add IEmailSender for ASP.NET Core Identity services
 			services.AddTransient<IEmailSender, Services.MailJetEmailSender>();
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				// Required in order to have UserManager<T>.GetUserId() to work.
+				options.ClaimsIdentity.UserIdClaimType = System.Security.Claims.ClaimTypes.NameIdentifier;
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

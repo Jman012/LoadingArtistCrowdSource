@@ -47,6 +47,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{code}", _serializationOptions) ?? new FieldDefinitionFormViewModel();
 		}
+		public async Task<string?> PutField(FieldDefinitionFormViewModel vm)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/field/{vm.Code}", vm, _serializationOptions);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return response.ReasonPhrase;
+		}
 		#endregion
 	}
 }

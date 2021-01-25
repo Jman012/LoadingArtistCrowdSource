@@ -11,6 +11,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	public class CrowdSourcedFieldDefinitionViewModel
 	{
 		public Guid Id { get; set; }
+		public string Code { get; set; }
 		public bool IsActive { get; set; } = true;
 		public bool IsDeleted { get; set; } = false;
 		public CrowdSourcedFieldType Type { get; set; }

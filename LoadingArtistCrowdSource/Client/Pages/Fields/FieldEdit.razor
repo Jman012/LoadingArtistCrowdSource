@@ -4,6 +4,8 @@
 @using LoadingArtistCrowdSource.Shared
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 
 <div class="container">
 	@if (!loaded)
@@ -88,7 +90,7 @@
 			}
 
 			<button type="submit" class="btn btn-primary">Create</button>
-			<button type="button" class="btn btn-secondary">Cancel</button>
+			<button type="button" class="btn btn-secondary" @onclick="HandleCancel">Cancel</button>
 
 		</EditForm>
 	}
@@ -118,6 +120,7 @@
 		}
 		else
 		{
+			isNew = false;
 			try
 			{
 				loaded = false;
@@ -133,7 +136,10 @@
 
 	private void OnNameInput(ChangeEventArgs ev)
 	{
-		fieldDef.Code = (ev.Value as string)!.ToLower().Replace(" ", "-");
+		if (isNew)
+		{
+			fieldDef.Code = (ev.Value as string)!.ToLower().Replace(" ", "-");
+		}
 	}
 
 	private void HandleAddOption()
@@ -171,9 +177,21 @@
 		}
 	}
 
-	private void HandleValidSubmit()
+	private async Task HandleValidSubmit()
 	{
-
+		var result = await Api.PutField(fieldDef);
+		if (result == null)
+		{
+			NavigationManager.NavigateTo("/field");
+		}
+		else
+		{
+			await JsRuntime.InvokeVoidAsync("alert", $"There was a problem saving the Field: ${result}");
+		}
 	}
 
+	private void HandleCancel()
+	{
+		NavigationManager.NavigateTo("/field");
+	}
 }

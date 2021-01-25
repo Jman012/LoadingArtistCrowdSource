@@ -38,11 +38,6 @@
 	private EditForm form { get; set; } = new EditForm();
 	private string namePrefix => $"{(isNew ? "Add" : "Edit")}_Option_";
 
-	protected override void OnInitialized()
-	{
-		base.OnInitialized();
-	}
-
 	public void Open(State state)
 	{
 		optionVM = state.OptionVM;
