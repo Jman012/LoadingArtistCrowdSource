@@ -10,13 +10,10 @@ namespace LoadingArtistCrowdSource.Server.Services
 {
 	public class ModelMapper
 	{
-		public ComicViewModel MapComic(Comic comic, 
-			bool mapImportedByUser = false, 
-			bool mapLastUpdatedUser = false, 
-			bool mapComicHistoryLogs = false, 
-			bool mapUserEntries = false, 
-			bool mapVerifiedEntries = false,
-			bool mapVerifiedUserEntries = false)
+		public ComicViewModel MapComic(Comic comic,
+			bool mapImportedByUser = false,
+			bool mapLastUpdatedUser = false,
+			bool mapComicHistoryLogs = false)
 		{
 			ComicViewModel comicVM = new ComicViewModel()
 			{
@@ -49,36 +46,6 @@ namespace LoadingArtistCrowdSource.Server.Services
 					.Select(this.MapComicHistoryLog)
 					.ToList();
 			}
-			if (mapUserEntries)
-			{
-				comicVM.CrowdSourcedFieldUserEntries = comic
-					.CrowdSourcedFieldUserEntries
-					.Select(this.MapCrowdSourcedFieldUserEntry)
-					.ToList();
-			}
-			if (mapVerifiedEntries)
-			{
-				comicVM.CrowdSourcedFieldVerifiedEntries = comic
-					.CrowdSourcedFieldVerifiedEntries
-					.Select(ve => this.MapCrowdSourcedFieldVerifiedEntry(ve, mapFieldDefinition: true))
-					.ToList();
-
-				if (mapVerifiedUserEntries)
-				{
-					var userEntriesLookup = comic.CrowdSourcedFieldUserEntries.ToLookup(ue => ue.CrowdSourcedFieldDefinitionId);
-					foreach (var ve in comicVM.CrowdSourcedFieldVerifiedEntries)
-					{
-						ve.CrowdSourcedUserEntries = userEntriesLookup[ve.CrowdSourcedFieldDefinition.Id]
-							.Select(ue => new CrowdSourcedFieldUserEntryViewModel()
-							{
-								CreatedDate = ue.CreatedDate,
-								Values = ue.CrowdSourcedFieldUserEntryValues.Select(v => v.Value).ToList(),
-								CreatedByUser = this.MapApplicationUser(ue.CreatedByUser),
-							})
-							.ToList();
-					}
-				}
-			}
 
 			return comicVM;
 		}
@@ -96,9 +63,20 @@ namespace LoadingArtistCrowdSource.Server.Services
 			return new ComicHistoryLogViewModel();
 		}
 
-		public CrowdSourcedFieldUserEntryViewModel MapCrowdSourcedFieldUserEntry(CrowdSourcedFieldUserEntry entry)
+		public CrowdSourcedFieldUserEntryViewModel MapCrowdSourcedFieldUserEntry(CrowdSourcedFieldUserEntry entry, bool mapCreatedBy = false)
 		{
-			return new CrowdSourcedFieldUserEntryViewModel();
+			var vm = new CrowdSourcedFieldUserEntryViewModel()
+			{
+				CreatedDate = entry.CreatedDate,
+				Values = entry.CrowdSourcedFieldUserEntryValues.Select(v => v.Value).ToList(),
+			};
+
+			if (mapCreatedBy)
+			{
+				vm.CreatedByUser = MapApplicationUser(entry.CreatedByUser);
+			}
+
+			return vm;
 		}
 
 		public CrowdSourcedFieldVerifiedEntryViewModel MapCrowdSourcedFieldVerifiedEntry(CrowdSourcedFieldVerifiedEntry entry, bool mapFirstCreatedByUser = false, bool mapFieldDefinition = false)

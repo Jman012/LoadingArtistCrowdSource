@@ -93,6 +93,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au!.CrowdSourcedFieldDefinitionsLastUpdated)
 				.HasForeignKey(csfd => csfd.LastUpdatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Indices
+			builder.Entity<CrowdSourcedFieldDefinition>()
+				.HasIndex(c => c.Code)
+				.IsUnique();
 			// Properties
 			builder.Entity<CrowdSourcedFieldDefinition>()
 				.Property(csfd => csfd.Type)
@@ -359,6 +363,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<CrowdSourcedFieldDefinition>().HasData(new CrowdSourcedFieldDefinition()
 			{
 				Id = def1Id,
+				Code = "panels",
 				IsActive = true,
 				IsDeleted = false,
 				Type = CrowdSourcedFieldType.IntegerNumber,
@@ -374,6 +379,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<CrowdSourcedFieldDefinition>().HasData(new CrowdSourcedFieldDefinition()
 			{
 				Id = def2Id,
+				Code = "characters",
 				IsActive = true,
 				IsDeleted = false,
 				Type = CrowdSourcedFieldType.FreeformTextfield,

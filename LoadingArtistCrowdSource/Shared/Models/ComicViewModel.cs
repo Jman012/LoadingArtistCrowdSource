@@ -27,7 +27,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string ImageThumbnailUrlSrc { get; set; } = "";
 
 		public string? ImageWideThumbnailUrlSrc { get; set; }
-		
+
 		public DateTimeOffset ImportedDate { get; set; }
 
 		public DateTimeOffset? LastUpdatedDate { get; set; }
@@ -36,7 +36,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public ApplicationUserViewModel? ImportedByUser { get; set; }
 		public ApplicationUserViewModel? LastUpdatedByUser { get; set; }
 		public List<ComicHistoryLogViewModel> ComicHistoryLogs { get; set; } = new List<ComicHistoryLogViewModel>();
-		public List<CrowdSourcedFieldUserEntryViewModel> CrowdSourcedFieldUserEntries { get; set; } = new List<CrowdSourcedFieldUserEntryViewModel>();
-		public List<CrowdSourcedFieldVerifiedEntryViewModel> CrowdSourcedFieldVerifiedEntries { get; set; } = new List<CrowdSourcedFieldVerifiedEntryViewModel>();
+		public List<ComicFieldViewModel> ComicFields { get; set; } = new List<ComicFieldViewModel>();
 	}
 }

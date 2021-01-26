@@ -1,33 +1,56 @@
 ﻿<div class="list-group">
-	@foreach (var entry in Entries)
+	@foreach (var field in Fields)
 	{
-		<Collapsible IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + entry.CrowdSourcedFieldDefinition.Id)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
-			<HeaderContent>
+		<Collapsible IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+			<HeaderContent Context="isCollapsed">
 				<div class="d-flex w-100 justify-content-between">
 					<div class="d-flex">
-						<span class="collapse-icon oi @(context ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
-						<h5 class="mb-1">@entry.CrowdSourcedFieldDefinition.Name</h5>
+						<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
+						<h5 class="mb-1">@field.Name</h5>
 					</div>
-					<div class="h6 mb-1">@string.Join(", ", entry.Values)</div>
+					<div class="h6 mb-1">
+						@if (field.VerifiedEntry != null)
+						{
+							foreach (var ve in field.VerifiedEntry.Values)
+							{
+								<span class="badge badge-secondary">@ve</span><text>&nbsp;</text>
+							}
+						}
+						else if (field.UserEntries.Count > 0)
+						{
+							<span class="badge badge-info">Collecting</span>
+						}
+						else
+						{
+							<span class="badge badge-warning">No Data</span>
+						}
+					</div>
 				</div>
-				<small class="text-muted">@entry.CrowdSourcedFieldDefinition.ShortDescription</small>
+				<small class="text-muted">@field.ShortDescription</small>
 			</HeaderContent>
-			<ChildContent>
+			<ChildContent Context="isCollapsed">
 				<div>
 					<table class="table">
 						<tbody>
 							<tr>
 								<td colspan="2">
-									<p>@entry.CrowdSourcedFieldDefinition.LongDescription</p>
+									@if (field.VerifiedEntry == null)
+									{
+										<button type="button" class="btn btn-sm btn-outline-info" style="float: right;">
+											<span class="oi oi-pencil" aria-hidden="true"></span>
+											Answer
+										</button>
+									}
+									<p>@field.LongDescription</p>
 								</td>
 							</tr>
 							<tr>
 								<th>Date Verified</th>
-								<td>@entry.VerificationDate.ToString("yyyy-MM-dd hh:mm:sstt zzz")</td>
+								<td>@field.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</td>
 							</tr>
 							<tr>
 								<th>Submitters</th>
-								<td>@string.Join(", ", entry.CrowdSourcedUserEntries.Select(ue => ue.CreatedByUser.UserName))</td>
+								<td>@string.Join(", ", field.UserEntries.Select(ue => ue.CreatedByUser.UserName))</td>
 							</tr>
 						</tbody>
 					</table>
@@ -41,5 +64,5 @@
 
 @code {
 	[Parameter]
-	public IEnumerable<CrowdSourcedFieldVerifiedEntryViewModel> Entries { get; set; } = new CrowdSourcedFieldVerifiedEntryViewModel[] { };
+	public IEnumerable<ComicFieldViewModel> Fields { get; set; } = new ComicFieldViewModel[] { };
 }

@@ -45,7 +45,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Include(c => c.ImportedByUser)
 				.Include(c => c.LastUpdatedByUser)
 				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
-				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldDefinition)
 				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CrowdSourcedFieldUserEntryValues)
 				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CreatedByUser)
 				.FirstOrDefaultAsync(c => c.Code == code);
@@ -55,16 +54,34 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
+			List<Models.CrowdSourcedFieldDefinition> fields = await _context.CrowdSourcedFieldDefinitions
+				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
+				.ToListAsync();
+
+			var dctVerifiedEntries = comic.CrowdSourcedFieldVerifiedEntries.ToDictionary(csfve => csfve.CrowdSourcedFieldDefinitionId);
+			var lkpUserEntries = comic.CrowdSourcedFieldUserEntries.ToLookup(csfue => csfue.CrowdSourcedFieldDefinitionId);
+
 			var comicVM = modelMapper.MapComic(comic,
 				mapImportedByUser: true,
-				mapLastUpdatedUser: true,
-				mapVerifiedEntries: true,
-				mapVerifiedUserEntries: true);
+				mapLastUpdatedUser: true);
 
-			if (!User.IsInRole(Roles.Administrator))
+			comicVM.ComicFields = fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
 			{
-				comicVM.CrowdSourcedFieldVerifiedEntries.RemoveAll(ve => !ve.CrowdSourcedFieldDefinition.IsActive || ve.CrowdSourcedFieldDefinition.IsDeleted);
-			}
+				Code = csfd.Code,
+				Type = csfd.Type,
+				DisplayOrder = csfd.DisplayOrder,
+				Name = csfd.Name,
+				ShortDescription = csfd.ShortDescription,
+				LongDescription = csfd.LongDescription,
+				CreatedDate = csfd.CreatedDate,
+				LastUpdatedDate = csfd.LastUpdatedDate,
+				UserEntries = lkpUserEntries.Contains(csfd.Id)
+					? lkpUserEntries[csfd.Id].Select(csfue => modelMapper.MapCrowdSourcedFieldUserEntry(csfue, mapCreatedBy: true)).ToList()
+					: new List<Shared.Models.CrowdSourcedFieldUserEntryViewModel>(),
+				VerifiedEntry = dctVerifiedEntries.ContainsKey(csfd.Id)
+					? modelMapper.MapCrowdSourcedFieldVerifiedEntry(dctVerifiedEntries[csfd.Id])
+					: null,
+			}).ToList();
 
 			return Json(comicVM);
 		}
