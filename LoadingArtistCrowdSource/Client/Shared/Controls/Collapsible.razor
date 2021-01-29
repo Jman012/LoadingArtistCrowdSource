@@ -1,9 +1,9 @@
 ﻿<a role="button" href="" id="@HeaderId" class="@ButtonClass" title="@TitleText" aria-expanded="@AriaExpanded" aria-controls="@CollapseId" @onclick="Toggle" @onclick:preventDefault="true">
-	@HeaderContent(IsCollapsed)
+	@HeaderContent(isCollapsed)
 </a>
 
 <div id="@CollapseId" class="@StateClass @ChildClass" aria-labelledby="@HeaderId">
-	@ChildContent(IsCollapsed)
+	@ChildContent(isCollapsed)
 </div>
 
 
@@ -26,14 +26,21 @@
 	[Parameter]
 	public RenderFragment<bool> ChildContent { get; set; } = null!;
 
-	private string TitleText => $"Click to {(IsCollapsed ? "expand" : "collapse")}";
-	private string AriaExpanded => IsCollapsed ? "false" : "true";
-	private string StateClass => IsCollapsed ? "d-none" : "";
+	private bool isCollapsed { get; set; }
+	private string TitleText => $"Click to {(isCollapsed ? "expand" : "collapse")}";
+	private string AriaExpanded => isCollapsed ? "false" : "true";
+	private string StateClass => isCollapsed ? "d-none" : "";
 	private string HeaderId => $"{IdPrefix}_Header";
 	private string CollapseId => $"{IdPrefix}_Collapse";
 
+	protected override void OnInitialized()
+	{
+		isCollapsed = IsCollapsed;
+		base.OnInitialized();
+	}
+
 	private void Toggle(MouseEventArgs e)
 	{
-		IsCollapsed = !IsCollapsed;
+		isCollapsed = !isCollapsed;
 	}
 }

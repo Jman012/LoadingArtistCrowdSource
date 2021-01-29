@@ -89,8 +89,17 @@
 				</div>
 			}
 
-			<button type="submit" class="btn btn-primary">Create</button>
-			<button type="button" class="btn btn-secondary" @onclick="HandleCancel">Cancel</button>
+			<button type="submit" class="btn btn-primary">
+				@if (isNew)
+				{
+					<text>Create</text>
+				}
+				else
+				{
+					<text>Update</text>
+				}
+			</button>
+			<button type="button" class="btn btn-light" @onclick="HandleCancel">Cancel</button>
 
 		</EditForm>
 	}

@@ -1,9 +1,9 @@
 ﻿<div class="modal fade @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+	<div class="@($"modal-dialog modal-dialog-centered {sizeClass}")" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title">@HeaderContent</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -26,17 +26,42 @@
 
 @code {
 
+	public enum _Size
+	{
+		Small,
+		Medium,
+		Large,
+		ExtraLarge,
+	}
+
 	[Parameter]
 	public RenderFragment HeaderContent { get; set; } = null!;
 	[Parameter]
 	public RenderFragment BodyContent { get; set; } = null!;
 	[Parameter]
 	public RenderFragment FooterContent { get; set; } = null!;
+	[Parameter]
+	public _Size Size { get; set; } = _Size.Medium;
 
 	public Guid Guid = Guid.NewGuid();
 	public string ModalDisplay = "none;";
 	public string ModalClass = "";
 	public bool ShowBackdrop = false;
+	private string sizeClass
+	{
+		get
+		{
+			switch (Size)
+			{
+				case _Size.Small: return "modal-sm";
+				case _Size.Medium: return "";
+				case _Size.Large: return "modal-lg";
+				case _Size.ExtraLarge: return "modal-xl";
+				default:
+					return "";
+			}
+		}
+	}
 
 	public void Open()
 	{

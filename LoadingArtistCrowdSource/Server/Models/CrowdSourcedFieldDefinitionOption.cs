@@ -13,7 +13,6 @@ namespace LoadingArtistCrowdSource.Server.Models
 	public class CrowdSourcedFieldDefinitionOption
 	{
 		public Guid CrowdSourcedFieldDefinitionId { get; set; }
-		public int Id { get; set; }
 		public string Code { get; set; } = "";
 		public string Text { get; set; } = "";
 		public string Description { get; set; } = "";

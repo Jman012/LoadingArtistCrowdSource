@@ -18,6 +18,8 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string LongDescription { get; set; } = "";
 		public DateTimeOffset CreatedDate { get; set; }
 		public DateTimeOffset? LastUpdatedDate { get; set; }
+
+		public List<CrowdSourcedFieldDefinitionOptionViewModel> Options { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 		public List<CrowdSourcedFieldUserEntryViewModel> UserEntries { get; set; } = new List<CrowdSourcedFieldUserEntryViewModel>();
 		public CrowdSourcedFieldVerifiedEntryViewModel? VerifiedEntry { get; set; }
 

@@ -49,8 +49,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			Models.CrowdSourcedFieldDefinition? fieldDef = await _context.CrowdSourcedFieldDefinitions
-				.Include(c => c.CreatedByUser)
-				.Include(c => c.LastUpdatedByUser)
+				.Include(csdf => csdf.CreatedByUser)
+				.Include(csdf => csdf.LastUpdatedByUser)
+				.Include(csdf => csdf.CrowdSourcedFieldDefinitionOptions)
 				.FirstOrDefaultAsync(c => c.Code == code);
 
 			if (fieldDef == null || fieldDef.IsDeleted)
@@ -58,7 +59,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
-			return Json(modelMapper.MapFieldDefinitionForm(fieldDef));
+			return Json(modelMapper.MapFieldDefinitionForm(fieldDef, mapOptions: true));
 		}
 
 		[HttpPut]
@@ -102,7 +103,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				var csfdo = pair.Item1;
 				var ovm = pair.Item2;
 
-				csfdo.Text = ovm.Code;
+				csfdo.Text = ovm.Text;
 				csfdo.Description = ovm.Description;
 				csfdo.URL = ovm.URL;
 			}

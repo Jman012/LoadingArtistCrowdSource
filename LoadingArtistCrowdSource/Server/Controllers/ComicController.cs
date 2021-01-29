@@ -54,7 +54,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
-			List<Models.CrowdSourcedFieldDefinition> fields = await _context.CrowdSourcedFieldDefinitions
+			List<Models.CrowdSourcedFieldDefinition> fields = await _context
+				.CrowdSourcedFieldDefinitions
+				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
 				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
 				.ToListAsync();
 
@@ -75,6 +77,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				LongDescription = csfd.LongDescription,
 				CreatedDate = csfd.CreatedDate,
 				LastUpdatedDate = csfd.LastUpdatedDate,
+				Options = csfd.CrowdSourcedFieldDefinitionOptions.Select(modelMapper.MapCrowdSourcedFieldDefinitionOption).ToList(),
 				UserEntries = lkpUserEntries.Contains(csfd.Id)
 					? lkpUserEntries[csfd.Id].Select(csfue => modelMapper.MapCrowdSourcedFieldUserEntry(csfue, mapCreatedBy: true)).ToList()
 					: new List<Shared.Models.CrowdSourcedFieldUserEntryViewModel>(),

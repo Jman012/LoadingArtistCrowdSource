@@ -157,7 +157,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			#region CrowdSourcedFieldDefinitionOption
 			// Keys
 			builder.Entity<CrowdSourcedFieldDefinitionOption>()
-				.HasKey(csfdo => new { csfdo.CrowdSourcedFieldDefinitionId, csfdo.Id });
+				.HasKey(csfdo => new { csfdo.CrowdSourcedFieldDefinitionId, csfdo.Code });
 			// Relationships
 			builder.Entity<CrowdSourcedFieldDefinitionOption>()
 				.HasOne(csfdo => csfdo.CrowdSourcedFieldDefinition)
