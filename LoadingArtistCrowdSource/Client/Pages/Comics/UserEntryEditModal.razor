@@ -75,7 +75,6 @@
 										</div>
 										break;
 									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
-									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 										<div class="form-group">
 											<label for="textfield">@comicField.Name</label>
 
@@ -85,8 +84,27 @@
 													   @bind-Value="stringAnswer" />
 										</div>
 										break;
-									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
+										<div class="form-group">
+											<label for="textfield">@comicField.Name</label>
 
+											<InputNumber id="textfield"
+														 name="textfield"
+														 class="form-control"
+														 @bind-Value="intAnswer" />
+										</div>
+										break;
+									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+										<div class="form-group">
+											<label for="select">@comicField.Name</label>
+
+											<InputMultiSelect id="select"
+															  name="select"
+															  class="form-control"
+															  size="8"
+															  @bind-Value="stringAnswers2"
+															  Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
+										</div>
 										break;
 									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 										<InputRadioGroup @bind-Value="stringAnswer">
@@ -197,6 +215,8 @@
 	private List<ValueWrapper<bool>> boolAnswers { get; set; } = new List<ValueWrapper<bool>>();
 	private string stringAnswer { get; set; } = "";
 	private List<ValueWrapper<string>> stringAnswers { get; set; } = new List<ValueWrapper<string>>();
+	private string[] stringAnswers2 { get; set; } = new string[] { };
+	private int? intAnswer { get; set; }
 	#endregion Answer Variables
 
 	protected override async Task OnInitializedAsync()
@@ -235,10 +255,16 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
-			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				stringAnswer = userEntry.Values.FirstOrDefault() ?? "";
 				break;
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
+				var first = userEntry.Values.FirstOrDefault();
+				int num = 0;
+				intAnswer = first != null && int.TryParse(first!, out num) ? num : null;
+				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+				stringAnswers2 = userEntry.Values.ToArray();
+				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 				stringAnswers = userEntry.Values.Select(v => new ValueWrapper<string>(v)).ToList();
 				break;
@@ -268,7 +294,7 @@
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 				values = new List<string>()
-			{
+				{
 					boolAnswer.ToString(),
 				};
 				break;
@@ -280,11 +306,13 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
-			{
+				{
 					stringAnswer,
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+				values = stringAnswers2.ToList();
+				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 				values = stringAnswers.Select(sa => sa.Value).ToList();
 				break;

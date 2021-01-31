@@ -25,6 +25,18 @@
 	<script src="_framework/blazor.webassembly.js"></script>
 	<script>navigator.serviceWorker.register('service-worker.js');</script>
 	<script src="_content/BlazorTable/BlazorTable.min.js"></script>
+	<script>
+		window.getSelectedValues = function (sel) {
+			var results = [];
+			var i;
+			for (i = 0; i < sel.options.length; i++) {
+				if (sel.options[i].selected) {
+					results[results.length] = sel.options[i].value;
+				}
+			}
+			return results;
+		};
+	</script>
 </body>
 
 </html>
