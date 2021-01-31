@@ -1,0 +1,40 @@
+﻿@if (IsInputGroup)
+{
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="@Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="@(isCollapsed ? "false" : "true")" @onclick="HandleClick">
+		@ButtonContent
+	</button>
+	<div class="dropdown-menu @bodyClass" aria-labelledby="@Id">
+		@BodyContent
+	</div>
+}
+else
+{
+	<div class="dropdown">
+		<button class="btn btn-secondary dropdown-toggle" type="button" id="@Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="@(isCollapsed ? "false" : "true")" @onclick="HandleClick">
+			@ButtonContent
+		</button>
+		<div class="dropdown-menu @bodyClass" aria-labelledby="@Id" style="position: absolute;">
+			@BodyContent
+		</div>
+	</div>
+}
+
+
+@code {
+	[Parameter]
+	public string Id { get; set; } = "";
+	[Parameter]
+	public bool IsInputGroup { get; set; } = false;
+	[Parameter]
+	public RenderFragment? ButtonContent { get; set; }
+	[Parameter]
+	public RenderFragment? BodyContent { get; set; }
+
+	private bool isCollapsed { get; set; } = true;
+	private string bodyClass => isCollapsed ? "" : "show";
+
+	private void HandleClick()
+	{
+		isCollapsed = !isCollapsed;
+	}
+}

@@ -1,4 +1,6 @@
 ﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Services.LACSApi Api
+@inject IJSRuntime JsRuntime
 
 <Modal @ref="modal" Size="Modal._Size.ExtraLarge">
 	<HeaderContent>
@@ -20,6 +22,7 @@
 								<img src="@comicImgSrc" class="img-fluid img-thumbnail" />
 							</div>
 							<div class="col-6">
+								<h5>Your Answer</h5>
 								@switch (comicField.Type)
 								{
 									case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
@@ -52,6 +55,7 @@
 											<label for="select">@comicField.Name</label>
 
 											<InputSelect id="select" name="select" class="form-control" @bind-Value="stringAnswer">
+												<option value=""></option>
 												@foreach (var option in comicField.Options)
 														{
 													<option value="@option.Code">@option.Text</option>
@@ -103,9 +107,30 @@
 										break;
 								}
 								<hr />
+								<h5>Description</h5>
+								<p>
+									@comicField.ShortDescription
+								</p>
 								<p>
 									@comicField.LongDescription
 								</p>
+								@if (comicField.Options.Any())
+								{
+									<hr />
+									<h5>Option Descriptions</h5>
+									<div class="list-group">
+										@foreach (var option in comicField.Options)
+										{
+											<div class="list-group-item">
+												<h6>@option.Text</h6>
+												<p>@option.Description</p>
+												<p>
+													<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
+												</p>
+											</div>
+										}
+									</div>
+								}
 							</div>
 						</div>
 					</div>
@@ -114,9 +139,15 @@
 		</AuthorizeView>
 	</BodyContent>
 	<FooterContent>
+		@if (isSubmitting)
+		{
+			<div class="spinner-border" role="status">
+				<span class="sr-only">Loading...</span>
+			</div>
+		}
 		@if (userName != null)
 		{
-			<button type="submit" class="btn btn-primary" @onclick="HandleSubmit">
+			<button type="submit" class="btn btn-primary" disabled="@isSubmitting" @onclick="HandleSubmit">
 				@if (userEntry.CreatedDate == default)
 				{
 					<text>Add Answer</text>
@@ -136,6 +167,7 @@
 	public struct State
 	{
 		public ComicFieldViewModel ComicField { get; set; }
+		public string ComicCode { get; set; }
 		public string ComicImgSrc { get; set; }
 	}
 
@@ -155,8 +187,10 @@
 	private EditForm form { get; set; } = new EditForm();
 	private string? userName { get; set; }
 	private ComicFieldViewModel comicField { get; set; } = new ComicFieldViewModel();
+	private string comicCode { get; set; } = "";
 	private string comicImgSrc { get; set; } = "";
 	private CrowdSourcedFieldUserEntryViewModel userEntry { get; set; } = new CrowdSourcedFieldUserEntryViewModel();
+	private bool isSubmitting { get; set; } = false;
 
 	#region Answer Variables
 	private bool boolAnswer { get; set; }
@@ -178,6 +212,7 @@
 	public void Open(State state)
 	{
 		comicField = state.ComicField;
+		comicCode = state.ComicCode;
 		comicImgSrc = state.ComicImgSrc;
 
 		if (userName != null)
@@ -228,7 +263,46 @@
 			return;
 		}
 
-		// TODO: Map answers back
+		List<string> values = new List<string>();
+		switch (comicField.Type)
+		{
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
+				values = new List<string>()
+			{
+					boolAnswer.ToString(),
+				};
+				break;
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
+				values = comicField.Options.Zip(boolAnswers).Where(x => x.Second.Value).Select(x => x.First.Code).ToList();
+				break;
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
+				values = new List<string>()
+			{
+					stringAnswer,
+				};
+				break;
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
+				values = stringAnswers.Select(sa => sa.Value).ToList();
+				break;
+			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
+				break;
+		}
+
+		isSubmitting = true;
+		StateHasChanged();
+		var result = await Api.PutUserEntryValues(comicCode, comicField.Code, values);
+		isSubmitting = false;
+		StateHasChanged();
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			await JsRuntime.InvokeVoidAsync("alert", $"There was a problem saving your answer: ${result}");
+			return;
+		}
 
 		await OnSubmit.InvokeAsync(new State()
 		{

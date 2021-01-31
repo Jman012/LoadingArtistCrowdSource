@@ -36,6 +36,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{code}", _serializationOptions) ?? new ComicViewModel();
 		}
+		public async Task<string?> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/comic/{comicCode}/entry/{fieldCode}", values, _serializationOptions);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return response.ReasonPhrase;
+		}
 		#endregion
 
 		#region FieldController

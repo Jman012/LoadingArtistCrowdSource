@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
@@ -19,9 +20,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	public class ComicController : Controller
 	{
 		private readonly ApplicationDbContext _context;
-		public ComicController(ApplicationDbContext context)
+		private readonly UserManager<Models.ApplicationUser> _userManager;
+
+		public ComicController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager)
 		{
 			this._context = context;
+			this._userManager = userManager;
 		}
 
 		[HttpGet]
@@ -87,6 +91,72 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}).ToList();
 
 			return Json(comicVM);
+		}
+
+		[HttpPut]
+		[Route("/api/comic/{comicCode}/entry/{fieldCode}")]
+		[Authorize]
+		public async Task<IActionResult> PutComicUserEntry(string comicCode, string fieldCode, [FromBody] List<string> values)
+		{
+			var userId = _userManager.GetUserId(User);
+
+			var comic = _context.Comics.FirstOrDefault(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound();
+			}
+
+			var fieldDefinition = _context.CrowdSourcedFieldDefinitions.FirstOrDefault(csfd => csfd.Code == fieldCode);
+			if (fieldDefinition == null)
+			{
+				return NotFound();
+			}
+
+			var userEntry = _context.CrowdSourcedFieldUserEntries.FirstOrDefault(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfue.CreatedBy == userId);
+
+			var transaction = await _context.Database.BeginTransactionAsync();
+
+			if (userEntry == null)
+			{
+				userEntry = new Models.CrowdSourcedFieldUserEntry()
+				{
+					ComicId = comic.Id,
+					CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+					CreatedBy = userId,
+					CreatedDate = DateTimeOffset.Now,
+				};
+				_context.CrowdSourcedFieldUserEntries.Add(userEntry);
+				await _context.SaveChangesAsync();
+			}
+			else
+			{
+				userEntry.LastUpdatedDate = DateTimeOffset.Now;
+			}
+
+			// Remove all values
+			var currentValues = await _context
+				.CrowdSourcedFieldUserEntryValues
+				.Where(csfuev => csfuev.ComicId == csfuev.ComicId && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
+				.ToListAsync();
+			_context.CrowdSourcedFieldUserEntryValues.RemoveRange(currentValues);
+			await _context.SaveChangesAsync();
+
+			// And re-add them as new rows
+			var newUserEntryValues = values.Select((value, index) => new Models.CrowdSourcedFieldUserEntryValue()
+			{
+				ComicId = comic.Id,
+				CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+				CreatedBy = userId,
+				Id = index,
+				Value = value,
+			}).ToList();
+
+			_context.CrowdSourcedFieldUserEntryValues.AddRange(newUserEntryValues);
+			await _context.SaveChangesAsync();
+
+			await transaction.CommitAsync();
+
+			return Ok();
 		}
 	}
 }

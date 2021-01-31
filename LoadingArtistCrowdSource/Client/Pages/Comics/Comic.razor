@@ -79,7 +79,7 @@
 			<div class="col-xl">
 				<h3>Crowd Sourced Data</h3>
 				<div class="entry-list">
-					<VerifiedEntries ComicImgSrc="@comic.ImageUrlSrc" Fields="comic.ComicFields"></VerifiedEntries>
+					<VerifiedEntries ComicCode="@comic.Code" ComicImgSrc="@comic.ImageUrlSrc" Fields="comic.ComicFields" OnComicNeedsRefresh="HandleComicNedsRefresh"></VerifiedEntries>
 				</div>
 			</div>
 		</div>
@@ -99,6 +99,23 @@
 		{
 			comic = await Api.GetComic(Code);
 			loaded = true;
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+		}
+	}
+
+	private async Task HandleComicNedsRefresh()
+	{
+		loaded = false;
+		StateHasChanged();
+
+		try
+		{
+			comic = await Api.GetComic(Code);
+			loaded = true;
+			StateHasChanged();
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
