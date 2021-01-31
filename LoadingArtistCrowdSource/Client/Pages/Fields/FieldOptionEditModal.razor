@@ -1,22 +1,28 @@
 ﻿<Modal @ref="modal">
-	<HeaderContent>
-		@(isNew ? "Add" : "Edit") Field Option
-	</HeaderContent>
-	<BodyContent>
-		<EditForm @ref="form" Model="optionVM">
-			<DataAnnotationsValidator />
-			<ValidationSummary />
+	<ModalBackdrop />
+	<ModalContent>
+		<ModalHeader>
+			<ModalTitle>
+				@(isNew ? "Add" : "Edit") Field Option
+			</ModalTitle>
+			<CloseButton Clicked="Close"></CloseButton>
+		</ModalHeader>
+		<ModalBody>
+			<EditForm @ref="form" Model="optionVM">
+				<DataAnnotationsValidator />
+				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
-			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Code" Disabled="!isNew"></FormTextfield>
-			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Text"></FormTextfield>
-			<FormTextarea NamePrefix="namePrefix" @bind-Value="optionVM.Description"></FormTextarea>
-			<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.URL"></FormTextfield>
-		</EditForm>
-	</BodyContent>
-	<FooterContent>
-		<button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save changes</button>
-		<button type="button" form="FieldOptionEditModal" class="btn btn-light" @onclick="() => Close()">Close</button>
-	</FooterContent>
+				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Code" Disabled="!isNew"></FormTextfield>
+				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Text"></FormTextfield>
+				<FormTextarea NamePrefix="namePrefix" @bind-Value="optionVM.Description"></FormTextarea>
+				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.URL"></FormTextfield>
+			</EditForm>
+		</ModalBody>
+		<ModalFooter>
+			<button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save changes</button>
+			<button type="button" form="FieldOptionEditModal" class="btn btn-light" @onclick="() => Close()">Close</button>
+		</ModalFooter>
+	</ModalContent>
 </Modal>
 
 @code {
@@ -43,12 +49,12 @@
 		optionVM = state.OptionVM;
 		index = state.Index;
 		StateHasChanged();
-		modal.Open();
+		modal.Show();
 	}
 
 	public void Close()
 	{
-		modal.Close();
+		modal.Hide();
 	}
 
 	private async Task HandleSubmit()
@@ -63,6 +69,6 @@
 			OptionVM = optionVM,
 			Index = index,
 		});
-		modal.Close();
+		modal.Hide();
 	}
 }

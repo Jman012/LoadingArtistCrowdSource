@@ -11,6 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using BlazorTable;
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
+
 
 namespace LoadingArtistCrowdSource.Client
 {
@@ -35,7 +39,23 @@ namespace LoadingArtistCrowdSource.Client
 			builder.Services.AddScoped<Services.LACSApi>();
 			builder.Services.AddBlazorTable();
 
-			await builder.Build().RunAsync();
+			// Blazorise
+			builder.Services
+				.AddBlazorise(options =>
+				{
+					options.ChangeTextOnKeyPress = true;
+				})
+				.AddBootstrapProviders()
+				.AddFontAwesomeIcons();
+
+			var host = builder.Build();
+
+			// Blazorise
+			host.Services
+				.UseBootstrapProviders()
+				.UseFontAwesomeIcons();
+
+			await host.RunAsync();
 		}
 	}
 }
