@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject Services.LACSApi Api
 
-<div class="container">
+<Container Fluid="false">
 	@if (!loaded)
 	{
 		<div class="d-flex justify-content-center">
@@ -16,56 +16,62 @@
 	{
 		<h1>@comic.Title</h1>
 
-		<div class="row">
-			<div class="col-xl">
+		<Row>
+			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
 				<h3>Metadata</h3>
-				<table class="table">
-					<tr>
-						<th>Identifier</th>
-						<td>@comic.Code</td>
-					</tr>
-					<tr>
-						<th>Number</th>
-						<td>@comic.Id</td>
-					</tr>
-					<tr>
-						<th>Permalink</th>
-						<td><NewTabLink Href="@comic.Permalink">@comic.Permalink</NewTabLink></td>
-					</tr>
-					<tr>
-						<th>Published</th>
-						<td>@comic.ComicPublishedDate.ToString("yyyy-MM-dd")</td>
-					</tr>
-					<tr>
-						<th>Tooltip</th>
-						<td>@comic.Tooltip</td>
-					</tr>
-					<tr>
-						<th>Image</th>
-						<td><NewTabLink Href="@comic.ImageUrlSrc">@comic.ImageUrlSrc</NewTabLink></td>
-					</tr>
-					<tr>
-						<th>Thumbnail</th>
-						<td><NewTabLink Href="@comic.ImageThumbnailUrlSrc"><img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" /></NewTabLink></td>
-					</tr>
-					<tr>
-						<th>Wide Thumbnail</th>
-						<td>
-							@if (comic.ImageWideThumbnailUrlSrc != null)
-							{
-								<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc"><img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" /></NewTabLink>
-							}
-							else
-							{
-								<text>N/A</text>
-							}
-						</td>
-					</tr>
-					<tr>
-						<th>Description</th>
-						<td><p>@comic.Description</p></td>
-					</tr>
-				</table>
+				<Table>
+					<TableBody>
+						<TableRow>
+							<TableHeaderCell>Identifier</TableHeaderCell>
+							<TableRowCell>@comic.Code</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Number</TableHeaderCell>
+							<TableRowCell>@comic.Id</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Permalink</TableHeaderCell>
+							<TableRowCell><NewTabLink Href="@comic.Permalink">@comic.Permalink</NewTabLink></TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Published</TableHeaderCell>
+							<TableRowCell>@comic.ComicPublishedDate.ToString("yyyy-MM-dd")</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Tooltip</TableHeaderCell>
+							<TableRowCell>@comic.Tooltip</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Image</TableHeaderCell>
+							<TableRowCell><NewTabLink Href="@comic.ImageUrlSrc">@comic.ImageUrlSrc</NewTabLink></TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Thumbnail</TableHeaderCell>
+							<TableRowCell>
+								<NewTabLink Href="@comic.ImageThumbnailUrlSrc">
+									<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" />
+								</NewTabLink>
+							</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Wide Thumbnail</TableHeaderCell>
+							<TableRowCell>
+								@if (comic.ImageWideThumbnailUrlSrc != null)
+								{
+									<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc"><img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" /></NewTabLink>
+								}
+								else
+								{
+									<text>N/A</text>
+								}
+							</TableRowCell>
+						</TableRow>
+						<TableRow>
+							<TableHeaderCell>Description</TableHeaderCell>
+							<TableRowCell><p>@comic.Description</p></TableRowCell>
+						</TableRow>
+					</TableBody>
+				</Table>
 
 				<h3>Comic Image</h3>
 				<p>
@@ -75,16 +81,16 @@
 						</a>
 					</center>
 				</p>
-			</div>
-			<div class="col-xl">
+			</Column>
+			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
 				<h3>Crowd Sourced Data</h3>
 				<div class="entry-list">
-					<VerifiedEntries ComicCode="@comic.Code" ComicImgSrc="@comic.ImageUrlSrc" Fields="comic.ComicFields" OnComicNeedsRefresh="HandleComicNedsRefresh"></VerifiedEntries>
+					<FieldEntries ComicCode="@comic.Code" ComicImgSrc="@comic.ImageUrlSrc" Fields="comic.ComicFields" OnComicNeedsRefresh="HandleComicNedsRefresh"></FieldEntries>
 				</div>
-			</div>
-		</div>
+			</Column>
+		</Row>
 	}
-</div>
+</Container>
 
 @code {
 	[Parameter]

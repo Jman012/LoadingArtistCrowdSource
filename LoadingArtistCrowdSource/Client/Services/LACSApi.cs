@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
+using LoadingArtistCrowdSource.Shared.Enums;
 using LoadingArtistCrowdSource.Shared.Models;
 
 namespace LoadingArtistCrowdSource.Client.Services
@@ -36,15 +37,9 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{code}", _serializationOptions) ?? new ComicViewModel();
 		}
-		public async Task<string?> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
+		public async Task<UserEntrySubmissionResult> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
 		{
-			var response = await _authClient.PutAsJsonAsync($"api/comic/{comicCode}/entry/{fieldCode}", values, _serializationOptions);
-			if (response.IsSuccessStatusCode)
-			{
-				return null;
-			}
-
-			return response.ReasonPhrase;
+			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{comicCode}/entry/{fieldCode}", values, _serializationOptions);
 		}
 		#endregion
 

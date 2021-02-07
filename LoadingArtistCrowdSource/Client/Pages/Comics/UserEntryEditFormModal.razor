@@ -1,6 +1,7 @@
 ﻿@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject Services.LACSApi Api
 @inject IJSRuntime JsRuntime
+@inject IToastService ToastService
 
 <Modal @ref="modal">
 	<ModalBackdrop />
@@ -19,12 +20,12 @@
 						<DataAnnotationsValidator />
 						<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
-						<div class="container">
-							<div class="row">
-								<div class="col-6">
+						<Container Fluid="false">
+							<Row>
+								<Column Display="Display.None.Block.OnWidescreen">
 									<img src="@comicImgSrc" class="img-fluid img-thumbnail" />
-								</div>
-								<div class="col-6">
+								</Column>
+								<Column>
 									<h5>Your Answer</h5>
 									@switch (comicField.Type)
 									{
@@ -139,22 +140,25 @@
 									{
 										<hr />
 										<h5>Option Descriptions</h5>
-										<div class="list-group">
+										<ListGroup>
 											@foreach (var option in comicField.Options)
 											{
-												<div class="list-group-item">
+												<ListGroupItem>
 													<h6>@option.Text</h6>
 													<p>@option.Description</p>
-													<p>
-														<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
-													</p>
-												</div>
+													@if (!string.IsNullOrEmpty(option.URL))
+													{
+														<p>
+															<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
+														</p>
+													}
+												</ListGroupItem>
 											}
-										</div>
+										</ListGroup>
 									}
-								</div>
-							</div>
-						</div>
+								</Column>
+							</Row>
+						</Container>
 					</EditForm>
 				</Authorized>
 			</AuthorizeView>
@@ -168,7 +172,7 @@
 			}
 			@if (userName != null)
 			{
-				<button type="submit" class="btn btn-primary" disabled="@isSubmitting" @onclick="HandleSubmit">
+				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@isSubmitting" Clicked="HandleSubmit">
 					@if (userEntry.CreatedDate == default)
 					{
 						<text>Add Answer</text>
@@ -177,9 +181,9 @@
 					{
 						<text>Edit Answer</text>
 					}
-				</button>
+				</Button>
 			}
-			<button type="button" form="FieldOptionEditModal" class="btn btn-light" @onclick="() => Close()">Close</button>
+			<Button Type="ButtonType.Button" Color="Color.Light" Clicked="Close">Close</Button>
 		</ModalFooter>
 	</ModalContent>
 </Modal>
@@ -298,7 +302,7 @@
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 				values = new List<string>()
-			{
+{
 					boolAnswer.ToString(),
 				};
 				break;
@@ -310,7 +314,7 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
-			{
+{
 					stringAnswer,
 				};
 				break;
@@ -326,14 +330,26 @@
 
 		isSubmitting = true;
 		StateHasChanged();
-		var result = await Api.PutUserEntryValues(comicCode, comicField.Code, values);
+		UserEntrySubmissionResult result;
+		try
+		{
+			result = await Api.PutUserEntryValues(comicCode, comicField.Code, values);
+		}
+		catch (System.Net.Http.HttpRequestException ex)
+		{
+			ToastService.ShowError($"There was a problem saving your answer: {ex.Message}");
+			return;
+		}
 		isSubmitting = false;
 		StateHasChanged();
 
-		if (!string.IsNullOrEmpty(result))
+		if (result.IsAlertVerified())
 		{
-			await JsRuntime.InvokeVoidAsync("alert", $"There was a problem saving your answer: ${result}");
-			return;
+			ToastService.ShowSuccess(result.AlertDescription(), result.AlertMessage());
+		}
+		else
+		{
+			ToastService.ShowInfo(result.AlertDescription(), result.AlertMessage());
 		}
 
 		await OnSubmit.InvokeAsync(new State()

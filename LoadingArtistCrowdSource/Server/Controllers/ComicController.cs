@@ -98,26 +98,34 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[Authorize]
 		public async Task<IActionResult> PutComicUserEntry(string comicCode, string fieldCode, [FromBody] List<string> values)
 		{
+			UserEntrySubmissionResult result = UserEntrySubmissionResult.NewEntryAdded;
 			var userId = _userManager.GetUserId(User);
 
-			var comic = _context.Comics.FirstOrDefault(c => c.Code == comicCode);
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
 			if (comic == null)
 			{
 				return NotFound();
 			}
 
-			var fieldDefinition = _context.CrowdSourcedFieldDefinitions.FirstOrDefault(csfd => csfd.Code == fieldCode);
+			var fieldDefinition = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDefinition == null)
 			{
 				return NotFound();
 			}
 
-			var userEntry = _context.CrowdSourcedFieldUserEntries.FirstOrDefault(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfue.CreatedBy == userId);
+			var existingVerifiedEntry = await _context.CrowdSourcedFieldVerifiedEntries.FirstOrDefaultAsync(csfve => csfve.ComicId == comic.Id && csfve.CrowdSourcedFieldDefinitionId == fieldDefinition.Id);
+			if (existingVerifiedEntry != null)
+			{
+				return BadRequest("This field is already verified");
+			}
+
+			var userEntry = await _context.CrowdSourcedFieldUserEntries.FirstOrDefaultAsync(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfue.CreatedBy == userId);
 
 			var transaction = await _context.Database.BeginTransactionAsync();
 
 			if (userEntry == null)
 			{
+				result = UserEntrySubmissionResult.NewEntryAdded;
 				userEntry = new Models.CrowdSourcedFieldUserEntry()
 				{
 					ComicId = comic.Id,
@@ -130,6 +138,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 			else
 			{
+				result = UserEntrySubmissionResult.ExistingEntryEdited;
 				userEntry.LastUpdatedDate = DateTimeOffset.Now;
 			}
 
@@ -154,9 +163,67 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			_context.CrowdSourcedFieldUserEntryValues.AddRange(newUserEntryValues);
 			await _context.SaveChangesAsync();
 
+			// Attempt verification
+			var userEntriesForField = await _context.CrowdSourcedFieldUserEntries
+				.Include(csfue => csfue.CrowdSourcedFieldUserEntryValues)
+				.Where(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id)
+				.ToListAsync();
+			// Entry Values => Entry lookup
+			var lkpUserEntriesForField = userEntriesForField
+				.ToLookup(csfue => csfue.CrowdSourcedFieldUserEntryValues.Select(csfuev => csfuev.Value).ToArray(), new Shared.Utilities.ArrayEqualityComparer<string>());
+			// Order the above lookup by number of entries for each overall value
+			var userEntriesForFieldRanked = lkpUserEntriesForField
+				.OrderBy(lkpCsfue => lkpCsfue.Key.Length)
+				.ToList();
+			var topUserEntryValues = userEntriesForFieldRanked.First();
+			var secondUserEntryValues = userEntriesForFieldRanked.Skip(1).FirstOrDefault();
+			// Once the threshold has been met (at least three user entries with the same value)
+			bool shouldVerify = false;
+			if (lkpUserEntriesForField[topUserEntryValues.Key].Count() >= 3)
+			{
+				if (secondUserEntryValues != null)
+				{
+					// If other values do exist, then we don't want the verified answer to only edge by.
+					// It should exceed the next most answered by a fair margin.
+					if (topUserEntryValues.Key.Length - secondUserEntryValues.Key.Length > 3)
+					{
+						shouldVerify = true;
+					}
+				}
+				else
+				{
+					shouldVerify = true;
+				}
+			}
+
+			if (shouldVerify)
+			{
+				result = result.ToVerified();
+				var firstUserEntry = lkpUserEntriesForField[topUserEntryValues.Key].OrderBy(csfue => csfue.CreatedDate).First();
+				var verifiedEntry = new Models.CrowdSourcedFieldVerifiedEntry()
+				{
+					ComicId = comic.Id,
+					CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+					FirstCreatedBy = firstUserEntry.CreatedBy,
+					VerificationDate = DateTimeOffset.Now,
+				};
+				var verifiedEntryValues = firstUserEntry.CrowdSourcedFieldUserEntryValues
+					.Select(csfuev => new Models.CrowdSourcedFieldVerifiedEntryValue()
+					{
+						ComicId = comic.Id,
+						CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+						Id = csfuev.Id,
+						Value = csfuev.Value
+					})
+					.ToList();
+				_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
+				_context.CrowdSourcedFieldVerifiedEntryValues.AddRange(verifiedEntryValues);
+				await _context.SaveChangesAsync();
+			}
+
 			await transaction.CommitAsync();
 
-			return Ok();
+			return Json(result);
 		}
 	}
 }

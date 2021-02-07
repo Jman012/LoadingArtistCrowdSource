@@ -1,0 +1,87 @@
+﻿@page "/search"
+@inject Services.LACSApi Api
+
+<Container Fluid="false">
+	<Row>
+		<Column>
+			<h1>Search</h1>
+
+			<h3>Search Terms</h3>
+			<div>
+
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text">Characters</span>
+						<span class="input-group-text">=</span>
+						<span class="input-group-text">Hat Guy, Jes</span>
+					</div>
+					<div class="input-group-append">
+						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
+							<span class="oi oi-pencil" aria-hidden="true"></span>
+						</Button>
+					</div>
+				</div>
+
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<Dropdown>
+							<DropdownToggle Outline="true" Color="Color.Secondary">Characters</DropdownToggle>
+							<DropdownMenu>
+								<DropdownItem>Characters</DropdownItem>
+								<DropdownItem>Hidden Spider</DropdownItem>
+							</DropdownMenu>
+						</Dropdown>
+						<Dropdown>
+							<DropdownToggle Outline="true" Color="Color.Secondary">=</DropdownToggle>
+							<DropdownMenu>
+								<DropdownItem>=</DropdownItem>
+								<DropdownItem>includes</DropdownItem>
+							</DropdownMenu>
+						</Dropdown>
+						<Dropdown>
+							<DropdownToggle Outline="true" Color="Color.Secondary">Hat Guy, Jes</DropdownToggle>
+							<DropdownMenu>
+								<DropdownItem>
+									<div class="form-check">
+										<input type="checkbox" class="form-check-input" id="dropdownCheck1">
+										<label class="form-check-label" for="dropdownCheck1">
+											Hat Guy
+										</label>
+									</div>
+								</DropdownItem>
+								<DropdownItem>
+									<div class="form-check">
+										<input type="checkbox" class="form-check-input" id="dropdownCheck2">
+										<label class="form-check-label" for="dropdownCheck2">
+											Jes
+										</label>
+									</div>
+								</DropdownItem>
+							</DropdownMenu>
+						</Dropdown>
+					</div>
+					<div class="input-group-append">
+						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
+							<span class="oi oi-x" aria-hidden="true"></span>
+						</Button>
+						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
+							<span class="oi oi-check" aria-hidden="true"></span>
+						</Button>
+					</div>
+				</div>
+
+				
+
+				<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
+					<span class="oi oi-plus" aria-hidden="true"></span>
+					<span class="sr-only">Add new search term</span>
+				</Button>
+			</div>
+		</Column>
+	</Row>
+</Container>
+
+
+@code {
+
+}

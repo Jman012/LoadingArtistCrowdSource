@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoadingArtistCrowdSource.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210124020412_Data")]
-    partial class Data
+    [Migration("20210205213705_NullableOptionsUrl")]
+    partial class NullableOptionsUrl
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -199,46 +199,12 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "JMAN012GUY@GMAIL.COM",
                             NormalizedUserName = "JMAN012GUY@GMAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEO1qaXdhky35IA9LeVVehFvqg5yP3ri0gHZC8m2tJ5hu2MVu7U/Uiwk60b+IeR07tg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEHFW/Fj/4UWqGOG3bEPZJcYIrSzFEZnjxgiB3R9DqRnwuoN1YZGFFM+woXbQmngY/w==",
                             PhoneNumber = "",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
                             UserName = "jman012guy@gmail.com"
-                        },
-                        new
-                        {
-                            Id = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "3acb17f1-65fe-4eac-bc2b-26403b23b998",
-                            Email = "jman012guy+1@gmail.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = true,
-                            NormalizedEmail = "JMAN012GUY+1@GMAIL.COM",
-                            NormalizedUserName = "JAMAMP1",
-                            PasswordHash = "",
-                            PhoneNumber = "",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "",
-                            TwoFactorEnabled = false,
-                            UserName = "jamamp1"
-                        },
-                        new
-                        {
-                            Id = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "3acb17f1-65fe-4eac-bc2b-26403b23b997",
-                            Email = "jman012guy+2@gmail.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = true,
-                            NormalizedEmail = "JMAN012GUY+2@GMAIL.COM",
-                            NormalizedUserName = "JAMAMP2",
-                            PasswordHash = "",
-                            PhoneNumber = "",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "",
-                            TwoFactorEnabled = false,
-                            UserName = "jamamp2"
                         });
                 });
 
@@ -314,7 +280,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
                             ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
                             ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            ImportedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 458, DateTimeKind.Unspecified).AddTicks(5040), new TimeSpan(0, -8, 0, 0, 0)),
+                            ImportedDate = new DateTimeOffset(new DateTime(2021, 2, 5, 13, 37, 4, 635, DateTimeKind.Unspecified).AddTicks(9786), new TimeSpan(0, -8, 0, 0, 0)),
                             Permalink = "https://loadingartist.com/comic/born/",
                             Title = "Born",
                             Tooltip = "Born"
@@ -366,7 +332,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
@@ -408,41 +374,14 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("LastUpdatedBy");
 
                     b.ToTable("CrowdSourcedFieldDefinition");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            Code = "",
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(366), new TimeSpan(0, -8, 0, 0, 0)),
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            IsDeleted = false,
-                            LongDescription = "blah blah",
-                            Name = "Panels",
-                            ShortDescription = "The number of panels in the comic",
-                            Type = "IntegerNumber"
-                        },
-                        new
-                        {
-                            Id = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            Code = "",
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(1571), new TimeSpan(0, -8, 0, 0, 0)),
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            IsDeleted = false,
-                            LongDescription = "blah blah blah blah",
-                            Name = "Characters",
-                            ShortDescription = "Which characters are present in the comic",
-                            Type = "FreeformTextfield"
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionFeedback", b =>
@@ -510,6 +449,30 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.ToTable("CrowdSourcedFieldDefinitionHistoryLog");
                 });
 
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionOption", b =>
+                {
+                    b.Property<Guid>("CrowdSourcedFieldDefinitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CrowdSourcedFieldDefinitionId", "Code");
+
+                    b.ToTable("CrowdSourcedFieldDefinitionOption");
+                });
+
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldUserEntry", b =>
                 {
                     b.Property<int>("ComicId")
@@ -534,56 +497,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("CrowdSourcedFieldUserEntry");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(2810), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(3079), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(3086), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(3089), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(3092), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            CreatedDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(3095), new TimeSpan(0, -8, 0, 0, 0)),
-                            LastUpdatedDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldUserEntryValue", b =>
@@ -611,80 +524,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("CrowdSourcedFieldUserEntryValue");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            Id = 0,
-                            Value = "3"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            Id = 0,
-                            Value = "3"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            Id = 0,
-                            Value = "3"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            Id = 0,
-                            Value = "Hat Guy"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            Id = 0,
-                            Value = "Hat Guy"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            Id = 0,
-                            Value = "Hat Guy"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            Id = 1,
-                            Value = "Jes"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d276",
-                            Id = 1,
-                            Value = "Jes"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            CreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d277",
-                            Id = 1,
-                            Value = "Jes"
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldVerifiedEntry", b =>
@@ -709,22 +548,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("FirstCreatedBy");
 
                     b.ToTable("CrowdSourcedFieldVerifiedEntry");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            VerificationDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(6073), new TimeSpan(0, -8, 0, 0, 0))
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            FirstCreatedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            VerificationDate = new DateTimeOffset(new DateTime(2021, 1, 23, 18, 4, 11, 460, DateTimeKind.Unspecified).AddTicks(6342), new TimeSpan(0, -8, 0, 0, 0))
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldVerifiedEntryValue", b =>
@@ -747,29 +570,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("CrowdSourcedFieldVerifiedEntryValue");
-
-                    b.HasData(
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("aad19aa9-95db-4c0a-a582-5d3da03475d5"),
-                            Id = 0,
-                            Value = "3"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            Id = 0,
-                            Value = "Blue"
-                        },
-                        new
-                        {
-                            ComicId = 1,
-                            CrowdSourcedFieldDefinitionId = new Guid("28333534-6b32-4ad2-85ca-32a4c6ebbe8b"),
-                            Id = 1,
-                            Value = "Hat Guy"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1013,6 +813,17 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Navigation("CrowdSourcedFieldDefinition");
                 });
 
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionOption", b =>
+                {
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinition", "CrowdSourcedFieldDefinition")
+                        .WithMany("CrowdSourcedFieldDefinitionOptions")
+                        .HasForeignKey("CrowdSourcedFieldDefinitionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CrowdSourcedFieldDefinition");
+                });
+
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldUserEntry", b =>
                 {
                     b.HasOne("LoadingArtistCrowdSource.Server.Models.Comic", "Comic")
@@ -1225,6 +1036,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Navigation("CrowdSourcedFieldDefinitionFeedbacks");
 
                     b.Navigation("CrowdSourcedFieldDefinitionHistoryLogs");
+
+                    b.Navigation("CrowdSourcedFieldDefinitionOptions");
 
                     b.Navigation("CrowdSourcedFieldUserEntries");
 

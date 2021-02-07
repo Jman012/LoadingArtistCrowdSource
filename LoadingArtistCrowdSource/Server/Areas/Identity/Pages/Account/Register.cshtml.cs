@@ -81,6 +81,11 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account
 			if (ModelState.IsValid)
 			{
 				var user = new ApplicationUser { UserName = Input.DisplayName, Email = Input.Email };
+				if (await _userManager.FindByEmailAsync(Input.Email) != null)
+				{
+					ModelState.AddModelError(string.Empty, "This email is already in use by someone else");
+					return Page();
+				}
 				var result = await _userManager.CreateAsync(user, Input.Password);
 				if (result.Succeeded)
 				{

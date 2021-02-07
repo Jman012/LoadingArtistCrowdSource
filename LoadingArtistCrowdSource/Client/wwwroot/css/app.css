@@ -48,3 +48,15 @@ a, .btn-link {
 		right: 0.75rem;
 		top: 0.5rem;
 	}
+
+
+.input-group > .input-group-append > .dropdown > .btn,
+.input-group > .input-group-prepend > .dropdown:not(:first-child) > .btn {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.input-group > .input-group-prepend > .dropdown > .btn {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}

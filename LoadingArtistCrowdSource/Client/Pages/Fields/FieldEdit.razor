@@ -7,7 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 
-<div class="container">
+<Container Fluid="false">
 	@if (!loaded)
 	{
 		<div class="d-flex justify-content-center">
@@ -57,39 +57,42 @@
 						<h4>Options</h4>
 						<div class="flex-fill"></div>
 						<div>
-							<button type="button" class="btn btn-secondary" @onclick="HandleAddOption">
+							<Button Color="Color.Secondary" Clicked="HandleAddOption">
 								<span class="oi oi-plus" aria-hidden="true"></span> Add
-							</button>
+							</Button>
 						</div>
 					</div>
 
-					<ul class="list-group">
+					<ListGroup>
 						@for (int i = 0; i < fieldDef.Options.Count; i++)
 						{
 							var index = i;
 							var option = fieldDef.Options[index];
-							<li class="list-group-item">
+							<ListGroupItem>
 								<div class="d-flex w-100 justify-content-between align-items-start">
 									<h5>@option.Text</h5>
 									<div>
-										<button type="button" class="btn btn-outline-secondary btn-sm flex-nowrap" @onclick="@(() => HandleEditOption(index))">
+										<Button Outline="true" Color="Color.Secondary" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleEditOption(index))">
 											<span class="oi oi-pencil" aria-hidden="true"></span> Edit
-										</button>
-										<button type="button" class="btn btn-outline-danger btn-sm flex-nowrap" @onclick="@(() => HandleRemoveOption(index))">
+										</Button>
+										<Button Outline="true" Color="Color.Danger" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleRemoveOption(index))">
 											<span class="oi oi-trash" aria-hidden="true"></span> Delete
-										</button>
+										</Button>
 									</div>
 								</div>
 								<small class="text-muted">@option.Code</small>
 								<p>@option.Description</p>
-								<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
-							</li>
+								@if (!string.IsNullOrEmpty(option.URL))
+								{
+									<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
+								}
+							</ListGroupItem>
 						}
-					</ul>
+					</ListGroup>
 				</div>
 			}
 
-			<button type="submit" class="btn btn-primary">
+			<Button Type="ButtonType.Submit" Color="Color.Primary">
 				@if (isNew)
 				{
 					<text>Create</text>
@@ -98,12 +101,12 @@
 				{
 					<text>Update</text>
 				}
-			</button>
-			<button type="button" class="btn btn-light" @onclick="HandleCancel">Cancel</button>
+			</Button>
+			<Button Color="Color.Light" Clicked="HandleCancel">Cancel</Button>
 
 		</EditForm>
 	}
-</div>
+</Container>
 
 <FieldOptionEditModal @ref="optionModal" OnSubmit="HandleFieldOptionModal"></FieldOptionEditModal>
 

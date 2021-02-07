@@ -10,11 +10,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Blazored.Toast;
+
 using BlazorTable;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
-
 
 namespace LoadingArtistCrowdSource.Client
 {
@@ -47,6 +48,9 @@ namespace LoadingArtistCrowdSource.Client
 				})
 				.AddBootstrapProviders()
 				.AddFontAwesomeIcons();
+
+			// Toast
+			builder.Services.AddBlazoredToast();
 
 			var host = builder.Build();
 

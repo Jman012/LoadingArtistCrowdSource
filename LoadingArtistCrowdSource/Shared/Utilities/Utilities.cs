@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -50,5 +51,23 @@ namespace LoadingArtistCrowdSource.Shared.Utilities
 			return value.ToString()!;
 		}
 
+	}
+
+	public class ArrayEqualityComparer<T> : IEqualityComparer<T[]>
+	{
+		public ArrayEqualityComparer()
+		{
+		}
+		public bool Equals(T[]? x, T[]? y)
+		{
+			if (x == null && y == null) return true;
+			if (x == null || y == null) return false;
+			return x.SequenceEqual(y);
+		}
+
+		public int GetHashCode(T[] obj)
+		{
+			return ((System.Collections.IStructuralEquatable)obj).GetHashCode(EqualityComparer<T>.Default);
+		}
 	}
 }

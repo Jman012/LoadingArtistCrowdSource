@@ -18,8 +18,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string Text { get; set; } = "";
 		[Required]
 		public string Description { get; set; } = "";
-		[Required]
 		[Url]
-		public string URL { get; set; } = "";
+		public string? URL { get; set; }
 	}
 }
