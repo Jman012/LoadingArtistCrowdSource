@@ -60,3 +60,7 @@ a, .btn-link {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 }
+
+.input-group-prepend .dropdown+.dropdown {
+	margin-left: -1px;
+}

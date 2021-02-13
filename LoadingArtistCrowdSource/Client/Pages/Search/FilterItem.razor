@@ -1,0 +1,121 @@
+﻿<Addons Class="input-group-sm mb-3">
+	<Addon AddonType="AddonType.Start">
+		@if (isEditing)
+		{
+			<Dropdown>
+				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@currentField.Name</DropdownToggle>
+				<DropdownMenu>
+					@foreach (var field in Fields)
+					{
+						<DropdownItem Clicked="() => HandleFieldClick(field)">@field.Name</DropdownItem>
+					}
+				</DropdownMenu>
+			</Dropdown>
+			<Dropdown>
+				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@currentFilter.Operator.Description()</DropdownToggle>
+				<DropdownMenu>
+					@foreach (var op in FilterOperatorExtension.AllOperators)
+					{
+						<DropdownItem Clicked="() => HandleOperatorClick(op)">@op.Description()</DropdownItem>
+					}
+				</DropdownMenu>
+			</Dropdown>
+			<Dropdown>
+				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@string.Join(", ", currentFilter.Values)</DropdownToggle>
+				<DropdownMenu>
+					@foreach (var option in currentField.Options)
+					{
+						<DropdownItem Clicked="() => HandleValueClick(option.Code)">
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" id="@option.Code">
+								<label class="form-check-label" for="@option.Code">
+									@option.Text
+								</label>
+							</div>
+						</DropdownItem>
+					}
+				</DropdownMenu>
+			</Dropdown>
+		}
+		else
+		{
+			<AddonLabel>@currentField.Name</AddonLabel>
+			<AddonLabel>@currentFilter.Operator.Description()</AddonLabel>
+			<AddonLabel>@string.Join(", ", currentFilter.Values)</AddonLabel>
+		}
+	</Addon>
+	<Addon AddonType="AddonType.End">
+		@if (isEditing)
+		{
+			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" Style="margin-left: 1px;" Clicked="() => isEditing = false">
+				<span class="oi oi-x" aria-hidden="true"></span>
+			</Button>
+			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
+				<span class="oi oi-check" aria-hidden="true"></span>
+			</Button>
+		}
+		else
+		{
+			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" Clicked="() => isEditing = true">
+				<span class="oi oi-pencil" aria-hidden="true"></span>
+			</Button>
+		}
+	</Addon>
+</Addons>
+
+@code {
+	[Parameter]
+	public IEnumerable<ComicFieldViewModel> Fields { get; set; } = new List<ComicFieldViewModel>();
+
+	[Parameter]
+	public Filter FilterData { get; set; } = new Filter();
+
+	private bool isEditing { get; set; } = false;
+	private Dictionary<string, ComicFieldViewModel> dictFields = new Dictionary<string, ComicFieldViewModel>();
+	private Filter currentFilter { get; set; } = new Filter();
+	private ComicFieldViewModel currentField { get; set; } = new ComicFieldViewModel();
+
+	protected override void OnInitialized()
+	{
+		currentFilter = FilterData;
+		dictFields = Fields.ToDictionary(f => f.Code);
+		SetCurrentFieldName();
+
+		base.OnInitializedAsync();
+	}
+
+	private void SetCurrentFieldName()
+	{
+		if (dictFields.TryGetValue(currentFilter.FieldDefinitionCode, out ComicFieldViewModel? field))
+		{
+			currentField = field;
+		}
+		else
+		{
+			currentField = new ComicFieldViewModel();
+		}
+	}
+
+	private void HandleFieldClick(ComicFieldViewModel field)
+	{
+		currentFilter.FieldDefinitionCode = field.Code;
+		SetCurrentFieldName();
+	}
+
+	private void HandleOperatorClick(FilterOperator op)
+	{
+		currentFilter.Operator = op;
+	}
+
+	private void HandleValueClick(string val)
+	{
+		if (currentFilter.Values.Contains(val))
+		{
+			currentFilter.Values = currentFilter.Values.Except(new string[] { val }).ToArray();
+		}
+		else
+		{
+			currentFilter.Values = currentFilter.Values.Concat(new string[] { val }).ToArray();
+		}
+	}
+}

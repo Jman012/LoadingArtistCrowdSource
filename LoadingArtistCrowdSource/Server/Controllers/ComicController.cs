@@ -29,15 +29,16 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		public IEnumerable<Shared.Models.ComicViewModel> Index()
+		public async Task<IEnumerable<Shared.Models.ComicViewModel>> Index()
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
-			return _context.Comics
+			var comics = await _context.Comics
 				.Include(c => c.ImportedByUser)
 				.Include(c => c.LastUpdatedByUser)
 				.OrderBy(c => c.Id)
-				.ToList()
-				.Select(c => modelMapper.MapComic(c));
+				.ToListAsync();
+
+			return comics.Select(c => modelMapper.MapComic(c));
 		}
 
 		[HttpGet]

@@ -1,87 +1,57 @@
 ﻿@page "/search"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject Services.LACSApi Api
 
-<Container Fluid="false">
-	<Row>
-		<Column>
-			<h1>Search</h1>
+@if (fields == null)
+{
+	<div class="d-flex justify-content-center">
+		<div class="spinner-border" role="status">
+			<span class="sr-only">Loading...</span>
+		</div>
+	</div>
+}
+else
+{
+	<Container Fluid="false">
+		<Row>
+			<Column>
+				<h1>Search</h1>
 
-			<h3>Search Terms</h3>
-			<div>
+				<div class="d-flex">
+					<h3>Search Terms</h3>
+					<div class="flex-fill"></div>
+					<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" title="Add new search term">
+						<span class="oi oi-plus" aria-hidden="true"></span>
+					</Button>
+				</div>
+				<div>
+					<FilterItem Fields="fields"></FilterItem>
 
-				<div class="input-group mb-3">
-					<div class="input-group-prepend">
-						<span class="input-group-text">Characters</span>
-						<span class="input-group-text">=</span>
-						<span class="input-group-text">Hat Guy, Jes</span>
-					</div>
-					<div class="input-group-append">
-						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
-							<span class="oi oi-pencil" aria-hidden="true"></span>
-						</Button>
-					</div>
 				</div>
 
-				<div class="input-group mb-3">
-					<div class="input-group-prepend">
-						<Dropdown>
-							<DropdownToggle Outline="true" Color="Color.Secondary">Characters</DropdownToggle>
-							<DropdownMenu>
-								<DropdownItem>Characters</DropdownItem>
-								<DropdownItem>Hidden Spider</DropdownItem>
-							</DropdownMenu>
-						</Dropdown>
-						<Dropdown>
-							<DropdownToggle Outline="true" Color="Color.Secondary">=</DropdownToggle>
-							<DropdownMenu>
-								<DropdownItem>=</DropdownItem>
-								<DropdownItem>includes</DropdownItem>
-							</DropdownMenu>
-						</Dropdown>
-						<Dropdown>
-							<DropdownToggle Outline="true" Color="Color.Secondary">Hat Guy, Jes</DropdownToggle>
-							<DropdownMenu>
-								<DropdownItem>
-									<div class="form-check">
-										<input type="checkbox" class="form-check-input" id="dropdownCheck1">
-										<label class="form-check-label" for="dropdownCheck1">
-											Hat Guy
-										</label>
-									</div>
-								</DropdownItem>
-								<DropdownItem>
-									<div class="form-check">
-										<input type="checkbox" class="form-check-input" id="dropdownCheck2">
-										<label class="form-check-label" for="dropdownCheck2">
-											Jes
-										</label>
-									</div>
-								</DropdownItem>
-							</DropdownMenu>
-						</Dropdown>
-					</div>
-					<div class="input-group-append">
-						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
-							<span class="oi oi-x" aria-hidden="true"></span>
-						</Button>
-						<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
-							<span class="oi oi-check" aria-hidden="true"></span>
-						</Button>
-					</div>
+				<h3>Results</h3>
+				<div>
+
 				</div>
-
-				
-
-				<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
-					<span class="oi oi-plus" aria-hidden="true"></span>
-					<span class="sr-only">Add new search term</span>
-				</Button>
-			</div>
-		</Column>
-	</Row>
-</Container>
-
+			</Column>
+		</Row>
+	</Container>
+}
 
 @code {
+	private ComicFieldViewModel[]? fields { get; set; } = null;
 
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			fields = await Api.GetSearch();
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+		}
+
+		await base.OnInitializedAsync();
+	}
 }

@@ -63,5 +63,12 @@ namespace LoadingArtistCrowdSource.Client.Services
 			return response.ReasonPhrase;
 		}
 		#endregion
+
+		#region SearchController
+		public async Task<ComicFieldViewModel[]> GetSearch()
+		{
+			return await _publicClient.GetFromJsonAsync<ComicFieldViewModel[]>("api/search", _serializationOptions) ?? new ComicFieldViewModel[] { };
+		}
+		#endregion
 	}
 }
