@@ -2,10 +2,30 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LoadingArtistCrowdSource.Shared
+@using LoadingArtistCrowdSource.Shared.Enums
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
 
-<h1>Comics</h1>
+<div class="d-flex">
+	<h1>Comics</h1>
+	<div class="flex-fill"></div>
+	<div> @*This wrapper is needed to not have the button group match the height of the h1*@
+		<Buttons>
+			<Button Type="ButtonType.Button" 
+					Color="Color.Light" 
+					Active="view == ComicListView.Thumbnail" 
+					Clicked="() => view = ComicListView.Thumbnail">
+				<Icon Name="@("fa-th-large")" IconStyle="IconStyle.Regular" />
+			</Button>
+			<Button Type="ButtonType.Button" 
+					Color="Color.Light" 
+					Active="view == ComicListView.Table" 
+					Clicked="() => view = ComicListView.Table">
+				<Icon Name="@("fa-th-list")" IconStyle="IconStyle.Regular" />
+			</Button>
+		</Buttons>
+	</div>
+</div>
 
 @if (comics == null)
 {
@@ -17,7 +37,22 @@
 }
 else
 {
-	<BlazorTable.Table TableItem="ComicViewModel" Items="comics" PageSize="15">
+	if (view == ComicListView.Thumbnail)
+	{
+		<div class="d-flex">
+			@foreach (var comic in comics)
+			{
+				<div>
+					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
+					<br />
+					@comic.Title
+				</div>
+			}
+		</div>
+	}
+	else
+	{
+		<BlazorTable.Table TableItem="ComicViewModel" Items="comics" PageSize="15">
 		<BlazorTable.Column TableItem="ComicViewModel" Title="Thumbnail" Field="@(c => c.ImageUrlSrc)" Sortable="true" Filterable="true">
 			<Template>
 				<img src="@context.ImageThumbnailUrlSrc" width="128" height="128" title="@context.Tooltip" alt="@context.Tooltip" />
@@ -39,10 +74,12 @@ else
 		</BlazorTable.Column>
 		<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
 	</BlazorTable.Table>
+	}
 }
 
 @code {
-	private ComicViewModel[]? comics = null;
+	private ComicViewModel[]? comics { get; set; } = null;
+	private ComicListView view { get; set; } = ComicListView.Thumbnail;
 
 	protected override async Task OnInitializedAsync()
 	{
