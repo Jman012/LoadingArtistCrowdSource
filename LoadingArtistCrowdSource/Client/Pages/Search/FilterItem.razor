@@ -21,8 +21,8 @@
 				</DropdownMenu>
 			</Dropdown>
 			<Dropdown>
-				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@string.Join(", ", currentFilter.Values)</DropdownToggle>
-				<DropdownMenu>
+				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@string.Join(", ", currentFilter.Values.Select(v => v.Value))</DropdownToggle>
+				<DropdownMenu Class="dropdown-menu-keep-open">
 					@foreach (var option in currentField.Options)
 					{
 						<DropdownItem Clicked="() => HandleValueClick(option.Code)">
@@ -109,13 +109,15 @@
 
 	private void HandleValueClick(string val)
 	{
-		if (currentFilter.Values.Contains(val))
+		var option = currentField.Options.First(o => o.Code == val);
+		var kv = KeyValuePair.Create<string, string>(option.Code, option.Text);
+		if (currentFilter.Values.Contains(kv))
 		{
-			currentFilter.Values = currentFilter.Values.Except(new string[] { val }).ToArray();
+			currentFilter.Values = currentFilter.Values.Except(new KeyValuePair<string, string>[] { kv }).ToArray();
 		}
 		else
 		{
-			currentFilter.Values = currentFilter.Values.Concat(new string[] { val }).ToArray();
+			currentFilter.Values = currentFilter.Values.Concat(new KeyValuePair<string, string>[] { kv }).ToArray();
 		}
 	}
 }

@@ -27,6 +27,11 @@ else
 				<div>
 					<FilterItem Fields="fields"></FilterItem>
 
+					@foreach (var field in fields)
+					{
+						<FilterItem2 Field="field"></FilterItem2>
+					}
+
 				</div>
 
 				<h3>Results</h3>

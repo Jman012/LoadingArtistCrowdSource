@@ -11,6 +11,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	{
 		public string FieldDefinitionCode { get; set; } = "";
 		public FilterOperator Operator { get; set; }
-		public string[] Values { get; set; } = new string[] { };
+		public KeyValuePair<string, string>[] Values { get; set; } = new KeyValuePair<string, string>[] { };
 	}
 }

@@ -1,0 +1,83 @@
+﻿<EditForm Model="optionValues">
+	<div class="dropdown">
+		<button type="button" id="@($"{Field.Code}-btn-label")" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			@dropdownText
+		</button>
+		<ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="@($"{Field.Code}-btn-label")">
+			<li class="dropdown-item-text">
+				<input type="text" value="@searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
+			</li>
+			<li class="dropdown-divider"></li>
+			@foreach (var optionValue in searchedOptionValues)
+			{
+				<li>
+					<label>
+						<InputCheckbox @bind-Value="optionValue.Value"></InputCheckbox>
+						@optionValue.Option.Text
+					</label>
+				</li>
+			}
+		</ul>
+	</div>
+</EditForm>
+
+@code {
+	public class OptionValue
+	{
+		public CrowdSourcedFieldDefinitionOptionViewModel Option { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel();
+		public bool Value { get; set; }
+	}
+
+	[Parameter]
+	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
+
+	[Parameter]
+	public Filter FilterData { get; set; } = new Filter();
+
+	private Filter currentFilter { get; set; } = new Filter();
+	private List<OptionValue> optionValues { get; set; } = new List<OptionValue>();
+	private List<OptionValue> searchedOptionValues { get; set; } = new List<OptionValue>();
+	private string? searchText { get; set; }
+
+	private string dropdownText
+	{
+		get
+		{
+			if (optionValues.Any(ov => ov.Value))
+			{
+				return string.Join(", ", optionValues.Where(ov => ov.Value).Select(ov => ov.Option.Text));
+			}
+			else
+			{
+				return "Any " + Field.Name;
+			}
+		}
+	}
+
+	protected override void OnInitialized()
+	{
+		optionValues = Field.Options.Select(o => new OptionValue() { Option = o, Value = false }).ToList();
+		performSearch();
+		base.OnInitialized();
+	}
+
+	private void HandleSearchInput(ChangeEventArgs e)
+	{
+		searchText = e.Value as string;
+		performSearch();
+	}
+
+	private void performSearch()
+	{
+		if (string.IsNullOrEmpty(searchText))
+		{
+			searchedOptionValues = optionValues.ToList();
+		}
+		else
+		{
+			searchedOptionValues = optionValues
+				.Where(ov => ov.Option.Text.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+				.ToList();
+		}
+	}
+}
