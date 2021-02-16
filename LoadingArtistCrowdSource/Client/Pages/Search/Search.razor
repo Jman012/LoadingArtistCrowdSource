@@ -24,12 +24,12 @@ else
 						<span class="oi oi-plus" aria-hidden="true"></span>
 					</Button>
 				</div>
-				<div>
-					<FilterItem Fields="fields"></FilterItem>
-
+				<div class="d-flex flex-wrap">
 					@foreach (var field in fields)
 					{
-						<FilterItem2 Field="field"></FilterItem2>
+						<div class="m-2">
+							<FilterItem2 Field="field"></FilterItem2>
+						</div>
 					}
 
 				</div>

@@ -11,7 +11,7 @@
 	transition: background-color .4s ease;
 }
 
-.checkbox-menu li input {
+.checkbox-menu li input[type='checkbox'] {
 	margin: 0px 5px;
 	top: 2px;
 	position: relative;

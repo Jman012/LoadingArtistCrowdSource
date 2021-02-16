@@ -45,7 +45,8 @@
 		{
 			if (optionValues.Any(ov => ov.Value))
 			{
-				return string.Join(", ", optionValues.Where(ov => ov.Value).Select(ov => ov.Option.Text));
+				string values = string.Join(", ", optionValues.Where(ov => ov.Value).Select(ov => ov.Option.Text));
+				return $"{Field.Name}: {values}";
 			}
 			else
 			{
@@ -56,7 +57,35 @@
 
 	protected override void OnInitialized()
 	{
-		optionValues = Field.Options.Select(o => new OptionValue() { Option = o, Value = false }).ToList();
+		switch (Field.Type)
+		{
+			case CrowdSourcedFieldType.Checkbox:
+				optionValues = new List<OptionValue>()
+				{
+					new OptionValue()
+					{
+						Option = new CrowdSourcedFieldDefinitionOptionViewModel()
+						{
+							Code = true.ToString(),
+							Text = "Yes",
+						},
+						Value = false,
+					},
+					new OptionValue()
+					{
+						Option = new CrowdSourcedFieldDefinitionOptionViewModel()
+						{
+							Code = false.ToString(),
+							Text = "No",
+						},
+						Value = false,
+					},
+				};
+				break;
+			default:
+				optionValues = Field.Options.Select(o => new OptionValue() { Option = o, Value = false }).ToList();
+				break;
+		}
 		performSearch();
 		base.OnInitialized();
 	}
