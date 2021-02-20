@@ -51,7 +51,7 @@ else
 						{
 							var index = i;
 							<div class="m-2">
-								<FilterItem2 Field="fields[i]"></FilterItem2>
+								<FilterItem Field="fields[index]" @bind-FilterData="searchVM.SearchEntries[index]"></FilterItem>
 							</div>
 						}
 					</div>
@@ -61,12 +61,12 @@ else
 					</p>
 				</EditForm>
 
-				<p>
-					@foreach (var searchEntry in searchVM.SearchEntries)
-					{
-						@searchEntry.FieldCode
-					}
-				</p>
+				<pre>
+					@System.Text.Json.JsonSerializer.Serialize(searchVM, options: new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.General)
+			   {
+				   WriteIndented = true,
+			   })
+				</pre>
 
 				<h3>Results</h3>
 				<div>

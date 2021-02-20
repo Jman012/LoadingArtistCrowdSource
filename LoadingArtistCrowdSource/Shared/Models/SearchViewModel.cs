@@ -24,6 +24,12 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	{
 		public string FieldCode { get; set; } = "";
 		public SearchEntryOperator Operator { get; set; } = SearchEntryOperator.Any;
-		public string[] FieldValues { get; set; } = new string[] { };
+		public SearchEntryOptionViewModel[] FieldValues { get; set; } = new SearchEntryOptionViewModel[] { };
+	}
+
+	public class SearchEntryOptionViewModel
+	{
+		public string Code { get; set; } = "";
+		public bool Filtered { get; set; }
 	}
 }

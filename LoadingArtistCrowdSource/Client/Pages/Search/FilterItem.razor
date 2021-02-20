@@ -1,123 +1,136 @@
-﻿<Addons Class="input-group-sm mb-3">
-	<Addon AddonType="AddonType.Start">
-		@if (isEditing)
+﻿<div class="dropdown">
+	<button type="button" id="@($"{Field.Code}-btn-label")" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		@dropdownText
+	</button>
+	<ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="@($"{Field.Code}-btn-label")">
+		<li class="dropdown-item-text">
+			<input type="text" value="@searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
+		</li>
+		<li class="dropdown-divider"></li>
+
+		<InputRadioGroup TValue="SearchEntryOperator" Value="@FilterData.Operator" ValueExpression="() => FilterData.Operator" ValueChanged="OperatorDidChange">
+			@foreach (var op in System.Enum.GetValues(typeof(SearchEntryOperator)).Cast<SearchEntryOperator>())
+			{
+				<li>
+					<label>
+						<InputRadio Value="op"></InputRadio>
+						@op.ToString()
+					</label>
+				</li>
+			}
+		</InputRadioGroup>
+		<li class="dropdown-divider"></li>
+		@foreach (var option in searchedOptions)
 		{
-			<Dropdown>
-				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@currentField.Name</DropdownToggle>
-				<DropdownMenu>
-					@foreach (var field in Fields)
-					{
-						<DropdownItem Clicked="() => HandleFieldClick(field)">@field.Name</DropdownItem>
-					}
-				</DropdownMenu>
-			</Dropdown>
-			<Dropdown>
-				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@currentFilter.Operator.Description()</DropdownToggle>
-				<DropdownMenu>
-					@foreach (var op in FilterOperatorExtension.AllOperators)
-					{
-						<DropdownItem Clicked="() => HandleOperatorClick(op)">@op.Description()</DropdownItem>
-					}
-				</DropdownMenu>
-			</Dropdown>
-			<Dropdown>
-				<DropdownToggle Outline="true" Color="Color.Secondary" Size="Size.Small">@string.Join(", ", currentFilter.Values.Select(v => v.Value))</DropdownToggle>
-				<DropdownMenu Class="dropdown-menu-keep-open">
-					@foreach (var option in currentField.Options)
-					{
-						<DropdownItem Clicked="() => HandleValueClick(option.Code)">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" id="@option.Code">
-								<label class="form-check-label" for="@option.Code">
-									@option.Text
-								</label>
-							</div>
-						</DropdownItem>
-					}
-				</DropdownMenu>
-			</Dropdown>
+			<li>
+				<label>
+					<InputCheckbox Value="option.Item1.Filtered" ValueExpression="() => option.Item1.Filtered" ValueChanged="(filtered) => OptionDidChange(option.Item1, filtered)"></InputCheckbox>
+					@option.Item2.Text
+				</label>
+			</li>
 		}
-		else
-		{
-			<AddonLabel>@currentField.Name</AddonLabel>
-			<AddonLabel>@currentFilter.Operator.Description()</AddonLabel>
-			<AddonLabel>@string.Join(", ", currentFilter.Values)</AddonLabel>
-		}
-	</Addon>
-	<Addon AddonType="AddonType.End">
-		@if (isEditing)
-		{
-			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" Style="margin-left: 1px;" Clicked="() => isEditing = false">
-				<span class="oi oi-x" aria-hidden="true"></span>
-			</Button>
-			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary">
-				<span class="oi oi-check" aria-hidden="true"></span>
-			</Button>
-		}
-		else
-		{
-			<Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" Clicked="() => isEditing = true">
-				<span class="oi oi-pencil" aria-hidden="true"></span>
-			</Button>
-		}
-	</Addon>
-</Addons>
+	</ul>
+</div>
 
 @code {
-	[Parameter]
-	public IEnumerable<ComicFieldViewModel> Fields { get; set; } = new List<ComicFieldViewModel>();
 
 	[Parameter]
-	public Filter FilterData { get; set; } = new Filter();
+	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
 
-	private bool isEditing { get; set; } = false;
-	private Dictionary<string, ComicFieldViewModel> dictFields = new Dictionary<string, ComicFieldViewModel>();
-	private Filter currentFilter { get; set; } = new Filter();
-	private ComicFieldViewModel currentField { get; set; } = new ComicFieldViewModel();
+	[Parameter]
+	public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
+	[Parameter]
+	public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
 
-	protected override void OnInitialized()
+	private List<CrowdSourcedFieldDefinitionOptionViewModel> fieldOptions { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
+
+	private string? searchText { get; set; }
+	private (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] searchedOptions { get; set; } = new (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] { };
+
+	private string dropdownText
 	{
-		currentFilter = FilterData;
-		dictFields = Fields.ToDictionary(f => f.Code);
-		SetCurrentFieldName();
-
-		base.OnInitializedAsync();
+		get
+		{
+			if (FilterData.FieldValues.Zip(fieldOptions).Any(o => o.First.Filtered))
+			{
+				string values = string.Join(", ", FilterData.FieldValues.Zip(fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
+				return $"{Field.Name}: {values}";
+			}
+			else
+			{
+				return "Any " + Field.Name;
+			}
+		}
 	}
 
-	private void SetCurrentFieldName()
+	protected override async Task OnInitializedAsync()
 	{
-		if (dictFields.TryGetValue(currentFilter.FieldDefinitionCode, out ComicFieldViewModel? field))
+		FilterData.FieldCode = Field.Code;
+
+		switch (Field.Type)
 		{
-			currentField = field;
+			case CrowdSourcedFieldType.Checkbox:
+				fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>()
+				{
+					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "Yes" },
+					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "No" },
+				};
+				FilterData.FieldValues = new SearchEntryOptionViewModel[]
+				{
+					new SearchEntryOptionViewModel() { Code = true.ToString() },
+					new SearchEntryOptionViewModel() { Code = false.ToString() },
+				};
+				break;
+			default:
+				fieldOptions = Field.Options;
+				FilterData.FieldValues = fieldOptions.Select(o => new SearchEntryOptionViewModel() { Code = o.Code, Filtered = false }).ToArray();
+				break;
+		}
+		await DidChange();
+		performSearch();
+		base.OnInitialized();
+	}
+
+	private void HandleSearchInput(ChangeEventArgs e)
+	{
+		searchText = e.Value as string;
+		performSearch();
+	}
+
+	private void performSearch()
+	{
+		if (string.IsNullOrEmpty(searchText))
+		{
+			searchedOptions = FilterData.FieldValues
+				.Zip(fieldOptions)
+				.ToArray();
 		}
 		else
 		{
-			currentField = new ComicFieldViewModel();
+			searchedOptions = FilterData.FieldValues
+				.Zip(fieldOptions)
+				.Where(o => o.Second.Text.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+				.ToArray();
 		}
 	}
 
-	private void HandleFieldClick(ComicFieldViewModel field)
+	private async Task OperatorDidChange(SearchEntryOperator op)
 	{
-		currentFilter.FieldDefinitionCode = field.Code;
-		SetCurrentFieldName();
+		FilterData.Operator = op;
+		await DidChange();
 	}
 
-	private void HandleOperatorClick(FilterOperator op)
+	private async Task OptionDidChange(SearchEntryOptionViewModel searchEntryOption, bool filtered)
 	{
-		currentFilter.Operator = op;
+		searchEntryOption.Filtered = filtered;
+		await DidChange();
 	}
 
-	private void HandleValueClick(string val)
+	private async Task DidChange()
 	{
-		var option = currentField.Options.First(o => o.Code == val);
-		var kv = KeyValuePair.Create<string, string>(option.Code, option.Text);
-		if (currentFilter.Values.Contains(kv))
+		if (FilterDataChanged != null)
 		{
-			currentFilter.Values = currentFilter.Values.Except(new KeyValuePair<string, string>[] { kv }).ToArray();
-		}
-		else
-		{
-			currentFilter.Values = currentFilter.Values.Concat(new KeyValuePair<string, string>[] { kv }).ToArray();
+			await FilterDataChanged.Value.InvokeAsync(FilterData);
 		}
 	}
 }
