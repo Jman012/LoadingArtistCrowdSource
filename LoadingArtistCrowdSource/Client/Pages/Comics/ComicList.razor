@@ -43,9 +43,11 @@ else
 			@foreach (var comic in comics)
 			{
 				<div>
-					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
-					<br />
-					@comic.Title
+					<NavLink href="@($"comic/{comic.Code}")">
+						<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
+						<br />
+						@comic.Title
+					</NavLink>
 				</div>
 			}
 		</div>
