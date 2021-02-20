@@ -65,9 +65,13 @@ namespace LoadingArtistCrowdSource.Client.Services
 		#endregion
 
 		#region SearchController
-		public async Task<ComicFieldViewModel[]> GetSearch()
+		public async Task<ComicFieldViewModel[]> GetSearchFields()
 		{
-			return await _publicClient.GetFromJsonAsync<ComicFieldViewModel[]>("api/search", _serializationOptions) ?? new ComicFieldViewModel[] { };
+			return await _publicClient.GetFromJsonAsync<ComicFieldViewModel[]>("api/search/fields", _serializationOptions) ?? new ComicFieldViewModel[] { };
+		}
+		public async Task<ComicViewModel[]> PostSearch(SearchViewModel vm)
+		{
+			return await _publicClient.PostAsJsonAsync<SearchViewModel, ComicViewModel[]>("api/search", vm, _serializationOptions) ?? new ComicViewModel[] { };
 		}
 		#endregion
 	}

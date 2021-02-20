@@ -17,7 +17,7 @@ else
 			<Column>
 				<h1>Search</h1>
 
-				<EditForm Model="searchVM">
+				<EditForm Model="searchVM" OnValidSubmit="HandleValidSubmit">
 					<Row>
 						<Column>
 							<FormNumber @bind-Value="searchVM.Id"></FormNumber>
@@ -82,19 +82,15 @@ else
 }
 
 @code {
-	@* private class SearchEntry
-	{
-		public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
-		public SearchEntryViewModel Entry { get; set; } = new SearchEntryViewModel();
-	} *@
 
 	private ComicFieldViewModel[]? fields { get; set; } = null;
 	private SearchViewModel searchVM { get; set; } = new SearchViewModel();
+
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			fields = await Api.GetSearch();
+			fields = await Api.GetSearchFields();
 			searchVM.SearchEntries = fields.Select(f => new SearchEntryViewModel()
 			{
 				FieldCode = f.Code,
@@ -106,5 +102,10 @@ else
 		}
 
 		await base.OnInitializedAsync();
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		await Api.PostSearch(searchVM);
 	}
 }

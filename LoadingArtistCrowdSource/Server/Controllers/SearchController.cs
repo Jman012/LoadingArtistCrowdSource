@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using LoadingArtistCrowdSource.Server.Data;
 using LoadingArtistCrowdSource.Shared.Enums;
+using LoadingArtistCrowdSource.Shared.Models;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<Shared.Models.ComicFieldViewModel>> Index()
+		[Route("fields")]
+		public async Task<IEnumerable<ComicFieldViewModel>> Fields()
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			List<Models.CrowdSourcedFieldDefinition> fields = await _context
@@ -36,7 +38,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
 				.ToListAsync();
 
-			return fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
+			return fields.Select(csfd => new ComicFieldViewModel()
 			{
 				Code = csfd.Code,
 				Type = csfd.Type,
@@ -48,6 +50,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				LastUpdatedDate = csfd.LastUpdatedDate,
 				Options = csfd.CrowdSourcedFieldDefinitionOptions.Select(modelMapper.MapCrowdSourcedFieldDefinitionOption).ToList(),
 			}).ToList();
+		}
+
+		[HttpPost]
+		public async Task<IEnumerable<ComicViewModel>> Search([FromBody] SearchViewModel vm)
+		{
+
+			return new ComicViewModel[] { };
 		}
 	}
 }

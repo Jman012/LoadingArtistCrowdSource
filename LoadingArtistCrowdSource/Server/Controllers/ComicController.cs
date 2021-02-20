@@ -42,7 +42,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		[Route("/api/comic/{code}")]
+		[Route("{code}")]
 		public async Task<IActionResult> GetComic(string code)
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
@@ -95,7 +95,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpPut]
-		[Route("/api/comic/{comicCode}/entry/{fieldCode}")]
+		[Route("{comicCode}/entry/{fieldCode}")]
 		[Authorize]
 		public async Task<IActionResult> PutComicUserEntry(string comicCode, string fieldCode, [FromBody] List<string> values)
 		{

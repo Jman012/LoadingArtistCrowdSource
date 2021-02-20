@@ -31,7 +31,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		[Route("/api/field")]
 		public IEnumerable<Shared.Models.CrowdSourcedFieldDefinitionViewModel> Index()
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
@@ -44,7 +43,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		[Route("/api/field/{code}")]
+		[Route("{code}")]
 		public async Task<IActionResult> GetField(string code)
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
@@ -63,7 +62,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpPut]
-		[Route("/api/field/{code}")]
+		[Route("{code}")]
 		public async Task<IActionResult> PutField(Shared.Models.FieldDefinitionFormViewModel vm)
 		{
 			var userId = _userManager.GetUserId(User);
