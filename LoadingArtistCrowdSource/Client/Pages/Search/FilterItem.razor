@@ -53,7 +53,7 @@
 		{
 			if (FilterData.FieldValues.Zip(fieldOptions).Any(o => o.First.Filtered))
 			{
-				string values = string.Join(", ", FilterData.FieldValues.Zip(fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
+				string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
 				return $"{Field.Name}: {values}";
 			}
 			else

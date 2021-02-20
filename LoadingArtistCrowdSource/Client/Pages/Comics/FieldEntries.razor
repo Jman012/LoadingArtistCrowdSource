@@ -18,7 +18,7 @@
 	</div>
 </div>
 
-<div class="form-inline">
+<div class="form-inline mb-2">
 	<AuthorizeView>
 		<Authorized>
 			<div class="form-check mr-sm-2">
@@ -41,11 +41,18 @@
 	</div>
 </div>
 
+<div class="d-flex mb-2">
+	<div class="flex-fill"></div>
+	<div>
+		<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
+	</div>
+</div>
+
 <ListGroup>
 	@foreach (var field in filteredFields)
 	{
 		var theField = field;
-		<Collapsible IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+		<Collapsible IsCollapsed="collapse" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
 			<HeaderContent Context="isCollapsed">
 				<div class="d-flex w-100 justify-content-between">
 					<div class="d-flex">
@@ -125,6 +132,8 @@
 
 	private string? userName { get; set; }
 	private UserEntryEditFormModal userEntryModal { get; set; } = new UserEntryEditFormModal();
+	private bool collapse { get; set; } = true;
+
 	private IEnumerable<ComicFieldViewModel> filteredFields { get; set; } = new ComicFieldViewModel[] { };
 	private bool isFiltering { get; set; } = false;
 	private string? filter { get; set; }
@@ -198,5 +207,16 @@
 		filter = "";
 		filteredFields = Fields.ToArray();
 		isFiltering = false;
+	}
+
+
+	private void ExpandAll()
+	{
+		collapse = false;
+	}
+
+	private void CollapseAll()
+	{
+		collapse = true;
 	}
 }
