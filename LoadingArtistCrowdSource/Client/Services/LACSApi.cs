@@ -62,6 +62,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 
 			return response.ReasonPhrase;
 		}
+		public async Task<string?> PutFieldPositions(string[] vm)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/field_positions/", vm, _serializationOptions);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return response.ReasonPhrase;
+		}
 		#endregion
 
 		#region SearchController

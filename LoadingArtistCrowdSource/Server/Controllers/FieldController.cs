@@ -37,7 +37,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return _context.CrowdSourcedFieldDefinitions
 				.Include(f => f.CreatedByUser)
 				.Include(f => f.LastUpdatedByUser)
-				.OrderBy(f => f.Id)
+				.OrderBy(f => f.DisplayOrder)
 				.ToList()
 				.Select(f => modelMapper.MapCrowdSourcedFieldDefinition(f, mapCreatedByUser: true, mapLastUpdatedByUser: true));
 		}
@@ -120,6 +120,29 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			await _context.SaveChangesAsync();
 
+			return Ok();
+		}
+
+		[HttpPut]
+		[Route("/api/field_positions")]
+		public async Task<IActionResult> PutFieldPositions([FromBody] List<string> fieldCodes)
+		{
+			var setFieldCodes = new HashSet<string>(fieldCodes);
+
+			var fields = await _context.CrowdSourcedFieldDefinitions.ToListAsync();
+			var setDbFieldCodes = new HashSet<string>(fields.Select(csfd => csfd.Code));
+
+			if (!setFieldCodes.SetEquals(setDbFieldCodes))
+			{
+				return BadRequest("Some fields were added or removed since the page was loaded. Please refresh and try again.");
+			}
+
+			fields = fields.OrderBy(csfd => fieldCodes.IndexOf(csfd.Code)).ToList();
+			fields = fields.Select((csfd, index) => {
+				csfd.DisplayOrder = index;
+				return csfd;
+			}).ToList();
+			await _context.SaveChangesAsync();
 			return Ok();
 		}
 	}

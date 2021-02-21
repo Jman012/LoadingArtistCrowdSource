@@ -4,10 +4,27 @@
 @using LoadingArtistCrowdSource.Shared
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
+@inject IToastService ToastService
 
 <div class="d-flex">
 	<h1>Fields</h1>
 	<div class="flex-fill"></div>
+	@if (hasReordered)
+	{
+		<div>
+			<Button Color="Color.Primary" Clicked="HandleSaveFieldOrder" class="mr-1">
+				@if (isSavingReorder)
+				{
+					<div class="spinner-border spinner-border-sm" role="status"></div>
+				}
+				else
+				{
+					<Icon Name="IconName.Save"></Icon>
+				}
+				Save Order
+			</Button>
+		</div>	
+	}
 	<div>
 		<NavLink class="btn btn-primary" href="field/new">
 			<span class="oi oi-plus" aria-hidden="true"></span> New Field
@@ -95,6 +112,8 @@ else
 	private CrowdSourcedFieldDefinitionViewModel[]? inactiveFields = null;
 	private CrowdSourcedFieldDefinitionViewModel[]? deletedFields = null;
 	private CrowdSourcedFieldDefinitionViewModel? draggingField = null;
+	private bool hasReordered = false;
+	private bool isSavingReorder = false;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -145,5 +164,22 @@ else
 		activeFields = listActiveFields.ToArray();
 
 		draggingField = null;
+		hasReordered = true;
+	}
+
+	private async Task HandleSaveFieldOrder()
+	{
+		isSavingReorder = true;
+		string result = await Api.PutFieldPositions(activeFields!.Select(f => f.Code).ToArray());
+		if (!string.IsNullOrEmpty(result))
+		{
+			ToastService.ShowError("Error", result);
+		}
+		else
+		{
+			isSavingReorder = false;
+			hasReordered = false;
+			ToastService.ShowSuccess("Success", "The order of fields has been updated.");
+		}
 	}
 }
