@@ -2,7 +2,7 @@ using System;
 
 namespace LoadingArtistCrowdSource.Shared.Enums
 {
-	public enum ComicListView {
+	public enum ComicListViewType {
 		Thumbnail,
 		Table,
 	}
