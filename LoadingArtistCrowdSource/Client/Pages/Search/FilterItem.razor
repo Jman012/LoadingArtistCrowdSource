@@ -3,49 +3,66 @@
 		@dropdownText
 	</button>
 	<ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="@($"{Field.Code}-btn-label")">
-		<li class="dropdown-item-text">
-			<div class="input-group">
-				<input type="text" value="@searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
-				<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
-					<i class="fa fa-times"></i>
-				</button>
-			</div>
-		</li>
-		<li class="dropdown-divider"></li>
 
-		<InputRadioGroup TValue="SearchEntryOperator" Value="@FilterData.Operator" ValueExpression="() => FilterData.Operator" ValueChanged="OperatorDidChange">
-			@foreach (var op in System.Enum.GetValues(typeof(SearchEntryOperator)).Cast<SearchEntryOperator>())
-			{
-				<li>
-					<label>
-						<InputRadio Value="op"></InputRadio>
-						@op.ToString()
-					</label>
-				</li>
-			}
-		</InputRadioGroup>
-		<li class="dropdown-divider"></li>
-		@foreach (var option in searchedOptions)
+		@switch (Field.Type)
 		{
-			<li>
-				<label>
-					<InputCheckbox Value="option.Item1.Filtered" ValueExpression="() => option.Item1.Filtered" ValueChanged="(filtered) => OptionDidChange(option.Item1, filtered)"></InputCheckbox>
-					@option.Item2.Text
-				</label>
-			</li>
+			case CrowdSourcedFieldType.IntegerNumber:
+			case CrowdSourcedFieldType.FreeformTextfield:
+			case CrowdSourcedFieldType.FreeformTextarea:
+				<li class="dropdown-item-text">
+					<div class="input-group">
+						<InputText class="form-control" @bind-Value="FilterData.FieldValues[0].Code"></InputText>
+						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
+							<i class="fa fa-times"></i>
+						</button>
+					</div>
+				</li>
+				break;
+			default:
+				<li class="dropdown-item-text">
+					<div class="input-group">
+						<input type="text" value="@searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
+						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
+							<i class="fa fa-times"></i>
+						</button>
+					</div>
+				</li>
+				<li class="dropdown-divider"></li>
+				<InputRadioGroup TValue="SearchEntryOperator" Value="@FilterData.Operator" ValueExpression="() => FilterData.Operator" ValueChanged="OperatorDidChange">
+					@foreach (var op in System.Enum.GetValues(typeof(SearchEntryOperator)).Cast<SearchEntryOperator>())
+					{
+						<li>
+							<label>
+								<InputRadio Value="op"></InputRadio>
+								@op.ToString()
+							</label>
+						</li>
+					}
+				</InputRadioGroup>
+				<li class="dropdown-divider"></li>
+				@foreach (var option in searchedOptions)
+				{
+					<li>
+						<label>
+							<InputCheckbox Value="option.Item1.Filtered" ValueExpression="() => option.Item1.Filtered" ValueChanged="(filtered) => OptionDidChange(option.Item1, filtered)"></InputCheckbox>
+							@option.Item2.Text
+						</label>
+					</li>
+				}
+				break;
 		}
 	</ul>
 </div>
 
 @code {
 
-	[Parameter]
-	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
+		[Parameter]
+		public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
 
-	[Parameter]
-	public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
-	[Parameter]
-	public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
+		[Parameter]
+		public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
+		[Parameter]
+		public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
 
 	private List<CrowdSourcedFieldDefinitionOptionViewModel> fieldOptions { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 
@@ -74,9 +91,22 @@
 
 		switch (Field.Type)
 		{
+			case CrowdSourcedFieldType.IntegerNumber:
+			case CrowdSourcedFieldType.FreeformTextfield:
+			case CrowdSourcedFieldType.FreeformTextarea:
+				fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
+				FilterData.FieldValues = new SearchEntryOptionViewModel[]
+				{
+					new SearchEntryOptionViewModel()
+					{
+						Code = "",
+						Filtered = true,
+					},
+				};
+				break;
 			case CrowdSourcedFieldType.Checkbox:
 				fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>()
-				{
+			{
 					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "Yes" },
 					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "No" },
 				};
@@ -84,7 +114,7 @@
 				{
 					new SearchEntryOptionViewModel() { Code = true.ToString() },
 					new SearchEntryOptionViewModel() { Code = false.ToString() },
-				};
+					};
 				break;
 			default:
 				fieldOptions = Field.Options;
@@ -139,6 +169,16 @@
 
 	private async Task DidChange()
 	{
+		switch (Field.Type)
+		{
+			case CrowdSourcedFieldType.IntegerNumber:
+			case CrowdSourcedFieldType.FreeformTextfield:
+			case CrowdSourcedFieldType.FreeformTextarea:
+				FilterData.FieldValues[0].Filtered = string.IsNullOrEmpty(FilterData.FieldValues[0].Code);
+				break;
+			default:
+				break;
+		}
 		if (FilterDataChanged != null)
 		{
 			await FilterDataChanged.Value.InvokeAsync(FilterData);

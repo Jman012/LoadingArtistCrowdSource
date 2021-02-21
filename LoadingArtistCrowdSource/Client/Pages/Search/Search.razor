@@ -37,11 +37,8 @@ else
 					<Row>
 						<Column>
 							<div class="d-flex">
-								<h3>Search Terms</h3>
+								<h4>Search Terms</h4>
 								<div class="flex-fill"></div>
-								@* <Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" title="Add new search term">
-							<span class="oi oi-plus" aria-hidden="true"></span>
-						</Button> *@
 							</div>
 						</Column>
 					</Row>
@@ -50,9 +47,16 @@ else
 						@for (int i = 0; i < fields.Length; i++)
 						{
 							var index = i;
-							<div class="m-2">
-								<FilterItem Field="fields[index]" @bind-FilterData="searchVM.SearchEntries[index]"></FilterItem>
-							</div>
+							if (fields[index].Type == CrowdSourcedFieldType.Section)
+							{
+								<h5 style="width: 100%;">@fields[index].Name</h5>
+							}
+							else
+							{
+								<div class="m-2">
+									<FilterItem Field="fields[index]" @bind-FilterData="searchVM.SearchEntries[index]"></FilterItem>
+								</div>
+							}
 						}
 					</div>
 

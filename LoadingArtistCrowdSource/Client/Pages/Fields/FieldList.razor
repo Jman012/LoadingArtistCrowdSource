@@ -170,16 +170,16 @@ else
 	private async Task HandleSaveFieldOrder()
 	{
 		isSavingReorder = true;
-		string result = await Api.PutFieldPositions(activeFields!.Select(f => f.Code).ToArray());
+		string? result = await Api.PutFieldPositions(activeFields!.Select(f => f.Code).ToArray());
 		if (!string.IsNullOrEmpty(result))
 		{
-			ToastService.ShowError("Error", result);
+			ToastService.ShowError(result, "Error");
 		}
 		else
 		{
 			isSavingReorder = false;
 			hasReordered = false;
-			ToastService.ShowSuccess("Success", "The order of fields has been updated.");
+			ToastService.ShowSuccess("The order of fields has been updated.", "Success");
 		}
 	}
 }

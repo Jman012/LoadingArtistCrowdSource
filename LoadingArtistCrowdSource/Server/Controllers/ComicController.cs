@@ -63,6 +63,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.CrowdSourcedFieldDefinitions
 				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
 				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
+				.OrderBy(csfd => csfd.DisplayOrder)
 				.ToListAsync();
 
 			var dctVerifiedEntries = comic.CrowdSourcedFieldVerifiedEntries.ToDictionary(csfve => csfve.CrowdSourcedFieldDefinitionId);

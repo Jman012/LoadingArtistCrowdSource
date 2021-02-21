@@ -49,18 +49,20 @@
 </div>
 
 <ListGroup>
+	@{ var i = 0; }
 	@foreach (var field in filteredFields)
 	{
+		var index = i++;
 		var theField = field;
 		if (field.Type == CrowdSourcedFieldType.Section)
 		{
 			<div class="list-group-item">
-				<h4>@field.Name</h4>
+				<h4 class="mb-0">@field.Name</h4>
 			</div>
 		}
 		else
 		{
-			<Collapsible IsCollapsed="collapse" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+			<Collapsible @ref="collapsibles[index]" IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
 				<HeaderContent Context="isCollapsed">
 					<div class="d-flex w-100 justify-content-between">
 						<div class="d-flex">
@@ -139,9 +141,9 @@
 	[Parameter]
 	public EventCallback OnComicNeedsRefresh { get; set; } = new EventCallback();
 
+	public Collapsible[] collapsibles { get; set; } = new Collapsible[] { };
 	private string? userName { get; set; }
 	private UserEntryEditFormModal userEntryModal { get; set; } = new UserEntryEditFormModal();
-	private bool collapse { get; set; } = true;
 
 	private IEnumerable<ComicFieldViewModel> filteredFields { get; set; } = new ComicFieldViewModel[] { };
 	private bool isFiltering { get; set; } = false;
@@ -163,6 +165,7 @@
 			userName = user.Identity!.Name;
 		}
 		HandleClearFilter();
+		collapsibles = Fields.Select(f => new Collapsible()).ToArray();
 		await base.OnInitializedAsync();
 	}
 
@@ -222,11 +225,17 @@
 
 	private void ExpandAll()
 	{
-		collapse = false;
+		foreach (var c in collapsibles)
+		{
+			c.Expand();
+		}
 	}
 
 	private void CollapseAll()
 	{
-		collapse = true;
+		foreach (var c in collapsibles)
+		{
+			c.Collapse();
+		}
 	}
 }

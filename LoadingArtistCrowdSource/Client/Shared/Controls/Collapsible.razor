@@ -49,8 +49,19 @@
 		base.OnParametersSet();
 	}
 
-	private void Toggle(MouseEventArgs e)
+	public void Toggle()
 	{
 		isCollapsed = !isCollapsed;
+
+	}
+
+	public void Expand()
+	{
+		isCollapsed = false;
+	}
+
+	public void Collapse()
+	{
+		isCollapsed = true;
 	}
 }

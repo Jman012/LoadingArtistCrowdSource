@@ -27,106 +27,110 @@
 								</Column>
 								<Column>
 									<h5>Your Answer</h5>
-									@switch (comicField.Type)
+									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
+									@if (modal.Visible)
 									{
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
-											<div class="form-group form-check">
-												<InputCheckbox id="checkbox"
-															   name="checkbox"
-															   class="form-check-input"
-															   @bind-Value="boolAnswer" />
-												<label for="checkbox" class="form-check-label">@comicField.Name</label>
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
-
-											for (int i = 0; i < comicField.Options.Count; i++)
-											{
-												var index = i;
-												var option = comicField.Options[index];
-												var valueWrapper = boolAnswers[index];
+										switch (comicField.Type)
+										{
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 												<div class="form-group form-check">
-													<InputCheckbox id="@($"checkbox-{option.Code}")"
-																   name="@($"checkbox-{option.Code}")"
+													<InputCheckbox id="checkbox"
+																   name="checkbox"
 																   class="form-check-input"
-																   @bind-Value="@valueWrapper.Value" />
-													<label for="@($"checkbox-{option.Code}")" class="form-check-label">@option.Text</label>
+																   @bind-Value="boolAnswer" />
+													<label for="checkbox" class="form-check-label">@comicField.Name</label>
 												</div>
-											}
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
-											<div class="form-group">
-												<label for="select">@comicField.Name</label>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
 
-												<InputSelect id="select" name="select" class="form-control" @bind-Value="stringAnswer">
-													<option value=""></option>
-													@foreach (var option in comicField.Options)
-															{
-														<option value="@option.Code">@option.Text</option>
-															}
-												</InputSelect>
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
-											<div class="form-group">
-												<label for="textarea">@comicField.Name</label>
-
-												<InputTextArea id="textarea"
-															   name="textarea"
-															   class="form-control"
-															   rows="3"
-															   @bind-Value="stringAnswer" />
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
-											<div class="form-group">
-												<label for="textfield">@comicField.Name</label>
-
-												<InputText id="textfield"
-														   name="textfield"
-														   class="form-control"
-														   @bind-Value="stringAnswer" />
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
-											<div class="form-group">
-												<label for="textfield">@comicField.Name</label>
-
-												<InputNumber id="textfield"
-															 name="textfield"
-															 class="form-control"
-															 @bind-Value="intAnswer" />
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
-											<div class="form-group">
-												<label for="select">@comicField.Name</label>
-
-												<InputMultiSelect id="select"
-																  name="select"
-																  class="form-control"
-																  size="8"
-																  @bind-Value="stringAnswers2"
-																  Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
-											</div>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-											<InputRadioGroup @bind-Value="stringAnswer">
-												@foreach (var option in comicField.Options)
-														{
-													<div class="form-check">
-														<InputRadio id="@($"radio-{option.Code}")"
-																	name="@($"radio-{option.Code}")"
-																	Value="option.Code" />
-														<label class="form-check-label" for="@($"radio-{option.Code}")">
-															@option.Text
-														</label>
+												for (int i = 0; i < comicField.Options.Count; i++)
+												{
+													var index = i;
+													var option = comicField.Options[index];
+													var valueWrapper = boolAnswers[index];
+													<div class="form-group form-check">
+														<InputCheckbox id="@($"checkbox-{option.Code}")"
+																	   name="@($"checkbox-{option.Code}")"
+																	   class="form-check-input"
+																	   @bind-Value="@valueWrapper.Value" />
+														<label for="@($"checkbox-{option.Code}")" class="form-check-label">@option.Text</label>
 													</div>
-														}
-											</InputRadioGroup>
-											break;
-										case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
-											break;
+												}
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
+												<div class="form-group">
+													<label for="select">@comicField.Name</label>
+
+													<InputSelect id="select" name="select" class="form-control" @bind-Value="stringAnswer">
+														<option value=""></option>
+														@foreach (var option in comicField.Options)
+																	{
+															<option value="@option.Code">@option.Text</option>
+																	}
+													</InputSelect>
+												</div>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
+												<div class="form-group">
+													<label for="textarea">@comicField.Name</label>
+
+													<InputTextArea id="textarea"
+																   name="textarea"
+																   class="form-control"
+																   rows="3"
+																   @bind-Value="stringAnswer" />
+												</div>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
+												<div class="form-group">
+													<label for="textfield">@comicField.Name</label>
+
+													<InputText id="textfield"
+															   name="textfield"
+															   class="form-control"
+															   @bind-Value="stringAnswer" />
+												</div>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
+												<div class="form-group">
+													<label for="textfield">@comicField.Name</label>
+
+													<InputNumber id="textfield"
+																 name="textfield"
+																 class="form-control"
+																 @bind-Value="intAnswer" />
+												</div>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
+												<div class="form-group">
+													<label for="select">@comicField.Name</label>
+
+													<InputMultiSelect id="select"
+																	  name="select"
+																	  class="form-control"
+																	  size="8"
+																	  @bind-Value="stringAnswers2"
+																	  Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
+												</div>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
+												<InputRadioGroup @bind-Value="stringAnswer">
+													@foreach (var option in comicField.Options)
+																{
+														<div class="form-check">
+															<InputRadio id="@($"radio-{option.Code}")"
+																		name="@($"radio-{option.Code}")"
+																		Value="option.Code" />
+															<label class="form-check-label" for="@($"radio-{option.Code}")">
+																@option.Text
+															</label>
+														</div>
+																}
+												</InputRadioGroup>
+												break;
+											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
+												break;
+										}
 									}
 									<hr />
 									<h5>Description</h5>
@@ -302,7 +306,7 @@
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 				values = new List<string>()
-{
+			{
 					boolAnswer.ToString(),
 				};
 				break;
@@ -312,10 +316,15 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
+				values = new List<string>()
+			{
+					stringAnswer,
+				};
+				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
-{
-					stringAnswer,
+			{
+					intAnswer?.ToString() ?? "",
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
@@ -337,6 +346,7 @@
 		}
 		catch (System.Net.Http.HttpRequestException ex)
 		{
+			isSubmitting = false;
 			ToastService.ShowError($"There was a problem saving your answer: {ex.Message}");
 			return;
 		}
