@@ -52,69 +52,78 @@
 	@foreach (var field in filteredFields)
 	{
 		var theField = field;
-		<Collapsible IsCollapsed="collapse" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
-			<HeaderContent Context="isCollapsed">
-				<div class="d-flex w-100 justify-content-between">
-					<div class="d-flex">
-						<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
-						<h5 class="mb-1">@field.Name</h5>
-					</div>
-					<div class="h6 mb-1">
-						@if (field.VerifiedEntry != null)
-						{
-							foreach (var ve in field.VerifiedEntry.Values)
+		if (field.Type == CrowdSourcedFieldType.Section)
+		{
+			<div class="list-group-item">
+				<h4>@field.Name</h4>
+			</div>
+		}
+		else
+		{
+			<Collapsible IsCollapsed="collapse" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+				<HeaderContent Context="isCollapsed">
+					<div class="d-flex w-100 justify-content-between">
+						<div class="d-flex">
+							<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
+							<h5 class="mb-1">@field.Name</h5>
+						</div>
+						<div class="h6 mb-1">
+							@if (field.VerifiedEntry != null)
 							{
-								<span class="badge badge-secondary">@ve</span><text>&nbsp;</text>
+								foreach (var ve in field.VerifiedEntry.Values)
+								{
+									<span class="badge badge-secondary">@ve</span><text>&nbsp;</text>
+								}
 							}
-						}
-						else if (field.UserEntries.Count > 0)
-						{
-							<span class="badge badge-info">Collecting</span>
-						}
-						else
-						{
-							<span class="badge badge-warning">No Data</span>
-						}
+							else if (field.UserEntries.Count > 0)
+							{
+								<span class="badge badge-info">Collecting</span>
+							}
+							else
+							{
+								<span class="badge badge-warning">No Data</span>
+							}
+						</div>
 					</div>
-				</div>
-				<small class="text-muted">@field.ShortDescription</small>
-			</HeaderContent>
-			<ChildContent Context="isCollapsed">
-				<div>
-					<Table>
-						<TableBody>
-							<TableRow>
-								<TableRowCell colspan="2">
-									@if (field.VerifiedEntry == null)
-									{
-										<Button Size="Size.Small" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
-											<span class="oi oi-pencil" aria-hidden="true"></span>&nbsp;
-											@if (userName != null && field.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName))
-											{
-												<text>Edit</text>
-											}
-											else
-											{
-												<text>Answer</text>
-											}
-										</Button>
-									}
-									<p>@field.LongDescription</p>
-								</TableRowCell>
-							</TableRow>
-							<TableRow>
-								<TableHeaderCell>Date Verified</TableHeaderCell>
-								<TableRowCell>@field.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
-							</TableRow>
-							<TableRow>
-								<TableHeaderCell>Submitters</TableHeaderCell>
-								<TableRowCell>@string.Join(", ", field.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
-							</TableRow>
-						</TableBody>
-					</Table>
-				</div>
-			</ChildContent>
-		</Collapsible>
+					<small class="text-muted">@field.ShortDescription</small>
+				</HeaderContent>
+				<ChildContent Context="isCollapsed">
+					<div>
+						<Table>
+							<TableBody>
+								<TableRow>
+									<TableRowCell colspan="2">
+										@if (field.VerifiedEntry == null)
+										{
+											<Button Size="Size.Small" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
+												<span class="oi oi-pencil" aria-hidden="true"></span>&nbsp;
+												@if (userName != null && field.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName))
+												{
+													<text>Edit</text>
+												}
+												else
+												{
+													<text>Answer</text>
+												}
+											</Button>
+										}
+										<p>@field.LongDescription</p>
+									</TableRowCell>
+								</TableRow>
+								<TableRow>
+									<TableHeaderCell>Date Verified</TableHeaderCell>
+									<TableRowCell>@field.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
+								</TableRow>
+								<TableRow>
+									<TableHeaderCell>Submitters</TableHeaderCell>
+									<TableRowCell>@string.Join(", ", field.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
+								</TableRow>
+							</TableBody>
+						</Table>
+					</div>
+				</ChildContent>
+			</Collapsible>
+		}
 	}
 </ListGroup>
 
@@ -184,7 +193,7 @@
 
 		if (!string.IsNullOrEmpty(filter))
 		{
-			filteredFields = filteredFields.Where(f => f.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.ShortDescription.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.LongDescription.Contains(filter, StringComparison.OrdinalIgnoreCase));
+			filteredFields = filteredFields.Where(f => f.Type == CrowdSourcedFieldType.Section || f.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.ShortDescription.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.LongDescription.Contains(filter, StringComparison.OrdinalIgnoreCase));
 			isFiltering = true;
 		}
 		else
@@ -194,6 +203,7 @@
 		if (_filterCheckAnswered || _filterCheckNoData || _filterCheckCollectingData || _filterCheckAcceptedAnswer)
 		{
 			filteredFields = filteredFields.Where(f =>
+				f.Type == CrowdSourcedFieldType.Section ||
 				(_filterCheckAnswered && f.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName)) ||
 				(_filterCheckNoData && !f.UserEntries.Any()) ||
 				(_filterCheckCollectingData && f.UserEntries.Any() && f.VerifiedEntry == null) ||
