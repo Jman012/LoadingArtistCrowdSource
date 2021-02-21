@@ -29,7 +29,9 @@
 				<NavLink href="@($"comic/{comic.Code}")">
 					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
 					<br />
-					@comic.Title
+					<center class="w-100">
+						@comic.Title
+					</center>
 				</NavLink>
 			</div>
 		}

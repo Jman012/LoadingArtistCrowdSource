@@ -61,7 +61,16 @@ else
 			{
 				<tr draggable="true" @key="field.Code" @ondragstart="() => HandleDragStart(field)" @ondrop="() => HandleDragDrop(field)">
 					<td class="@($"grabbable {(draggingField == field ? "active" : "")}")"><Icon Name="@("fa-grip-vertical")"></Icon></td>
-					<td>@field.Name</td>
+					<td>
+						@if (field.Type == CrowdSourcedFieldType.Section)
+						{
+							<strong>@field.Name</strong>
+						}
+						else
+						{
+							@field.Name
+						}
+					</td>
 					<td>@field.Type</td>
 					<td>@field.CreatedByUser.UserName</td>
 					<td>@field.CreatedDate</td>
