@@ -55,8 +55,57 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[HttpPost]
 		public async Task<IEnumerable<ComicViewModel>> Search([FromBody] SearchViewModel vm)
 		{
+			IQueryable<Models.Comic> query = _context.Comics
+				.Include(c => c.ImportedByUser)
+				.Include(c => c.LastUpdatedByUser);
 
-			return new ComicViewModel[] { };
+			if (vm.Id.HasValue)
+			{
+				query = query.Where(c => c.Id == vm.Id.Value);
+			}
+			if (!string.IsNullOrEmpty(vm.Code))
+			{
+				query = query.Where(c => c.Code.Contains(vm.Code));
+			}
+			if (!string.IsNullOrEmpty(vm.Title))
+			{
+				query = query.Where(c => c.Title.Contains(vm.Title));
+			}
+			if (!string.IsNullOrEmpty(vm.Description))
+			{
+				query = query.Where(c => c.Description != null && c.Description.Contains(vm.Description));
+			}
+			foreach (var searchEntry in vm.SearchEntries)
+			{
+				string[] values = searchEntry.FieldValues.Where(v => v.Filtered).Select(v => v.Code).ToArray();
+				if (!values.Any())
+				{
+					continue;
+				}
+
+				switch (searchEntry.Operator)
+				{
+					case SearchEntryOperator.Any:
+						query = query.Where(c =>
+							c.CrowdSourcedFieldVerifiedEntries.Any(csfve =>
+								csfve.CrowdSourcedFieldDefinition.Code == searchEntry.FieldCode
+								&& csfve.CrowdSourcedFieldVerifiedEntryValues.Any(csfvev => values.Contains(csfvev.Value))));
+						break;
+					case SearchEntryOperator.All:
+						query = query.Where(c =>
+							c.CrowdSourcedFieldVerifiedEntries.Any(csfve =>
+								csfve.CrowdSourcedFieldDefinition.Code == searchEntry.FieldCode
+								&& csfve.CrowdSourcedFieldVerifiedEntryValues.All(csfvev => values.Contains(csfvev.Value))));
+						break;
+					default:
+						throw new Exception($"Unhandled {nameof(SearchEntryOperator)} value '{searchEntry.Operator}'");
+				}
+			}
+
+			var comics = await query.OrderBy(c => c.Id).ToListAsync();
+
+			Services.ModelMapper modelMapper = new Services.ModelMapper();
+			return comics.Select(c => modelMapper.MapComic(c));
 		}
 	}
 }
