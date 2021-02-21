@@ -40,12 +40,12 @@ else
 								<h3>Search Terms</h3>
 								<div class="flex-fill"></div>
 								@* <Button Type="ButtonType.Button" Outline="true" Color="Color.Secondary" title="Add new search term">
-									<span class="oi oi-plus" aria-hidden="true"></span>
-								</Button> *@
+							<span class="oi oi-plus" aria-hidden="true"></span>
+						</Button> *@
 							</div>
 						</Column>
 					</Row>
-					
+
 					<div class="d-flex flex-wrap">
 						@for (int i = 0; i < fields.Length; i++)
 						{
@@ -61,21 +61,32 @@ else
 					</p>
 				</EditForm>
 
-				<pre>
-					@System.Text.Json.JsonSerializer.Serialize(searchVM, options: new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.General)
-			   {
-				   WriteIndented = true,
-			   })
-				</pre>
+				@*<pre>
+			 @System.Text.Json.JsonSerializer.Serialize(searchVM, options: new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.General)
+		{
+			WriteIndented = true,
+		})
+		 </pre>*@
 
-				<h3>Results</h3>
-				<div>
-					<div class="d-flex justify-content-center">
-						<div class="spinner-border" role="status">
-							<span class="sr-only">Loading...</span>
+				@if (comics == null)
+				{
+					<div>
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="sr-only">Loading...</span>
+							</div>
 						</div>
 					</div>
-				</div>
+				}
+				else
+				{
+					<LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView Comics="comics">
+						<HeaderContent>
+							<h3>Results</h3>
+						</HeaderContent>
+					</LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView>
+				}
+
 			</Column>
 		</Row>
 	</Container>
@@ -85,6 +96,7 @@ else
 
 	private ComicFieldViewModel[]? fields { get; set; } = null;
 	private SearchViewModel searchVM { get; set; } = new SearchViewModel();
+	private ComicViewModel[]? comics { get; set; } = new ComicViewModel[] { };
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -106,6 +118,15 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		await Api.PostSearch(searchVM);
+		comics = null;
+
+		try
+		{
+			comics = await Api.PostSearch(searchVM);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+		}
 	}
 }
