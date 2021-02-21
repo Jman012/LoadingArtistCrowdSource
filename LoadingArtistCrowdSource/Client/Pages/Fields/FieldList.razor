@@ -5,7 +5,15 @@
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
 
-<h1>Fields</h1>
+<div class="d-flex">
+	<h1>Fields</h1>
+	<div class="flex-fill"></div>
+	<div>
+		<NavLink class="btn btn-primary" href="field/new">
+			<span class="oi oi-plus" aria-hidden="true"></span> New Field
+		</NavLink>
+	</div>
+</div>
 
 @if (activeFields == null)
 {
@@ -17,27 +25,40 @@
 }
 else
 {
-	<NavLink class="btn btn-primary" href="field/new">
-		<span class="oi oi-plus" aria-hidden="true"></span> New Field
-	</NavLink>
-
 	<h3>Active Fields</h3>
-	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="activeFields" PageSize="15">
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Name" Field="@(fd => fd.Name)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Type" Field="@(fd => fd.Type)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Created By" Field="@(fd => fd.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Created" Field="@(fd => fd.CreatedDate)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Last Updated By" Field="@(fd => fd.LastUpdatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Last Updated" Field="@(fd => fd.LastUpdatedDate)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="" Field="@(fd => fd.Code)" Sortable="false" Filterable="false">
-			<Template>
-				<NavLink class="nav-link" href="@($"field/{context.Code}")">
-					<span class="oi oi-pencil" aria-hidden="true"></span> Edit
-				</NavLink>
-			</Template>
-		</BlazorTable.Column>
-		<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
-	</BlazorTable.Table>
+	<table class="table" ondragover="event.preventDefault();">
+		<thead>
+			<tr>
+				<th></th>
+				<th>Name</th>
+				<th>Type</th>
+				<th>Created By</th>
+				<th>Created</th>
+				<th>Last Updated By</th>
+				<th>Last Updated</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var field in activeFields)
+			{
+				<tr draggable="true" @key="field.Code" @ondragstart="() => HandleDragStart(field)" @ondrop="() => HandleDragDrop(field)">
+					<td class="@($"grabbable {(draggingField == field ? "active" : "")}")"><Icon Name="@("fa-grip-vertical")"></Icon></td>
+					<td>@field.Name</td>
+					<td>@field.Type</td>
+					<td>@field.CreatedByUser.UserName</td>
+					<td>@field.CreatedDate</td>
+					<td>@field.LastUpdatedByUser.UserName</td>
+					<td>@field.LastUpdatedDate</td>
+					<td>
+						<NavLink class="nav-link" href="@($"field/{field.Code}")">
+							<span class="oi oi-pencil" aria-hidden="true"></span> Edit
+						</NavLink>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 
 	<h3>Inactive Fields</h3>
 	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="inactiveFields" PageSize="15">
@@ -73,6 +94,7 @@ else
 	private CrowdSourcedFieldDefinitionViewModel[]? activeFields = null;
 	private CrowdSourcedFieldDefinitionViewModel[]? inactiveFields = null;
 	private CrowdSourcedFieldDefinitionViewModel[]? deletedFields = null;
+	private CrowdSourcedFieldDefinitionViewModel? draggingField = null;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -96,5 +118,32 @@ else
 		{
 			exception.Redirect();
 		}
+	}
+
+	protected void HandleDragStart(CrowdSourcedFieldDefinitionViewModel field)
+	{
+		draggingField = field;
+	}
+
+	protected void HandleDragDrop(CrowdSourcedFieldDefinitionViewModel field)
+	{
+		if (draggingField == null || activeFields == null)
+		{
+			return;
+		}
+		if (field.Code == draggingField.Code)
+		{
+			draggingField = null;
+			return;
+		}
+
+		var listActiveFields = activeFields.ToList();
+		var idxDragging = listActiveFields.IndexOf(draggingField);
+		var idxDrop = listActiveFields.IndexOf(field);
+		listActiveFields.RemoveAt(idxDragging);
+		listActiveFields.Insert(idxDrop, draggingField);
+		activeFields = listActiveFields.ToArray();
+
+		draggingField = null;
 	}
 }
