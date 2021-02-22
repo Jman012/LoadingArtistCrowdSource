@@ -79,7 +79,7 @@ else
 				{
 					<LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView Comics="comics">
 						<HeaderContent>
-							<h3>Results</h3>
+							<h3>Results (@comics.Length)</h3>
 						</HeaderContent>
 					</LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView>
 				}
@@ -117,9 +117,18 @@ else
 	{
 		comics = null;
 
+		var newSearchVM = new SearchViewModel()
+		{
+			Id = searchVM.Id,
+			Code = searchVM.Code,
+			Title = searchVM.Title,
+			Description = searchVM.Description,
+			SearchEntries = searchVM.SearchEntries.Where(se => se.FieldValues.Any(fv => fv.Filtered)).ToArray(),
+		};
+
 		try
 		{
-			comics = await Api.PostSearch(searchVM);
+			comics = await Api.PostSearch(newSearchVM);
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

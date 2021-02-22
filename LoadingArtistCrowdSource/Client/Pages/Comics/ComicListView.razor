@@ -1,4 +1,6 @@
-﻿<div class="d-flex">
+﻿@inject IJSRuntime JsRuntime;
+
+<div class="d-flex">
 	@HeaderContent
 	<div class="flex-fill"></div>
 	<div>
@@ -7,13 +9,13 @@
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
 					Active="view == ComicListViewType.Thumbnail"
-					Clicked="() => view = ComicListViewType.Thumbnail">
+					Clicked="Thumbnail">
 				<Icon Name="@("fa-th-large")" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
 					Active="view == ComicListViewType.Table"
-					Clicked="() => view = ComicListViewType.Table">
+					Clicked="Table">
 				<Icon Name="@("fa-th-list")" />
 			</Button>
 		</Buttons>
@@ -64,10 +66,36 @@ else
 }
 
 @code {
+	const string Cookie = "ComicListViewType";
 	[Parameter]
 	public IEnumerable<ComicViewModel> Comics { get; set; } = new ComicViewModel[] { };
 	[Parameter]
 	public RenderFragment? HeaderContent { get; set; }
 
 	private ComicListViewType view { get; set; } = ComicListViewType.Thumbnail;
+
+	protected override async Task OnInitializedAsync()
+	{
+		string cookieValue = await JsRuntime.InvokeAsync<string>("ReadCookie", Cookie);
+		if (!string.IsNullOrEmpty(cookieValue))
+		{
+			if (System.Enum.TryParse(cookieValue, out ComicListViewType cookieView))
+			{
+				this.view = cookieView;
+			}
+		}
+		await base.OnInitializedAsync();
+	}
+
+	private async Task Thumbnail()
+	{
+		view = ComicListViewType.Thumbnail;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+	}
+
+	private async Task Table()
+	{
+		view = ComicListViewType.Table;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+	}
 }

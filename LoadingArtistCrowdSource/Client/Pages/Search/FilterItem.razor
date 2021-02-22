@@ -174,7 +174,7 @@
 			case CrowdSourcedFieldType.IntegerNumber:
 			case CrowdSourcedFieldType.FreeformTextfield:
 			case CrowdSourcedFieldType.FreeformTextarea:
-				FilterData.FieldValues[0].Filtered = string.IsNullOrEmpty(FilterData.FieldValues[0].Code);
+				FilterData.FieldValues[0].Filtered = !string.IsNullOrEmpty(FilterData.FieldValues[0].Code);
 				break;
 			default:
 				break;
