@@ -1,0 +1,4 @@
+.comic-thumbnail-link:hover,
+.comic-thumbnail-link:focus {
+	opacity: 0.8;
+}
