@@ -1,7 +1,62 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<h1>Loading Artist Crowd Source</h1>
 
-Welcome to your new app.
+<p class="lead">
+	A resource to crowd source information about Gregor Czaykowski's 
+	<NewTabLink Href="https://loadingartist.com">Loading Artist</NewTabLink> web comic.
+</p>
+<p>
+	If you've ever asked yourself,
+	<ul>
+		<li>What was the first comic Red Shirt Guy appeared in?</li>
+		<li>How many comics have the hidden spider in them?</li>
+		<li>When did Gregor begin using halftones?</li>
+		<li>Which comics have both characters X and Y together?</li>
+		<li>What percentage of comics are about picking up women?</li>
+	</ul>
+	Then this is the perfect resource. Loading Artist Crowd Source collects a variety 
+	of different data points about each and every comic in order to create a full index 
+	of the web comic series in order for the community to search for interesting patterns,
+	or just to easily and quickly find which comic they're thinking of.
+</p>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<h3>How does it work?</h3>
+<p>
+	Crowd sourcing is where a crowd of people is doing the job of sourcing the information 
+	and submitting it together. This means that you, a member of the Loading Artist community, 
+	are a key part in making this website possible. At the time this was created, Gregor halftones?
+	created X comics over the past ten years. Having one person to categorize and index all of
+	that data would be tremendous.
+</p>
+<p>
+	Instead, each member of the community is encouraged to take part in filling out a smaller
+	portion of the data. The way this works is you are given a random comic that has not been
+	fully indexed yet and fill out what you believe to be the correct data for 1, a few, or all
+	of the data fields for a comic. This is repeated a few more times by other members of the 
+	community. Once a consensus of data has been reached for a particular field on one comic,
+	the answer is considered verified and searchable.
+</p>
+
+<h3>Why does there need to be a consensus?</h3>
+<p>
+	The different data fields will have their own definitions and descriptions. Because we're 
+	asking the community to submit data, it's possible one person's interpretation of the 
+	question will differ from another person's. Thus, there will be some amount of human error.
+	Accepting an answer after consensus will help strengthen the integrity of the data being
+	collected.
+</p>
+
+
+<AuthorizeView>
+	<Authorized>
+		<p>
+			<a href="#" @onclick:preventDefault class="btn btn-primary">Contribute to a random comic</a>
+		</p>
+	</Authorized>
+	<NotAuthorized>
+		<p>
+			Login or create an account to <NavLink class="btn btn-primary" href="authentication/register">Get Started!</NavLink>
+		</p>
+	</NotAuthorized>
+</AuthorizeView>

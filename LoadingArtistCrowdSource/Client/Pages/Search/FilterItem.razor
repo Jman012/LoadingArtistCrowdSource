@@ -1,5 +1,5 @@
 ﻿<div class="dropdown">
-	<button type="button" id="@($"{Field.Code}-btn-label")" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	<button type="button" id="@($"{Field.Code}-btn-label")" class="@($"btn {(FilterData.FieldValues.Any(fv => fv.Filtered) ? "btn-secondary" : "btn-light")} btn-sm dropdown-toggle")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		@dropdownText
 	</button>
 	<ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="@($"{Field.Code}-btn-label")">
@@ -56,13 +56,13 @@
 
 @code {
 
-		[Parameter]
-		public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
+	[Parameter]
+	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
 
-		[Parameter]
-		public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
-		[Parameter]
-		public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
+	[Parameter]
+	public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
+	[Parameter]
+	public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
 
 	private List<CrowdSourcedFieldDefinitionOptionViewModel> fieldOptions { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 
