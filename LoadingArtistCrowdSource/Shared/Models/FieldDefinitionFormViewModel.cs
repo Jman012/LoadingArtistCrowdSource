@@ -58,5 +58,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string? LastUpdatedBy { get; set; }
 
 		public List<CrowdSourcedFieldDefinitionOptionViewModel> Options { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
+
+		public bool IsNewField { get; set; }
 	}
 }

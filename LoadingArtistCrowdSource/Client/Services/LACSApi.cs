@@ -35,11 +35,11 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<ComicViewModel> GetComic(string code)
 		{
-			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{code}", _serializationOptions) ?? new ComicViewModel();
+			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new ComicViewModel();
 		}
 		public async Task<UserEntrySubmissionResult> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
 		{
-			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{comicCode}/entry/{fieldCode}", values, _serializationOptions);
+			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{System.Web.HttpUtility.UrlEncode(comicCode)}/entry/{System.Web.HttpUtility.UrlEncode(fieldCode)}", values, _serializationOptions);
 		}
 		#endregion
 
@@ -50,17 +50,17 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<FieldDefinitionFormViewModel> GetField(string code)
 		{
-			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{code}", _serializationOptions) ?? new FieldDefinitionFormViewModel();
+			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new FieldDefinitionFormViewModel();
 		}
 		public async Task<string?> PutField(FieldDefinitionFormViewModel vm)
 		{
-			var response = await _authClient.PutAsJsonAsync($"api/field/{vm.Code}", vm, _serializationOptions);
+			var response = await _authClient.PutAsJsonAsync($"api/field/{System.Web.HttpUtility.UrlEncode(vm.Code)}", vm, _serializationOptions);
 			if (response.IsSuccessStatusCode)
 			{
 				return null;
 			}
 
-			return response.ReasonPhrase;
+			return await response.Content.ReadAsStringAsync();
 		}
 		public async Task<string?> PutFieldPositions(string[] vm)
 		{
@@ -70,7 +70,7 @@ namespace LoadingArtistCrowdSource.Client.Services
 				return null;
 			}
 
-			return response.ReasonPhrase;
+			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion
 

@@ -72,6 +72,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
 				.FirstOrDefaultAsync(csfd => csfd.Code == vm.Code);
 
+			if (vm.IsNewField && fieldDef != null)
+			{
+				return BadRequest("This Code is already taken by another field in the system.");
+			}
+
 			if (fieldDef == null)
 			{
 				fieldDef = new Models.CrowdSourcedFieldDefinition()
@@ -129,7 +134,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		{
 			var setFieldCodes = new HashSet<string>(fieldCodes);
 
-			var fields = await _context.CrowdSourcedFieldDefinitions.ToListAsync();
+			var fields = await _context.CrowdSourcedFieldDefinitions
+				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
+				.ToListAsync();
 			var setDbFieldCodes = new HashSet<string>(fields.Select(csfd => csfd.Code));
 
 			if (!setFieldCodes.SetEquals(setDbFieldCodes))

@@ -108,6 +108,7 @@ else
 		catch (AccessTokenNotAvailableException exception)
 		{
 			exception.Redirect();
+			return;
 		}
 
 		await base.OnInitializedAsync();
@@ -133,6 +134,7 @@ else
 		catch (AccessTokenNotAvailableException exception)
 		{
 			exception.Redirect();
+			return;
 		}
 	}
 }
