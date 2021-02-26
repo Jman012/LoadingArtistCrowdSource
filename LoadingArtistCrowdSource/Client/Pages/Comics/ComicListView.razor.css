@@ -2,3 +2,14 @@
 .comic-thumbnail-link:focus {
 	opacity: 0.8;
 }
+
+.collapse-icon {
+	color: #444;
+	margin-right: 0.5em;
+	font-size: 0.8em;
+	width: 16px;
+}
+
+.header-collapsible {
+	color: #444;
+}

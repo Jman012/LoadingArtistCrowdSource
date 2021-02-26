@@ -8,9 +8,15 @@
 		<Buttons>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
+					Active="view == ComicListViewType.GroupedByYear"
+					Clicked="GroupedByYear">
+				<Icon Name="@("fa-th-large")" />
+			</Button>
+			<Button Type="ButtonType.Button"
+					Color="Color.Light"
 					Active="view == ComicListViewType.Thumbnail"
 					Clicked="Thumbnail">
-				<Icon Name="@("fa-th-large")" />
+				<Icon Name="@("fa-th")" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
@@ -22,13 +28,50 @@
 	</div>
 </div>
 
-@if (view == ComicListViewType.Thumbnail)
+@if (view == ComicListViewType.GroupedByYear)
+{
+	var i = 0;
+	@foreach (var year in ComicsGroupedByYear)
+	{
+		var index = i++;
+		<div class="d-flex">
+			<div class="flex-fill"></div>
+			<div>
+				<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
+			</div>
+		</div>
+		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="false">
+			<HeaderContent Context="isCollapsed">
+				<h3 class="header-collapsible">
+					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
+					@year.Year <small class="text-muted">(@year.Comics.Count())</small>
+				</h3>
+			</HeaderContent>
+			<ChildContent>
+				<div class="d-flex">
+					@foreach (var comic in year.Comics)
+					{
+						<div class="comic-thumbnail-link">
+							<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
+								<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
+								<center class="w-100">
+									@comic.Title
+								</center>
+							</NavLink>
+						</div>
+					}
+				</div>
+			</ChildContent>
+		</Collapsible>
+	}
+}
+else if (view == ComicListViewType.Thumbnail)
 {
 	<div class="d-flex">
 		@foreach (var comic in Comics)
 		{
 			<div class="comic-thumbnail-link">
-				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{comic.Code}")">
+				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
 					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
 					<center class="w-100">
 						@comic.Title
@@ -55,7 +98,7 @@ else
 		<BlazorTable.Column TableItem="ComicViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicViewModel" Field="@(c => c.Code)">
 			<Template>
-				<NavLink class="nav-link" href="@($"comic/{context.Code}")">
+				<NavLink class="nav-link" href="@($"comic/{System.Web.HttpUtility.UrlEncode(context.Code)}")">
 					<span class="oi oi-plus" aria-hidden="true"></span> View
 				</NavLink>
 			</Template>
@@ -65,6 +108,10 @@ else
 }
 
 @code {
+	class GroupedYear {
+		public int Year;
+		public IEnumerable<ComicViewModel> Comics = new ComicViewModel[] { };
+	}
 	const string Cookie = "ComicListViewType";
 	[Parameter]
 	public IEnumerable<ComicViewModel> Comics { get; set; } = new ComicViewModel[] { };
@@ -72,6 +119,8 @@ else
 	public RenderFragment? HeaderContent { get; set; }
 
 	private ComicListViewType view { get; set; } = ComicListViewType.Thumbnail;
+	private IEnumerable<GroupedYear> ComicsGroupedByYear { get; set; } = new GroupedYear[] { };
+	private Collapsible[] GroupedByYearCollapsibles { get; set; } = new Collapsible[] { };
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -83,7 +132,17 @@ else
 				this.view = cookieView;
 			}
 		}
+
+		ComicsGroupedByYear = Comics.GroupBy(c => c.ComicPublishedDate.Year, c => c, (year, c) => new GroupedYear { Year = year, Comics = c });
+		GroupedByYearCollapsibles = ComicsGroupedByYear.Select(y => new Collapsible()).ToArray();
+
 		await base.OnInitializedAsync();
+	}
+
+	private async Task GroupedByYear()
+	{
+		view = ComicListViewType.GroupedByYear;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
 	}
 
 	private async Task Thumbnail()
@@ -96,5 +155,21 @@ else
 	{
 		view = ComicListViewType.Table;
 		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+	}
+
+	private void ExpandAll()
+	{
+		foreach (var c in GroupedByYearCollapsibles)
+		{
+			c.Expand();
+		}
+	}
+
+	private void CollapseAll()
+	{
+		foreach (var c in GroupedByYearCollapsibles)
+		{
+			c.Collapse();
+		}
 	}
 }
