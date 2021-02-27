@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Linq;
@@ -84,5 +85,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 			return await _publicClient.PostAsJsonAsync<SearchViewModel, ComicViewModel[]>("api/search", vm, _serializationOptions) ?? new ComicViewModel[] { };
 		}
 		#endregion
+
+		#region AdminController
+		public async Task ImportFeed(Stream ms)
+		{
+			var content = new MultipartFormDataContent
+			{
+				{ new StreamContent(ms), "\"upload\"", "feed.xml" }
+			};
+			await _authClient.PostAsync("api/admin/import_feed", content);
+		}
+		#endregion AdminController
 	}
 }

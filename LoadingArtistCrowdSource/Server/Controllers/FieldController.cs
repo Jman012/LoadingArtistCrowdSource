@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using LoadingArtistCrowdSource.Server.Data;
 using LoadingArtistCrowdSource.Shared;
+using LoadingArtistCrowdSource.Shared.Enums;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 
-using LoadingArtistCrowdSource.Shared.Enums;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
