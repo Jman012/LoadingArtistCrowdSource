@@ -147,23 +147,35 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				syndicationFeed = SyndicationFeed.Load(xmlReader);
 			}
 
+			int id = 1;
 			using (var transaction = _context.Database.BeginTransaction())
 			{
-				int id = 0;
-				foreach (var feedItem in syndicationFeed.Items.Reverse())
+				try
 				{
-					id += 1;
-					var newComic = CreateComic(feedItem, id, userId);
+					foreach (var feedItem in syndicationFeed.Items.Reverse())
+					{
+						id += 1;
+						var newComic = CreateComic(feedItem, id, userId);
+						_context.Comics.Add(newComic);
+					}
+					
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error");
+					await transaction.RollbackAsync();
+					return BadRequest("Something went wrong");
 				}
 			}
-			
 
-			return Ok();
+			return Ok($"Success - {id-1} comics imported");
 		}
 
 		private Models.Comic CreateComic(SyndicationItem feedItem, int id, string userId)
 		{
-			Uri? link = feedItem.Links.FirstOrDefault(l => l.Title == "alternate")?.Uri;
+			Uri? link = feedItem.Links.FirstOrDefault(l => l.RelationshipType == "alternate")?.Uri;
 			if (link == null)
 			{
 				throw new Exception("Could not find alternate link");
@@ -174,10 +186,29 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				throw new Exception("Could not find code");
 			}
+			code = code.TrimEnd('/');
 
-			string tooltip = feedItem.Content.ToString();
+			string? tooltip = feedItem.Summary?.Text;
 
-			string? description = feedItem.ElementExtensions.FirstOrDefault(e => e.OuterName == "encoded" && e.OuterNamespace == "http://purl.org/rss/1.0/modules/content/")
+			string? description = feedItem.ElementExtensions
+				.FirstOrDefault(e => e.OuterName == "encoded" && e.OuterNamespace == "http://purl.org/rss/1.0/modules/content/")?
+				.GetObject<string?>();
+			if (string.IsNullOrEmpty(description))
+			{
+				throw new Exception("Description is blank");
+			}
+
+			var year = $"{feedItem.PublishDate.Year:00}";
+			var month = $"{feedItem.PublishDate.Month:00}";
+			var day = $"{feedItem.PublishDate.Day:00}";
+
+			// Comics from Born (2011) to High Five (2014-08-15) are PNG,
+			// and from Drawn Back (2014-08-22) to current are JPG.
+			string imageUrlSrc = $"https://loadingartist.com/wp-content/uploads/{year}/{month}/{year}-{month}-{day}-{code}.jpg";
+			if (feedItem.PublishDate < new DateTime(2014, 08, 21))
+			{
+				imageUrlSrc = $"https://loadingartist.com/wp-content/uploads/{year}/{month}/{year}-{month}-{day}-{code}.png";
+			}
 
 			var comic = new Models.Comic()
 			{
@@ -186,11 +217,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Permalink = link.OriginalString,
 				ComicPublishedDate = feedItem.PublishDate,
 				Title = feedItem.Title.Text,
-				Tooltip = null,
-				Description = ,
-				ImageUrlSrc = ,
-				ImageThumbnailUrlSrc = ,
-				ImageWideThumbnailUrlSrc = ,
+				Tooltip = tooltip,
+				Description = description,
+				ImageUrlSrc = imageUrlSrc,
+				ImageThumbnailUrlSrc = $"https://loadingartist.com/comic-thumbs/{code}.png",
+				ImageWideThumbnailUrlSrc = $"https://loadingartist.com/comic-thumbs-wide/{code}.png",
 				ImportedDate = DateTimeOffset.Now,
 				ImportedBy = userId,
 				LastUpdatedDate = null,

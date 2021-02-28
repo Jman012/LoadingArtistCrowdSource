@@ -17,6 +17,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// <summary>
 		/// A sequential Id of the published comic, in order of time of publication.
 		/// </summary>
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int Id { get; set; }
 
 		/// <summary>

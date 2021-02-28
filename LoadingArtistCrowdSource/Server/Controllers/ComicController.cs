@@ -38,6 +38,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.OrderBy(c => c.Id)
 				.ToListAsync();
 
+			// Temp: reduce size. future: new vm.
+			foreach (var comic in comics)
+			{
+				comic.Tooltip = comic.Description = comic.ImageWideThumbnailUrlSrc = comic.Permalink = comic.ImageUrlSrc = "";
+			}
+
 			return comics.Select(c => modelMapper.MapComic(c));
 		}
 

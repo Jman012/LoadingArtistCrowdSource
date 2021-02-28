@@ -31,16 +31,16 @@
 @if (view == ComicListViewType.GroupedByYear)
 {
 	var i = 0;
-	@foreach (var year in ComicsGroupedByYear)
+	<div class="d-flex">
+		<div class="flex-fill"></div>
+		<div>
+			<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
+		</div>
+	</div>
+	@foreach (var year in ComicsGroupedByYear.OrderBy(y => y.Year))
 	{
 		var index = i++;
-		<div class="d-flex">
-			<div class="flex-fill"></div>
-			<div>
-				<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
-			</div>
-		</div>
-		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="false">
+		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="true">
 			<HeaderContent Context="isCollapsed">
 				<h3 class="header-collapsible">
 					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
@@ -48,14 +48,14 @@
 				</h3>
 			</HeaderContent>
 			<ChildContent>
-				<div class="d-flex">
-					@foreach (var comic in year.Comics)
+				<div class="d-flex flex-wrap">
+					@foreach (var comic in year.Comics.OrderBy(c => c.Id))
 					{
 						<div class="comic-thumbnail-link">
 							<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
 								<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
-								<center class="w-100">
-									@comic.Title
+								<center class="comic-title">
+									@comic.Id @comic.Title
 								</center>
 							</NavLink>
 						</div>
@@ -67,13 +67,13 @@
 }
 else if (view == ComicListViewType.Thumbnail)
 {
-	<div class="d-flex">
+	<div class="d-flex flex-wrap">
 		@foreach (var comic in Comics)
 		{
 			<div class="comic-thumbnail-link">
 				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
 					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
-					<center class="w-100">
+					<center class="comic-title">
 						@comic.Title
 					</center>
 				</NavLink>

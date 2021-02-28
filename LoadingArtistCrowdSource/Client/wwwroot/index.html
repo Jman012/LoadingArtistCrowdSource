@@ -57,12 +57,6 @@
 		$(document).on("click", ".allow-focus", function (e) {
 			e.stopPropagation();
 		});
-		//$("body").on("click", ".dropdown-menu.dropdown-menu-keep-open", function (e) {
-		//	$(this).parent().is(".show") && e.stopPropagation();
-		//});
-		//$("body").on("click", ".dropdown-item label.form-check-label", function (e) {
-		//	e.stopPropagation();
-		//});
 		window.WriteCookie = function (name, value, days) {
 			var expires;
 			if (days) {

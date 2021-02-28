@@ -35,11 +35,7 @@
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Published</TableHeaderCell>
-							<TableRowCell>@comic.ComicPublishedDate.ToString("yyyy-MM-dd")</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Tooltip</TableHeaderCell>
-							<TableRowCell>@comic.Tooltip</TableRowCell>
+							<TableRowCell>@comic.ComicPublishedDate.ToString("yyyy-MM-dd mm:dd:ss K")</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Image</TableHeaderCell>
@@ -67,8 +63,12 @@
 							</TableRowCell>
 						</TableRow>
 						<TableRow>
+							<TableHeaderCell>Tooltip</TableHeaderCell>
+							<TableRowCell>@((MarkupString)comic.Tooltip)</TableRowCell>
+						</TableRow>
+						<TableRow>
 							<TableHeaderCell>Description</TableHeaderCell>
-							<TableRowCell><p>@comic.Description</p></TableRowCell>
+							<TableRowCell><p>@((MarkupString)comic.Description)</p></TableRowCell>
 						</TableRow>
 					</TableBody>
 				</Table>

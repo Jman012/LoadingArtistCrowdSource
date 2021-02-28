@@ -197,7 +197,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "JMAN012GUY@GMAIL.COM",
                             NormalizedUserName = "JMAN012GUY@GMAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEHFW/Fj/4UWqGOG3bEPZJcYIrSzFEZnjxgiB3R9DqRnwuoN1YZGFFM+woXbQmngY/w==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEGcMHFGENP1e3gIgzicFPkEkznYA2I/i4ygvv6gkD5J5ZbtP5mZhNULGL5kn+OKtQA==",
                             PhoneNumber = "",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
@@ -209,9 +209,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.Comic", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -268,21 +266,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("LastUpdatedBy");
 
                     b.ToTable("Comic");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "born",
-                            ComicPublishedDate = new DateTimeOffset(new DateTime(2011, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, -8, 0, 0, 0)),
-                            ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
-                            ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
-                            ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-                            ImportedDate = new DateTimeOffset(new DateTime(2021, 2, 5, 13, 37, 4, 635, DateTimeKind.Unspecified).AddTicks(9786), new TimeSpan(0, -8, 0, 0, 0)),
-                            Permalink = "https://loadingartist.com/comic/born/",
-                            Title = "Born",
-                            Tooltip = "Born"
-                        });
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.ComicHistoryLog", b =>

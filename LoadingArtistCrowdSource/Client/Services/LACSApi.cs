@@ -87,13 +87,14 @@ namespace LoadingArtistCrowdSource.Client.Services
 		#endregion
 
 		#region AdminController
-		public async Task ImportFeed(Stream ms)
+		public async Task<string> ImportFeed(Stream ms)
 		{
 			var content = new MultipartFormDataContent
 			{
 				{ new StreamContent(ms), "\"upload\"", "feed.xml" }
 			};
-			await _authClient.PostAsync("api/admin/import_feed", content);
+			var response = await _authClient.PostAsync("api/admin/import_feed", content);
+			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion AdminController
 	}

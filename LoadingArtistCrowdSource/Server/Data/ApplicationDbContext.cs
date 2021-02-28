@@ -306,23 +306,23 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<ApplicationUser>().HasData(
 				adminUser
 			);
-			builder.Entity<Comic>().HasData(new Comic()
-			{
-				Id = 1,
-				Code = "born",
-				Permalink = "https://loadingartist.com/comic/born/",
-				ComicPublishedDate = DateTimeOffset.Parse("2011-01-04T00:00:00.000-0800"),
-				Title = "Born",
-				Tooltip = "Born",
-				Description = null,
-				ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
-				ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
-				ImageWideThumbnailUrlSrc = null,
-				ImportedDate = DateTimeOffset.Now,
-				ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
-				LastUpdatedByUser = null,
-				LastUpdatedBy = null,
-			});
+			// builder.Entity<Comic>().HasData(new Comic()
+			// {
+			// 	Id = 1,
+			// 	Code = "born",
+			// 	Permalink = "https://loadingartist.com/comic/born/",
+			// 	ComicPublishedDate = DateTimeOffset.Parse("2011-01-04T00:00:00.000-0800"),
+			// 	Title = "Born",
+			// 	Tooltip = "Born",
+			// 	Description = null,
+			// 	ImageUrlSrc = "https://loadingartist.com/wp-content/uploads/2011/07/2011-01-04-born.png",
+			// 	ImageThumbnailUrlSrc = "https://loadingartist.com/comic-thumbs/born.png",
+			// 	ImageWideThumbnailUrlSrc = null,
+			// 	ImportedDate = DateTimeOffset.Now,
+			// 	ImportedBy = "432ea055-ea01-443d-a6f7-e97d2c18d275",
+			// 	LastUpdatedByUser = null,
+			// 	LastUpdatedBy = null,
+			// });
 		}
 
 		public DbSet<Comic> Comics => Set<Comic>();

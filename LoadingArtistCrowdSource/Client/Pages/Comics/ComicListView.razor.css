@@ -13,3 +13,8 @@
 .header-collapsible {
 	color: #444;
 }
+
+.comic-title {
+	width: 128px;
+	word-break: break-word;
+}
