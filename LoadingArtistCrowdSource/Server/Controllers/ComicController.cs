@@ -98,7 +98,20 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					: null,
 			}).ToList();
 
-			return Json(comicVM);
+			var firstComicCode = (await _context.Comics.OrderBy(c => c.Id).FirstAsync()).Code;
+			var previousComicCode = (await _context.Comics.Where(c => c.Id == comic.Id - 1).FirstOrDefaultAsync())?.Code;
+			var nextComicCode = (await _context.Comics.Where(c => c.Id == comic.Id + 1).FirstOrDefaultAsync())?.Code;
+			var latestComicCode = (await _context.Comics.OrderBy(c => c.Id).LastAsync()).Code;
+			var comicPageVM = new Shared.Models.ComicPageViewModel()
+			{
+				ComicViewModel = comicVM,
+				FirstComicCode = firstComicCode,
+				PreviousComicCode = previousComicCode,
+				NextComicCode = nextComicCode,
+				LatestComicCode = latestComicCode,
+			};
+
+			return Json(comicPageVM);
 		}
 
 		[HttpPut]

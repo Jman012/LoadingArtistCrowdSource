@@ -34,9 +34,9 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _publicClient.GetFromJsonAsync<ComicViewModel[]>("api/comic", _serializationOptions) ?? new ComicViewModel[] { };
 		}
-		public async Task<ComicViewModel> GetComic(string code)
+		public async Task<ComicPageViewModel> GetComic(string code)
 		{
-			return await _publicClient.GetFromJsonAsync<ComicViewModel>($"api/comic/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new ComicViewModel();
+			return await _publicClient.GetFromJsonAsync<ComicPageViewModel>($"api/comic/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new ComicPageViewModel();
 		}
 		public async Task<UserEntrySubmissionResult> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
 		{
@@ -85,6 +85,13 @@ namespace LoadingArtistCrowdSource.Client.Services
 			return await _publicClient.PostAsJsonAsync<SearchViewModel, ComicViewModel[]>("api/search", vm, _serializationOptions) ?? new ComicViewModel[] { };
 		}
 		#endregion
+
+		#region RandomController
+		public async Task<string> GetRandomComicCode()
+		{
+			return await _publicClient.GetStringAsync("api/random");
+		}
+		#endregion RandomController
 
 		#region AdminController
 		public async Task<string> ImportFeed(Stream ms)

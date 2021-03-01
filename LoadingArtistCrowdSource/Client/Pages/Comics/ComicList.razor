@@ -8,14 +8,11 @@
 
 @if (comics == null)
 {
-	<div class="d-flex justify-content-center">
-		<div class="spinner-border" role="status">
-			<span class="sr-only">Loading...</span>
-		</div>
-	</div>
+	<Spinner></Spinner>
 }
 else
 {
+	<ComicNavigation></ComicNavigation>
 	<ComicListView Comics="comics">
 		<HeaderContent>
 			<h1>Comics</h1>
@@ -24,10 +21,15 @@ else
 }
 
 @code {
-	private ComicViewModel[]? comics { get; set; } = null;
+	private static ComicViewModel[]? comics { get; set; } = null;
 
 	protected override async Task OnInitializedAsync()
 	{
+		if (comics != null && comics.Any())
+		{
+			return;
+		}
+
 		try
 		{
 			comics = await Api.GetComics();

@@ -40,14 +40,14 @@
 	@foreach (var year in ComicsGroupedByYear.OrderBy(y => y.Year))
 	{
 		var index = i++;
-		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="true">
+		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="true" IdPrefix="@year.Year.ToString()">
 			<HeaderContent Context="isCollapsed">
 				<h3 class="header-collapsible">
 					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
 					@year.Year <small class="text-muted">(@year.Comics.Count())</small>
 				</h3>
 			</HeaderContent>
-			<ChildContent>
+			<ChildContent Context="isCollapsed">
 				<div class="d-flex flex-wrap">
 					@foreach (var comic in year.Comics.OrderBy(c => c.Id))
 					{
@@ -86,7 +86,7 @@ else
 	<BlazorTable.Table TableItem="ComicViewModel" Items="Comics" PageSize="15">
 		<BlazorTable.Column TableItem="ComicViewModel" Title="Thumbnail" Field="@(c => c.ImageUrlSrc)" Sortable="true" Filterable="true">
 			<Template>
-				<img src="@context.ImageThumbnailUrlSrc" width="128" height="128" title="@context.Tooltip" alt="@context.Tooltip" />
+				<img src="@context.ImageThumbnailUrlSrc" width="64" height="64" title="@context.Tooltip" alt="@context.Tooltip" />
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicViewModel" Title="Id" Field="@(c => c.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
@@ -108,7 +108,8 @@ else
 }
 
 @code {
-	class GroupedYear {
+	class GroupedYear
+	{
 		public int Year;
 		public IEnumerable<ComicViewModel> Comics = new ComicViewModel[] { };
 	}

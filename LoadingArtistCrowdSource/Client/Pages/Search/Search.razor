@@ -4,11 +4,7 @@
 
 @if (fields == null)
 {
-	<div class="d-flex justify-content-center">
-		<div class="spinner-border" role="status">
-			<span class="sr-only">Loading...</span>
-		</div>
-	</div>
+	<Spinner></Spinner>
 }
 else
 {
@@ -67,13 +63,7 @@ else
 
 				@if (comics == null)
 				{
-					<div>
-						<div class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="sr-only">Loading...</span>
-							</div>
-						</div>
-					</div>
+					<Spinner></Spinner>
 				}
 				else
 				{

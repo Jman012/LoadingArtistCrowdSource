@@ -1,0 +1,23 @@
+﻿@page "/random"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject LoadingArtistCrowdSource.Client.Services.LACSApi Api
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+
+<Spinner></Spinner>
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			string randomComicCode = await Api.GetRandomComicCode();
+			NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(randomComicCode));
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+		await base.OnInitializedAsync();
+	}
+}

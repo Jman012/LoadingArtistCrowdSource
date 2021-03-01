@@ -6,15 +6,27 @@
 <Container Fluid="false">
 	@if (!loaded)
 	{
-		<div class="d-flex justify-content-center">
-			<div class="spinner-border" role="status">
-				<span class="sr-only">Loading...</span>
-			</div>
-		</div>
+		<Row>
+			<Column>
+				<Spinner></Spinner>
+			</Column>
+		</Row>
 	}
 	else
 	{
-		<h1>@comic.Title</h1>
+		<Row>
+			<Column>
+				<ComicNavigation ComicPage="comicPage"></ComicNavigation>
+			</Column>
+		</Row>
+
+		<Row>
+			<Column>
+				<div class="d-flex justify-content-center">
+					<h1>@comic.Title</h1>
+				</div>
+			</Column>
+		</Row>
 
 		<Row>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
@@ -64,11 +76,11 @@
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Tooltip</TableHeaderCell>
-							<TableRowCell>@((MarkupString)comic.Tooltip)</TableRowCell>
+							<TableRowCell>@((MarkupString)(comic.Tooltip ?? ""))</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Description</TableHeaderCell>
-							<TableRowCell><p>@((MarkupString)comic.Description)</p></TableRowCell>
+							<TableRowCell><p>@((MarkupString)(comic.Description ?? ""))</p></TableRowCell>
 						</TableRow>
 					</TableBody>
 				</Table>
@@ -93,17 +105,29 @@
 </Container>
 
 @code {
+	private string _code = "";
 	[Parameter]
 	public string Code { get; set; } = "";
 
 	private bool loaded { get; set; }
-	private ComicViewModel comic { get; set; } = new ComicViewModel();
+	private ComicPageViewModel comicPage { get; set; } = new ComicPageViewModel();
+	private ComicViewModel comic => comicPage.ComicViewModel;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
+	{
+		if (_code != Code)
+		{
+			_code = Code;
+			await GetComic();
+		}
+		await base.OnParametersSetAsync();
+	}
+
+	private async Task GetComic()
 	{
 		try
 		{
-			comic = await Api.GetComic(Code);
+			comicPage = await Api.GetComic(Code);
 			loaded = true;
 		}
 		catch (AccessTokenNotAvailableException exception)
@@ -120,7 +144,7 @@
 
 		try
 		{
-			comic = await Api.GetComic(Code);
+			comicPage = await Api.GetComic(Code);
 			loaded = true;
 			StateHasChanged();
 		}

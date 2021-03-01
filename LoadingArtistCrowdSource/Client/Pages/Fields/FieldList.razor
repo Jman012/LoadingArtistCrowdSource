@@ -15,7 +15,7 @@
 			<Button Color="Color.Primary" Clicked="HandleSaveFieldOrder" class="mr-1">
 				@if (isSavingReorder)
 				{
-					<div class="spinner-border spinner-border-sm" role="status"></div>
+					<Spinner Small="true" Inline="true"></Spinner>
 				}
 				else
 				{
@@ -34,11 +34,7 @@
 
 @if (activeFields == null)
 {
-	<div class="d-flex justify-content-center">
-		<div class="spinner-border" role="status">
-			<span class="sr-only">Loading...</span>
-		</div>
-	</div>
+	<Spinner></Spinner>
 }
 else
 {
