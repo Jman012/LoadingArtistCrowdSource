@@ -30,9 +30,9 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 
 		#region ComicController
-		public async Task<ComicViewModel[]> GetComics()
+		public async Task<ComicListItemViewModel[]> GetComics()
 		{
-			return await _publicClient.GetFromJsonAsync<ComicViewModel[]>("api/comic", _serializationOptions) ?? new ComicViewModel[] { };
+			return await _publicClient.GetFromJsonAsync<ComicListItemViewModel[]>("api/comic", _serializationOptions) ?? new ComicListItemViewModel[] { };
 		}
 		public async Task<ComicPageViewModel> GetComic(string code)
 		{
@@ -80,9 +80,9 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _publicClient.GetFromJsonAsync<ComicFieldViewModel[]>("api/search/fields", _serializationOptions) ?? new ComicFieldViewModel[] { };
 		}
-		public async Task<ComicViewModel[]> PostSearch(SearchViewModel vm)
+		public async Task<ComicListItemViewModel[]> PostSearch(SearchViewModel vm)
 		{
-			return await _publicClient.PostAsJsonAsync<SearchViewModel, ComicViewModel[]>("api/search", vm, _serializationOptions) ?? new ComicViewModel[] { };
+			return await _publicClient.PostAsJsonAsync<SearchViewModel, ComicListItemViewModel[]>("api/search", vm, _serializationOptions) ?? new ComicListItemViewModel[] { };
 		}
 		#endregion
 

@@ -50,6 +50,20 @@ namespace LoadingArtistCrowdSource.Server.Services
 			return comicVM;
 		}
 
+		public ComicListItemViewModel MapComicListItem(Comic comic)
+		{
+			ComicListItemViewModel comicVM = new ComicListItemViewModel()
+			{
+				Id = comic.Id,
+				Code = comic.Code,
+				ComicPublishedDate = comic.ComicPublishedDate,
+				Title = comic.Title,
+				ImageThumbnailUrlSrc = comic.ImageThumbnailUrlSrc,
+			};
+
+			return comicVM;
+		}
+
 		public ApplicationUserViewModel MapApplicationUser(ApplicationUser user)
 		{
 			return new ApplicationUserViewModel()

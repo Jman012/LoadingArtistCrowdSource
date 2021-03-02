@@ -53,9 +53,9 @@
 					{
 						<div class="comic-thumbnail-link">
 							<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
-								<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
+								<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Title" alt="@comic.Title" />
 								<center class="comic-title">
-									@comic.Id @comic.Title
+									@comic.Title
 								</center>
 							</NavLink>
 						</div>
@@ -72,7 +72,7 @@ else if (view == ComicListViewType.Thumbnail)
 		{
 			<div class="comic-thumbnail-link">
 				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
-					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Tooltip" alt="@comic.Tooltip" />
+					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Title" alt="@comic.Title" />
 					<center class="comic-title">
 						@comic.Title
 					</center>
@@ -83,20 +83,20 @@ else if (view == ComicListViewType.Thumbnail)
 }
 else
 {
-	<BlazorTable.Table TableItem="ComicViewModel" Items="Comics" PageSize="15">
-		<BlazorTable.Column TableItem="ComicViewModel" Title="Thumbnail" Field="@(c => c.ImageUrlSrc)" Sortable="true" Filterable="true">
+	<BlazorTable.Table TableItem="ComicListItemViewModel" Items="Comics" PageSize="15">
+		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Thumbnail" Field="@(c => c.ImageThumbnailUrlSrc)" Sortable="true" Filterable="true">
 			<Template>
-				<img src="@context.ImageThumbnailUrlSrc" width="64" height="64" title="@context.Tooltip" alt="@context.Tooltip" />
+				<img src="@context.ImageThumbnailUrlSrc" width="64" height="64" title="@context.Title" alt="@context.Title" />
 			</Template>
 		</BlazorTable.Column>
-		<BlazorTable.Column TableItem="ComicViewModel" Title="Id" Field="@(c => c.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="ComicViewModel" Title="Published" Field="@(c => c.ComicPublishedDate)" Sortable="true" Filterable="true">
+		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Id" Field="@(c => c.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Published" Field="@(c => c.ComicPublishedDate)" Sortable="true" Filterable="true">
 			<Template>
 				@context.ComicPublishedDate.ToString("yyyy-MM-dd")
 			</Template>
 		</BlazorTable.Column>
-		<BlazorTable.Column TableItem="ComicViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
-		<BlazorTable.Column TableItem="ComicViewModel" Field="@(c => c.Code)">
+		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="ComicListItemViewModel" Field="@(c => c.Code)">
 			<Template>
 				<NavLink class="nav-link" href="@($"comic/{System.Web.HttpUtility.UrlEncode(context.Code)}")">
 					<span class="oi oi-plus" aria-hidden="true"></span> View
@@ -111,11 +111,12 @@ else
 	class GroupedYear
 	{
 		public int Year;
-		public IEnumerable<ComicViewModel> Comics = new ComicViewModel[] { };
+		public IEnumerable<ComicListItemViewModel> Comics = new ComicListItemViewModel[] { };
 	}
+
 	const string Cookie = "ComicListViewType";
 	[Parameter]
-	public IEnumerable<ComicViewModel> Comics { get; set; } = new ComicViewModel[] { };
+	public IEnumerable<ComicListItemViewModel> Comics { get; set; } = new ComicListItemViewModel[] { };
 	[Parameter]
 	public RenderFragment? HeaderContent { get; set; }
 

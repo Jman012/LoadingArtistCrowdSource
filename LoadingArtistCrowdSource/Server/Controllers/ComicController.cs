@@ -29,7 +29,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<Shared.Models.ComicViewModel>> Index()
+		public async Task<IEnumerable<Shared.Models.ComicListItemViewModel>> Index()
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			var comics = await _context.Comics
@@ -44,7 +44,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				comic.Tooltip = comic.Description = comic.ImageWideThumbnailUrlSrc = comic.Permalink = comic.ImageUrlSrc = "";
 			}
 
-			return comics.Select(c => modelMapper.MapComic(c));
+			return comics.Select(c => modelMapper.MapComicListItem(c));
 		}
 
 		[HttpGet]

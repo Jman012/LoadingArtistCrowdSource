@@ -54,7 +54,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IEnumerable<ComicViewModel>> Search([FromBody] SearchViewModel vm)
+		public async Task<IEnumerable<ComicListItemViewModel>> Search([FromBody] SearchViewModel vm)
 		{
 			IQueryable<Models.Comic> query = _context.Comics
 				.Include(c => c.ImportedByUser)
@@ -106,7 +106,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var comics = await query.OrderBy(c => c.Id).ToListAsync();
 
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
-			return comics.Select(c => modelMapper.MapComic(c));
+			return comics.Select(c => modelMapper.MapComicListItem(c));
 		}
 	}
 }
