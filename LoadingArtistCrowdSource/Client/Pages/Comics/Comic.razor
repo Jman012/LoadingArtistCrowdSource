@@ -98,7 +98,11 @@
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
 				<h3>Crowd Sourced Data</h3>
 				<div class="entry-list">
-					<FieldEntries ComicCode="@comic.Code" ComicImgSrc="@comic.ImageUrlSrc" Fields="comic.ComicFields" OnComicNeedsRefresh="HandleComicNedsRefresh"></FieldEntries>
+					<FieldEntries ComicCode="@comic.Code" 
+								  ComicImgSrc="@comic.ImageUrlSrc" 
+								  ComicProgress="@comicPage.Progress" 
+								  Fields="comic.ComicFields" 
+								  OnComicNeedsRefresh="HandleComicNedsRefresh"></FieldEntries>
 				</div>
 			</Column>
 		</Row>

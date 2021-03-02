@@ -41,7 +41,12 @@
 	</div>
 </div>
 
-<div class="d-flex mb-2">
+<div class="d-flex mb-2 align-items-baseline">
+	<div class="progress" style="width: 100px; height: 22px;">
+		<div class="progress-bar" role="progressbar" style="width: @(Math.Floor(ComicProgress * 100.0))%" aria-valuenow="@(Math.Floor(ComicProgress * 100.0))" aria-valuemin="0" aria-valuemax="100">
+			@(Math.Floor(ComicProgress * 100.0))%
+		</div>
+	</div>
 	<div class="flex-fill"></div>
 	<div>
 		<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
@@ -136,6 +141,8 @@
 	public string ComicCode { get; set; } = "";
 	[Parameter]
 	public string ComicImgSrc { get; set; } = "";
+	[Parameter]
+	public double ComicProgress { get; set; }
 	[Parameter]
 	public IEnumerable<ComicFieldViewModel> Fields { get; set; } = new ComicFieldViewModel[] { };
 	[Parameter]

@@ -90,6 +90,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					: null,
 			}).ToList();
 
+			// Each field = 0, 1, or 2 points.
+			// Verified = 2 points, Collecting = 1 points, No Data = 0 points
+			var nonSectionFields = comicVM.ComicFields.Where(cf => cf.Type != CrowdSourcedFieldType.Section);
+			var totalPoints = nonSectionFields.Count() * 2;
+			var accruedPoints = nonSectionFields.Sum(cf => cf.VerifiedEntry != null ? 2 : (cf.UserEntries.Any() ? 1 : 0));
+			var progress = totalPoints == 0 ? 0.0 : (totalPoints == accruedPoints ? 1.0 : ((double)accruedPoints / (double)totalPoints));
+
 			var firstComicCode = (await _context.Comics.OrderBy(c => c.Id).FirstAsync()).Code;
 			var previousComicCode = (await _context.Comics.Where(c => c.Id == comic.Id - 1).FirstOrDefaultAsync())?.Code;
 			var nextComicCode = (await _context.Comics.Where(c => c.Id == comic.Id + 1).FirstOrDefaultAsync())?.Code;
@@ -101,6 +108,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				PreviousComicCode = previousComicCode,
 				NextComicCode = nextComicCode,
 				LatestComicCode = latestComicCode,
+				Progress = progress,
 			};
 
 			return Json(comicPageVM);

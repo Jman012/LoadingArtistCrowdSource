@@ -13,5 +13,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string? PreviousComicCode { get; set; }
 		public string? NextComicCode { get; set; }
 		public string? LatestComicCode { get; set; }
+		public double Progress { get; set; }
 	}
 }
