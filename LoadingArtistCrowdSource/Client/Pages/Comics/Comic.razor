@@ -12,8 +12,7 @@
 			</Column>
 		</Row>
 	}
-	else
-	{
+	<div class="@(loaded ? "" : "d-none")">
 		<Row>
 			<Column>
 				<ComicNavigation ComicPage="comicPage"></ComicNavigation>
@@ -57,7 +56,7 @@
 							<TableHeaderCell>Thumbnail</TableHeaderCell>
 							<TableRowCell>
 								<NewTabLink Href="@comic.ImageThumbnailUrlSrc">
-									<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" />
+									<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" class="img-fluid" style="max-height: 128px;" />
 								</NewTabLink>
 							</TableRowCell>
 						</TableRow>
@@ -66,7 +65,9 @@
 							<TableRowCell>
 								@if (comic.ImageWideThumbnailUrlSrc != null)
 								{
-									<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc"><img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" /></NewTabLink>
+									<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc">
+										<img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" class="img-fluid" style="max-height: 128px;" />
+									</NewTabLink>
 								}
 								else
 								{
@@ -101,6 +102,7 @@
 				</div>
 			</Column>
 		</Row>
+	</div>
 	}
 </Container>
 
@@ -139,13 +141,13 @@
 
 	private async Task HandleComicNedsRefresh()
 	{
-		loaded = false;
+		//loaded = false;
 		StateHasChanged();
 
 		try
 		{
 			comicPage = await Api.GetComic(Code);
-			loaded = true;
+			//loaded = true;
 			StateHasChanged();
 		}
 		catch (AccessTokenNotAvailableException exception)

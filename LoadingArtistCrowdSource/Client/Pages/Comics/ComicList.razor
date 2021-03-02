@@ -12,7 +12,7 @@
 }
 else
 {
-	<ComicNavigation></ComicNavigation>
+	<ComicNavigation ComicPage="comicPage" IsComicList="true"></ComicNavigation>
 	<ComicListView Comics="comics">
 		<HeaderContent>
 			<h1>Comics</h1>
@@ -22,6 +22,8 @@ else
 
 @code {
 	private static ComicViewModel[]? comics { get; set; } = null;
+
+	private ComicPageViewModel comicPage { get; set; } = new ComicPageViewModel();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -33,6 +35,10 @@ else
 		try
 		{
 			comics = await Api.GetComics();
+			comicPage = new ComicPageViewModel()
+			{
+				LatestComicCode = comics.LastOrDefault()?.Code,
+			};
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

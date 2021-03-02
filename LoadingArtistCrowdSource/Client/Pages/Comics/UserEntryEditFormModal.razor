@@ -1,4 +1,5 @@
-﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject Services.LACSApi Api
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
@@ -168,13 +169,17 @@
 			</AuthorizeView>
 		</ModalBody>
 		<ModalFooter>
-			@if (isSubmitting)
-			{
-				<Spinner Inline="true"></Spinner>
-			}
-			@if (userName != null)
-			{
-				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@isSubmitting" Clicked="HandleSubmit">
+			<div class="w-100 d-flex flex-row justify-content-around">
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="isFirstInFields">
+					<Icon Name="IconName.AngleLeft"></Icon>
+					Back
+				</Button>
+
+				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(isSubmitting || userName == null)" Clicked="HandleSubmit">
+					@if (isSubmitting)
+					{
+						<Spinner Small="true" Inline="true"></Spinner><text>&nbsp;</text>
+					}
 					@if (userEntry.CreatedDate == default)
 					{
 						<text>Add Answer</text>
@@ -183,9 +188,16 @@
 					{
 						<text>Edit Answer</text>
 					}
+					&nbsp;<Icon Name="IconName.AngleRight"></Icon>
 				</Button>
-			}
-			<Button Type="ButtonType.Button" Color="Color.Light" Clicked="Close">Close</Button>
+
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields">
+					Skip&nbsp;
+					<Icon Name="IconName.AngleRight"></Icon>
+				</Button>
+
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel">Close</Button>
+			</div>
 		</ModalFooter>
 	</ModalContent>
 </Modal>
@@ -199,6 +211,20 @@
 		public string ComicImgSrc { get; set; }
 	}
 
+	public enum CompletionType
+	{
+		Back,
+		SubmitAndNext,
+		SkipNext,
+		Cancel,
+	}
+
+	public struct Completion
+	{
+		public CompletionType Type;
+		public ComicFieldViewModel Field;
+	}
+
 	private class ValueWrapper<T>
 	{
 		public T Value { get; set; }
@@ -209,7 +235,9 @@
 	}
 
 	[Parameter]
-	public EventCallback<State> OnSubmit { get; set; }
+	public EventCallback<Completion> OnSubmit { get; set; }
+	[Parameter]
+	public IReadOnlyList<ComicFieldViewModel> Fields { get; set; } = new List<ComicFieldViewModel>();
 
 	private Modal modal { get; set; } = new Modal();
 	private EditForm form { get; set; } = new EditForm();
@@ -219,6 +247,10 @@
 	private string comicImgSrc { get; set; } = "";
 	private CrowdSourcedFieldUserEntryViewModel userEntry { get; set; } = new CrowdSourcedFieldUserEntryViewModel();
 	private bool isSubmitting { get; set; } = false;
+
+	private int indexInFields => Fields.Select((item, index) => new { item, index }).FirstOrDefault(x => x.item.Code == comicField.Code)?.index ?? 0;
+	private bool isFirstInFields => indexInFields == 0 && Fields.Count > 0;
+	private bool isLastInFields => indexInFields == Fields.Count - 1;
 
 	#region Answer Variables
 	private bool boolAnswer { get; set; }
@@ -304,7 +336,7 @@
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 				values = new List<string>()
-			{
+{
 					boolAnswer.ToString(),
 				};
 				break;
@@ -315,13 +347,13 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 				values = new List<string>()
-			{
+{
 					stringAnswer,
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
-			{
+{
 					intAnswer?.ToString() ?? "",
 				};
 				break;
@@ -342,6 +374,11 @@
 		{
 			result = await Api.PutUserEntryValues(comicCode, comicField.Code, values);
 		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
 		catch (System.Net.Http.HttpRequestException ex)
 		{
 			isSubmitting = false;
@@ -360,10 +397,38 @@
 			ToastService.ShowInfo(result.AlertDescription(), result.AlertMessage());
 		}
 
-		await OnSubmit.InvokeAsync(new State()
+		await OnSubmit.InvokeAsync(new Completion()
 		{
-			ComicField = comicField,
+			Type = CompletionType.SubmitAndNext,
+			Field = comicField,
 		});
-		modal.Hide();
+		//modal.Hide();
+	}
+
+	private async Task HandleBack()
+	{
+		await OnSubmit.InvokeAsync(new Completion()
+		{
+			Type = CompletionType.Back,
+			Field = comicField,
+		});
+	}
+
+	private async Task HandleSkip()
+	{
+		await OnSubmit.InvokeAsync(new Completion()
+		{
+			Type = CompletionType.SkipNext,
+			Field = comicField,
+		});
+	}
+
+	public async Task HandleCancel()
+	{
+		await OnSubmit.InvokeAsync(new Completion()
+		{
+			Type = CompletionType.Cancel,
+			Field = comicField,
+		});
 	}
 }

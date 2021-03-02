@@ -129,7 +129,7 @@
 	}
 </ListGroup>
 
-<UserEntryEditFormModal @ref="userEntryModal" OnSubmit="HandleUserEntrySubmitted"></UserEntryEditFormModal>
+<UserEntryEditFormModal @ref="userEntryModal" OnSubmit="HandleUserEntrySubmitted" Fields="filteredFieldsWithoutSections"></UserEntryEditFormModal>
 
 @code {
 	[Parameter]
@@ -145,7 +145,8 @@
 	private string? userName { get; set; }
 	private UserEntryEditFormModal userEntryModal { get; set; } = new UserEntryEditFormModal();
 
-	private IEnumerable<ComicFieldViewModel> filteredFields { get; set; } = new ComicFieldViewModel[] { };
+	private IReadOnlyList<ComicFieldViewModel> filteredFields { get; set; } = new List<ComicFieldViewModel>();
+	private IReadOnlyList<ComicFieldViewModel> filteredFieldsWithoutSections { get; set; } = new List<ComicFieldViewModel>();
 	private bool isFiltering { get; set; } = false;
 	private string? filter { get; set; }
 	private bool _filterCheckAnswered = false;
@@ -169,6 +170,14 @@
 		await base.OnInitializedAsync();
 	}
 
+	protected override async Task OnParametersSetAsync()
+	{
+		performFilter();
+		collapsibles = Fields.Select(f => new Collapsible()).ToArray();
+
+		await base.OnParametersSetAsync();
+	}
+
 	private void HandleAnswerField(ComicFieldViewModel field)
 	{
 		userEntryModal.Open(new UserEntryEditFormModal.State()
@@ -179,9 +188,52 @@
 		});
 	}
 
-	private async Task HandleUserEntrySubmitted(UserEntryEditFormModal.State state)
+	private async Task HandleUserEntrySubmitted(UserEntryEditFormModal.Completion completion)
 	{
-		await OnComicNeedsRefresh.InvokeAsync();
+		int index = filteredFieldsWithoutSections.Select((item, index) => new { item, index }).First(x => x.item.Code == completion.Field.Code).index;
+		ComicFieldViewModel? previous = index - 1 < 0 ? (ComicFieldViewModel?)null : filteredFieldsWithoutSections[index - 1];
+		ComicFieldViewModel? next = index + 1 >= filteredFieldsWithoutSections.Count ? (ComicFieldViewModel?)null : filteredFieldsWithoutSections[index + 1];
+
+		switch (completion.Type)
+		{
+			case UserEntryEditFormModal.CompletionType.Back:
+				userEntryModal.Open(new UserEntryEditFormModal.State()
+				{
+					ComicField = previous ?? new ComicFieldViewModel(),
+					ComicCode = ComicCode,
+					ComicImgSrc = ComicImgSrc,
+				});
+				break;
+			case UserEntryEditFormModal.CompletionType.SkipNext:
+				userEntryModal.Open(new UserEntryEditFormModal.State()
+				{
+					ComicField = next ?? new ComicFieldViewModel(),
+					ComicCode = ComicCode,
+					ComicImgSrc = ComicImgSrc,
+				});
+				break;
+			case UserEntryEditFormModal.CompletionType.SubmitAndNext:
+				if (next == null)
+				{
+					userEntryModal.Close();
+				}
+				else
+				{
+					userEntryModal.Open(new UserEntryEditFormModal.State()
+					{
+						ComicField = next ?? new ComicFieldViewModel(),
+						ComicCode = ComicCode,
+						ComicImgSrc = ComicImgSrc,
+					});
+				}
+				await OnComicNeedsRefresh.InvokeAsync();
+				break;
+			case UserEntryEditFormModal.CompletionType.Cancel:
+			default:
+				userEntryModal.Close();
+				break;
+		}
+
 	}
 
 	private void HandleSearchInput(ChangeEventArgs e)
@@ -192,7 +244,7 @@
 
 	private void performFilter()
 	{
-		filteredFields = Fields;
+		IEnumerable<ComicFieldViewModel> filteredFields = Fields;
 
 		if (!string.IsNullOrEmpty(filter))
 		{
@@ -212,13 +264,15 @@
 				(_filterCheckCollectingData && f.UserEntries.Any() && f.VerifiedEntry == null) ||
 				(_filterCheckAcceptedAnswer && f.VerifiedEntry != null));
 		}
-		filteredFields = filteredFields.ToArray();
+		this.filteredFields = filteredFields.ToList();
+		this.filteredFieldsWithoutSections = this.filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
 	}
 
 	private void HandleClearFilter()
 	{
 		filter = "";
-		filteredFields = Fields.ToArray();
+		filteredFields = Fields.ToList();
+		filteredFieldsWithoutSections = filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
 		isFiltering = false;
 	}
 
