@@ -33,16 +33,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			var comics = await _context.Comics
-				.Include(c => c.ImportedByUser)
-				.Include(c => c.LastUpdatedByUser)
 				.OrderBy(c => c.Id)
 				.ToListAsync();
-
-			// Temp: reduce size. future: new vm.
-			foreach (var comic in comics)
-			{
-				comic.Tooltip = comic.Description = comic.ImageWideThumbnailUrlSrc = comic.Permalink = comic.ImageUrlSrc = "";
-			}
 
 			return comics.Select(c => modelMapper.MapComicListItem(c));
 		}
