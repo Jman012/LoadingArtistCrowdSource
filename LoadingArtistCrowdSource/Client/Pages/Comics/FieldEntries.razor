@@ -62,7 +62,7 @@
 		if (field.Type == CrowdSourcedFieldType.Section)
 		{
 			<div class="list-group-item">
-				<h4 class="mb-0">@field.Name</h4>
+				<h6 class="mb-0">@field.Name</h6>
 			</div>
 		}
 		else
@@ -70,9 +70,9 @@
 			<Collapsible @ref="collapsibles[index]" IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
 				<HeaderContent Context="isCollapsed">
 					<div class="d-flex w-100 justify-content-between">
-						<div class="d-flex">
+						<div class="d-flex align-items-center">
 							<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
-							<h5 class="mb-1">@field.Name</h5>
+							<span>@field.Name</span>
 						</div>
 						<div class="h6 mb-1">
 							@if (field.VerifiedEntry != null)
@@ -96,13 +96,13 @@
 				</HeaderContent>
 				<ChildContent Context="isCollapsed">
 					<div>
-						<Table>
+						<Table Narrow="true">
 							<TableBody>
 								<TableRow>
-									<TableRowCell colspan="2">
+									<TableRowCell colspan="2" style="border-top: none;">
 										@if (field.VerifiedEntry == null)
 										{
-											<Button Size="Size.Small" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
+											<Button Size="Size.ExtraSmall" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
 												<span class="oi oi-pencil" aria-hidden="true"></span>&nbsp;
 												@if (userName != null && field.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName))
 												{
@@ -118,11 +118,11 @@
 									</TableRowCell>
 								</TableRow>
 								<TableRow>
-									<TableHeaderCell>Date Verified</TableHeaderCell>
+									<TableRowCell>Date Verified</TableRowCell>
 									<TableRowCell>@field.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
 								</TableRow>
 								<TableRow>
-									<TableHeaderCell>Submitters</TableHeaderCell>
+									<TableRowCell>Submitters</TableRowCell>
 									<TableRowCell>@string.Join(", ", field.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
 								</TableRow>
 							</TableBody>

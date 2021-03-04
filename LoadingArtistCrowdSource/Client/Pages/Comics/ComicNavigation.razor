@@ -1,29 +1,19 @@
-﻿<div class="d-flex flex-row">
-	<div style="flex: 1 1 0;">
-		<div class="h-100 w-100 align-items-center d-flex flex-row justify-content-end">
-			<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.FirstComicCode)}")" class="@($"btn btn-link btn-lg {(ShowFirst ? "" : "disabled")}")" title="First">
-				<Icon Name="@("fa-angle-double-left")"></Icon>
-			</NavLink>
-			<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.PreviousComicCode)}")" class="@($"btn btn-link btn-lg {(ShowPrevious ? "" : "disabled")}")" title="Previous">
-				<Icon Name="@("fa-angle-left")"></Icon>
-			</NavLink>
-		</div>
-	</div>
-	<div>
-		<NavLink href="/random" class="btn btn-link btn-lg" title="Random Comic">
-			<Icon Name="IconName.Random"></Icon>
-		</NavLink>
-	</div>
-	<div style="flex: 1 1 0;">
-		<div class="h-100 w-100 align-items-center d-flex flex-row justify-content-start">
-			<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.NextComicCode)}")" class="@($"btn btn-link btn-lg {(ShowNext ? "" : "disabled")}")" title="Next">
-				<Icon Name="@("fa-angle-right")"></Icon>
-			</NavLink>
-			<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.LatestComicCode)}")" class="@($"btn btn-link btn-lg {(ShowLatest || IsComicList ? "" : "disabled")}")" title="Latest">
-				<Icon Name="@("fa-angle-double-right")"></Icon>
-			</NavLink>
-		</div>
-	</div>
+﻿<div class="d-flex flex-row w-100 align-items-center justify-content-center mb-3">
+	<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.FirstComicCode)}")" class="@($"btn btn-outline-primary mr-2 {(ShowFirst ? "" : "disabled")}")" title="First">
+		<Icon Name="@("fa-angle-double-left")"></Icon>
+	</NavLink>
+	<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.PreviousComicCode)}")" class="@($"btn btn-outline-primary mr-2 {(ShowPrevious ? "" : "disabled")}")" title="Previous">
+		<Icon Name="@("fa-angle-left")"></Icon>
+	</NavLink>
+	<NavLink href="/random" class="btn btn-outline-primary mr-2" title="Random Comic">
+		<Icon Name="IconName.Random"></Icon>
+	</NavLink>
+	<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.NextComicCode)}")" class="@($"btn btn-outline-primary mr-2 {(ShowNext ? "" : "disabled")}")" title="Next">
+		<Icon Name="@("fa-angle-right")"></Icon>
+	</NavLink>
+	<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(ComicPage.LatestComicCode)}")" class="@($"btn btn-outline-primary mr-2 {(ShowLatest || IsComicList ? "" : "disabled")}")" title="Latest">
+		<Icon Name="@("fa-angle-double-right")"></Icon>
+	</NavLink>
 </div>
 
 @code {

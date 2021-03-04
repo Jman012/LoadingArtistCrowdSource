@@ -120,7 +120,7 @@ else
 	[Parameter]
 	public RenderFragment? HeaderContent { get; set; }
 
-	private ComicListViewType view { get; set; } = ComicListViewType.Thumbnail;
+	private ComicListViewType view { get; set; } = ComicListViewType.GroupedByYear;
 	private IEnumerable<GroupedYear> ComicsGroupedByYear { get; set; } = new GroupedYear[] { };
 	private Collapsible[] GroupedByYearCollapsibles { get; set; } = new Collapsible[] { };
 

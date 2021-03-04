@@ -68,3 +68,36 @@ a, .btn-link {
 .blazored-toast-container {
 	z-index: 3;
 }
+
+
+/* Hacky fix because Blazorise does not support modal-dialog-scrollable yet. */
+
+.modal.custom-modal-dialog-scrollable>.modal-dialog {
+	display: -ms-flexbox;
+	display: flex;
+	max-height: calc(100% - 1rem)
+}
+
+.modal.custom-modal-dialog-scrollable>.modal-dialog .modal-content {
+	max-height: calc(100vh - 1rem);
+	overflow: hidden
+}
+
+.modal.custom-modal-dialog-scrollable>.modal-dialog .modal-footer,
+.modal.custom-modal-dialog-scrollable>.modal-dialog .modal-header {
+	-ms-flex-negative: 0;
+	flex-shrink: 0
+}
+
+.modal.custom-modal-dialog-scrollable>.modal-dialog .modal-body {
+	overflow-y: auto
+}
+
+@media (min-width:576px) {
+	.modal.custom-modal-dialog-scrollable>.modal-dialog {
+		max-height: calc(100% - 3.5rem)
+	}
+	.modal.custom-modal-dialog-scrollable>.modal-dialog .modal-content {
+		max-height: calc(100vh - 3.5rem)
+	}
+}

@@ -4,9 +4,9 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
 
-<Modal @ref="modal">
+<Modal @ref="modal" Class="custom-modal-dialog-scrollable">
 	<ModalBackdrop />
-	<ModalContent Size="ModalSize.ExtraLarge">
+	<ModalContent Size="ModalSize.Large">
 		<ModalHeader>
 			<ModalTitle>@comicField.Name</ModalTitle>
 			<CloseButton Clicked="Close"></CloseButton>
@@ -23,11 +23,11 @@
 
 						<Container Fluid="false">
 							<Row>
-								<Column Display="Display.None.Block.OnWidescreen" Style="max-height: 80vh; overflow-y: auto;">
+								<Column Display="Display.None.Block.OnWidescreen">
 									<img src="@comicImgSrc" class="img-fluid img-thumbnail" />
 								</Column>
 								<Column>
-									<h5>Your Answer</h5>
+									<h5>Your Response</h5>
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (modal.Visible)
 									{
@@ -169,34 +169,34 @@
 			</AuthorizeView>
 		</ModalBody>
 		<ModalFooter>
-			<div class="w-100 d-flex flex-row justify-content-around">
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="isFirstInFields">
+			<div class="w-100 d-flex flex-row justify-content-around flex-wrap">
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="isFirstInFields" Class="mr-2 mb-2 text-nowrap">
 					<Icon Name="IconName.AngleLeft"></Icon>
 					Back
 				</Button>
 
-				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(isSubmitting || userName == null)" Clicked="HandleSubmit">
+				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(isSubmitting || userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
 					@if (isSubmitting)
 					{
 						<Spinner Small="true" Inline="true"></Spinner><text>&nbsp;</text>
 					}
 					@if (userEntry.CreatedDate == default)
 					{
-						<text>Add Answer</text>
+						<text>Add Response</text>
 					}
 					else
 					{
-						<text>Edit Answer</text>
+						<text>Edit Response</text>
 					}
 					&nbsp;<Icon Name="IconName.AngleRight"></Icon>
 				</Button>
 
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields">
-					Skip&nbsp;
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields" Class="mr-2 mb-2 text-nowrap">
+					Next&nbsp;
 					<Icon Name="IconName.AngleRight"></Icon>
 				</Button>
 
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel">Close</Button>
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel" Class="mb-2 text-nowrap">Close</Button>
 			</div>
 		</ModalFooter>
 	</ModalContent>
