@@ -1,0 +1,93 @@
+﻿@page "/comic/{Code}/edit"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
+
+<Container Fluid="false">
+	<Row>
+		<Column>
+			<h3>Edit: </h3>
+
+			@if (comic.Code == "")
+			{
+				<Spinner></Spinner>
+			}
+			else
+			{
+				<EditForm Model="comic" OnValidSubmit="HandleValidSubmit">
+					<DataAnnotationsValidator />
+					<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+
+					@*<FormNumber @bind-Value="comic.Id" Disabled="true"></FormNumber>*@
+					<FormTextfield @bind-Value="comic.Code"></FormTextfield>
+					<FormTextfield @bind-Value="comic.Permalink"></FormTextfield>
+					@*<FormTextfield Value="@comic.ComicPublishedDate.ToString()" Disabled="true"></FormTextfield>*@
+					<FormTextfield @bind-Value="comic.Title"></FormTextfield>
+					<FormTextarea @bind-Value="comic.Tooltip" rows="5"></FormTextarea>
+					<FormTextarea @bind-Value="comic.Description" rows="5"></FormTextarea>
+					<FormTextfield @bind-Value="comic.ImageUrlSrc"></FormTextfield>
+					<FormTextfield @bind-Value="comic.ImageThumbnailUrlSrc"></FormTextfield>
+					<FormTextfield @bind-Value="comic.ImageWideThumbnailUrlSrc"></FormTextfield>
+
+					<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="isSubmitting">
+						@if (isSubmitting)
+						{
+							<Spinner Inline="true" Small="true"></Spinner>
+						}
+						Save
+					</Button>
+					<Button Color="Color.Light" Clicked="HandleCancel">Back</Button>
+				</EditForm>
+			}
+		</Column>
+	</Row>
+</Container>
+
+@code {
+	[Parameter]
+	public string Code { get; set; } = "";
+
+	private ComicViewModel comic { get; set; } = new ComicViewModel();
+	private bool isSubmitting { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			comic = (await Api.GetComic(Code)).ComicViewModel;
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+
+		await base.OnInitializedAsync();
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		isSubmitting = true;
+		try
+		{
+			await Api.PutComicMetadata(Code, comic);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+		isSubmitting = false;
+
+		ToastService.ShowSuccess("The comic metadata has been updated");
+		NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(Code));
+	}
+
+	private void HandleCancel()
+	{
+		NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(Code));
+	}
+}

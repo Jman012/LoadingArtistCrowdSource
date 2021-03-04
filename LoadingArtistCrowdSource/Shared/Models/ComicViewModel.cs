@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,22 +11,32 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	{
 		public int Id { get; set; }
 
+		[Required]
 		public string Code { get; set; } = "";
 
+		[Required]
+		[Url]
 		public string Permalink { get; set; } = "";
 
 		public DateTimeOffset ComicPublishedDate { get; set; }
 
+		[Required]
 		public string Title { get; set; } = "";
 
 		public string? Tooltip { get; set; } = "";
 
 		public string? Description { get; set; } = "";
 
+		[Required]
+		[Url]
 		public string ImageUrlSrc { get; set; } = "";
 
+		[Required]
+		[Url]
 		public string ImageThumbnailUrlSrc { get; set; } = "";
 
+		[Required]
+		[Url]
 		public string? ImageWideThumbnailUrlSrc { get; set; }
 
 		public DateTimeOffset ImportedDate { get; set; }

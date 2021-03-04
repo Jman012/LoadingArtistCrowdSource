@@ -173,14 +173,12 @@
 			userName = user.Identity!.Name;
 		}
 		HandleClearFilter();
-		//collapsibles = Fields.Select(f => new Collapsible()).ToArray();
 		await base.OnInitializedAsync();
 	}
 
 	protected override async Task OnParametersSetAsync()
 	{
 		performFilter();
-		//collapsibles = Fields.Select(f => new Collapsible()).ToArray();
 
 		await base.OnParametersSetAsync();
 	}

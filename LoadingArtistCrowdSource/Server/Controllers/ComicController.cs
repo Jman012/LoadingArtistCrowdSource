@@ -246,5 +246,29 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			return Json(result);
 		}
+
+		[HttpPut]
+		[Route("{comicCode}/edit")]
+		[Authorize(Roles = Roles.AdminMod)]
+		public async Task PutComicMetadata([FromRoute] string comicCode, [FromBody] Shared.Models.ComicViewModel vm)
+		{
+			var userId = _userManager.GetUserId(User);
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Id == vm.Id);
+
+			comic.Code = vm.Code;
+			comic.Permalink = vm.Permalink;
+			comic.Title = vm.Title;
+			comic.Tooltip = vm.Tooltip;
+			comic.Description = vm.Description;
+			comic.ImageUrlSrc = vm.ImageUrlSrc;
+			comic.ImageThumbnailUrlSrc = vm.ImageThumbnailUrlSrc;
+			comic.ImageWideThumbnailUrlSrc = vm.ImageWideThumbnailUrlSrc;
+
+			comic.LastUpdatedBy = userId;
+			comic.LastUpdatedDate = DateTimeOffset.Now;
+
+			await _context.SaveChangesAsync();
+			return;
+		}
 	}
 }

@@ -30,6 +30,11 @@
 		<Row>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
 				<h3>Metadata</h3>
+				<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
+					<Authorized>
+						<NavLink href="@($"/comic/{System.Web.HttpUtility.UrlEncode(Code)}/edit")">Edit Metadata</NavLink>
+					</Authorized>
+				</AuthorizeView>
 				<Table Bordered="true" Narrow="true">
 					<TableBody>
 						<TableRow>

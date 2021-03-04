@@ -1,8 +1,6 @@
 ﻿@page "/field/{Code}"
 @using System.Text.RegularExpressions
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@using LoadingArtistCrowdSource.Shared
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
 @inject NavigationManager NavigationManager
@@ -90,6 +88,10 @@
 			}
 
 			<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="isSubmitting">
+				@if (isSubmitting)
+				{
+					<Spinner Inline="true" Small="true"></Spinner>
+				}
 				@if (isNew)
 				{
 					<text>Create</text>

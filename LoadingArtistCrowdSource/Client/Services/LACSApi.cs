@@ -42,6 +42,11 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{System.Web.HttpUtility.UrlEncode(comicCode)}/entry/{System.Web.HttpUtility.UrlEncode(fieldCode)}", values, _serializationOptions);
 		}
+		public async Task PutComicMetadata(string comicCode, ComicViewModel vm)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/comic/{System.Web.HttpUtility.UrlEncode(comicCode)}/edit", vm, _serializationOptions);
+			response.EnsureSuccessStatusCode();
+		}
 		#endregion
 
 		#region FieldController
