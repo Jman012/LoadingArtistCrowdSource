@@ -149,7 +149,7 @@
 											@foreach (var option in comicField.Options)
 											{
 												<ListGroupItem>
-													<h6>@option.Text</h6>
+													<h5>@option.Text</h5>
 													<p>@option.Description</p>
 													@if (!string.IsNullOrEmpty(option.URL))
 													{
@@ -175,6 +175,11 @@
 					Back
 				</Button>
 
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields" Class="mr-2 mb-2 text-nowrap">
+					Next&nbsp;
+					<Icon Name="IconName.AngleRight"></Icon>
+				</Button>
+
 				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(isSubmitting || userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
 					@if (isSubmitting)
 					{
@@ -190,13 +195,6 @@
 					}
 					&nbsp;<Icon Name="IconName.AngleRight"></Icon>
 				</Button>
-
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields" Class="mr-2 mb-2 text-nowrap">
-					Next&nbsp;
-					<Icon Name="IconName.AngleRight"></Icon>
-				</Button>
-
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel" Class="mb-2 text-nowrap">Close</Button>
 			</div>
 		</ModalFooter>
 	</ModalContent>

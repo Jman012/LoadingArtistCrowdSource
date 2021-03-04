@@ -100,20 +100,17 @@
 							<TableBody>
 								<TableRow>
 									<TableRowCell colspan="2" style="border-top: none;">
-										@if (field.VerifiedEntry == null)
-										{
-											<Button Size="Size.ExtraSmall" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
-												<span class="oi oi-pencil" aria-hidden="true"></span>&nbsp;
-												@if (userName != null && field.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName))
-												{
-													<text>Edit</text>
-												}
-												else
-												{
-													<text>Answer</text>
-												}
-											</Button>
-										}
+										<Button Size="Size.ExtraSmall" Outline="true" Color="Color.Info" Style="float: right;" Clicked="() => HandleAnswerField(theField)">
+											<span class="oi oi-pencil" aria-hidden="true"></span>&nbsp;
+											@if (userName != null && field.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName))
+											{
+												<text>Edit</text>
+											}
+											else
+											{
+												<text>Answer</text>
+											}
+										</Button>
 										<p>@field.LongDescription</p>
 									</TableRowCell>
 								</TableRow>

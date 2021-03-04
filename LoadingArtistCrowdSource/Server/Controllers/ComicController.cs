@@ -21,11 +21,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
+		private readonly ILogger<ComicController> _logger;
 
-		public ComicController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager)
+		public ComicController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager, ILogger<ComicController> logger)
 		{
-			this._context = context;
-			this._userManager = userManager;
+			_context = context;
+			_userManager = userManager;
+			_logger = logger;
 		}
 
 		[HttpGet]
@@ -120,131 +122,169 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		public async Task<IActionResult> PutComicUserEntry(string comicCode, string fieldCode, [FromBody] List<string> values)
 		{
 			UserEntrySubmissionResult result = UserEntrySubmissionResult.NewEntryAdded;
-			var userId = _userManager.GetUserId(User);
 
+			/* Gather information */
+			var userId = _userManager.GetUserId(User);
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
 			if (comic == null)
 			{
 				return NotFound();
 			}
-
 			var fieldDefinition = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDefinition == null)
 			{
 				return NotFound();
 			}
+			// Get the user's entry, if it exists.
+			var userEntry = await _context.CrowdSourcedFieldUserEntries
+				.FirstOrDefaultAsync(csfue => csfue.ComicId == comic.Id &&
+											  csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id &&
+											  csfue.CreatedBy == userId);
 
-			var existingVerifiedEntry = await _context.CrowdSourcedFieldVerifiedEntries.FirstOrDefaultAsync(csfve => csfve.ComicId == comic.Id && csfve.CrowdSourcedFieldDefinitionId == fieldDefinition.Id);
-			if (existingVerifiedEntry != null)
+			// Perform the following changes under a transaction
+			using (var transaction = await _context.Database.BeginTransactionAsync())
 			{
-				return BadRequest("This field is already verified");
-			}
-
-			var userEntry = await _context.CrowdSourcedFieldUserEntries.FirstOrDefaultAsync(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfue.CreatedBy == userId);
-
-			var transaction = await _context.Database.BeginTransactionAsync();
-
-			if (userEntry == null)
-			{
-				result = UserEntrySubmissionResult.NewEntryAdded;
-				userEntry = new Models.CrowdSourcedFieldUserEntry()
+				try
 				{
-					ComicId = comic.Id,
-					CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
-					CreatedBy = userId,
-					CreatedDate = DateTimeOffset.Now,
-				};
-				_context.CrowdSourcedFieldUserEntries.Add(userEntry);
-				await _context.SaveChangesAsync();
-			}
-			else
-			{
-				result = UserEntrySubmissionResult.ExistingEntryEdited;
-				userEntry.LastUpdatedDate = DateTimeOffset.Now;
-			}
-
-			// Remove all values
-			var currentValues = await _context
-				.CrowdSourcedFieldUserEntryValues
-				.Where(csfuev => csfuev.ComicId == csfuev.ComicId && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
-				.ToListAsync();
-			_context.CrowdSourcedFieldUserEntryValues.RemoveRange(currentValues);
-			await _context.SaveChangesAsync();
-
-			// And re-add them as new rows
-			var newUserEntryValues = values.Select((value, index) => new Models.CrowdSourcedFieldUserEntryValue()
-			{
-				ComicId = comic.Id,
-				CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
-				CreatedBy = userId,
-				Id = index,
-				Value = value,
-			}).ToList();
-
-			_context.CrowdSourcedFieldUserEntryValues.AddRange(newUserEntryValues);
-			await _context.SaveChangesAsync();
-
-			// Attempt verification
-			var userEntriesForField = await _context.CrowdSourcedFieldUserEntries
-				.Include(csfue => csfue.CrowdSourcedFieldUserEntryValues)
-				.Where(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id)
-				.ToListAsync();
-			// Entry Values => Entry lookup
-			var lkpUserEntriesForField = userEntriesForField
-				.ToLookup(csfue => csfue.CrowdSourcedFieldUserEntryValues.Select(csfuev => csfuev.Value).ToArray(), new Shared.Utilities.ArrayEqualityComparer<string>());
-			// Order the above lookup by number of entries for each overall value
-			var userEntriesForFieldRanked = lkpUserEntriesForField
-				.OrderBy(lkpCsfue => lkpCsfue.Key.Length)
-				.ToList();
-			var topUserEntryValues = userEntriesForFieldRanked.First();
-			var secondUserEntryValues = userEntriesForFieldRanked.Skip(1).FirstOrDefault();
-			// Once the threshold has been met (at least three user entries with the same value)
-			bool shouldVerify = false;
-			if (lkpUserEntriesForField[topUserEntryValues.Key].Count() >= 3)
-			{
-				if (secondUserEntryValues != null)
-				{
-					// If other values do exist, then we don't want the verified answer to only edge by.
-					// It should exceed the next most answered by a fair margin.
-					if (topUserEntryValues.Key.Length - secondUserEntryValues.Key.Length > 3)
+					/* Change User Entry */
 					{
-						shouldVerify = true;
+						// Create the user entry if it didn't already exist.
+						if (userEntry == null)
+						{
+							result = UserEntrySubmissionResult.NewEntryAdded;
+							userEntry = new Models.CrowdSourcedFieldUserEntry()
+							{
+								ComicId = comic.Id,
+								CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+								CreatedBy = userId,
+								CreatedDate = DateTimeOffset.Now,
+							};
+							_context.CrowdSourcedFieldUserEntries.Add(userEntry);
+							await _context.SaveChangesAsync();
+						}
+						else
+						{
+							result = UserEntrySubmissionResult.ExistingEntryEdited;
+							userEntry.LastUpdatedDate = DateTimeOffset.Now;
+						}
+
+						// First, remove all values
+						var currentValues = await _context
+							.CrowdSourcedFieldUserEntryValues
+							.Where(csfuev => csfuev.ComicId == csfuev.ComicId && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
+							.ToListAsync();
+						_context.CrowdSourcedFieldUserEntryValues.RemoveRange(currentValues);
+						await _context.SaveChangesAsync();
+
+						// Next, re-add them as new rows.
+						// This is easier than attempting to edit in place.
+						var newUserEntryValues = values.Select((value, index) => new Models.CrowdSourcedFieldUserEntryValue()
+						{
+							ComicId = comic.Id,
+							CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+							CreatedBy = userId,
+							Id = index,
+							Value = value,
+						}).ToList();
+
+						// Finally, save these to storage.
+						_context.CrowdSourcedFieldUserEntryValues.AddRange(newUserEntryValues);
+						await _context.SaveChangesAsync();
 					}
-				}
-				else
-				{
-					shouldVerify = true;
-				}
-			}
 
-			if (shouldVerify)
-			{
-				result = result.ToVerified();
-				var firstUserEntry = lkpUserEntriesForField[topUserEntryValues.Key].OrderBy(csfue => csfue.CreatedDate).First();
-				var verifiedEntry = new Models.CrowdSourcedFieldVerifiedEntry()
-				{
-					ComicId = comic.Id,
-					CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
-					FirstCreatedBy = firstUserEntry.CreatedBy,
-					VerificationDate = DateTimeOffset.Now,
-				};
-				var verifiedEntryValues = firstUserEntry.CrowdSourcedFieldUserEntryValues
-					.Select(csfuev => new Models.CrowdSourcedFieldVerifiedEntryValue()
+					/* Perform Verification */
 					{
-						ComicId = comic.Id,
-						CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
-						Id = csfuev.Id,
-						Value = csfuev.Value
-					})
-					.ToList();
-				_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
-				_context.CrowdSourcedFieldVerifiedEntryValues.AddRange(verifiedEntryValues);
-				await _context.SaveChangesAsync();
+						// Retrieve all user entries for this comic's field.
+						List<Models.CrowdSourcedFieldUserEntry> userEntriesForField = await _context.CrowdSourcedFieldUserEntries
+							.Include(csfue => csfue.CrowdSourcedFieldUserEntryValues)
+							.Where(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id)
+							.ToListAsync();
+						// Entry Values => Entry lookup
+						ILookup<string[], Models.CrowdSourcedFieldUserEntry> lkpUserEntriesForField = userEntriesForField
+							.ToLookup(csfue => csfue.CrowdSourcedFieldUserEntryValues.Select(csfuev => csfuev.Value).ToArray(), // The Key of the lookup is the series of values.
+								new Shared.Utilities.ArrayEqualityComparer<string>()); // Use a proper comparer for arrays of strings.
+						// Order the above lookup by number of entries for each overall value
+						List<IGrouping<string[], Models.CrowdSourcedFieldUserEntry>> userEntriesForFieldRanked = lkpUserEntriesForField
+							.OrderBy(lkpCsfue => lkpCsfue.Key.Length)
+							.ToList();
+						// Pick the top and second to top entry value sets, which will
+						// be compared against below.
+						IGrouping<string[], Models.CrowdSourcedFieldUserEntry> topUserEntryValues = userEntriesForFieldRanked.First();
+						IGrouping<string[], Models.CrowdSourcedFieldUserEntry>? secondUserEntryValues = userEntriesForFieldRanked.Skip(1).FirstOrDefault();
+
+						/*
+						 * The criteria for one set of values to be verified is as follows.
+						 * 
+						 * If the difference in number of entries for one value set and the next 
+						 * (or if the next does not exist, then assume this number is 0) exceeds the set threshold, 
+						 * then the top number of entries becomes verified.
+						 */
+						int threshold = 3;
+						int numEntriesTopValueSet = lkpUserEntriesForField[topUserEntryValues.Key].Count();
+						int numEntriesNextValueSet = secondUserEntryValues != null ? lkpUserEntriesForField[secondUserEntryValues.Key].Count() : 0;
+						bool shouldVerify = (numEntriesTopValueSet - numEntriesNextValueSet) >= threshold;
+
+						var verifiedEntry = await _context.CrowdSourcedFieldVerifiedEntries
+								.Include(csfve => csfve.CrowdSourcedFieldVerifiedEntryValues)
+								.FirstOrDefaultAsync(csfve => csfve.ComicId == comic.Id &&
+													 csfve.CrowdSourcedFieldDefinitionId == fieldDefinition.Id);
+						if (shouldVerify)
+						{
+
+							// Create a new VerifiedEntry record, if one doesn't already exist.
+							if (verifiedEntry == null)
+							{
+								result = result.ToVerified();
+
+								var firstUserEntry = lkpUserEntriesForField[topUserEntryValues.Key].OrderBy(csfue => csfue.CreatedDate).First();
+								verifiedEntry = new Models.CrowdSourcedFieldVerifiedEntry()
+								{
+									ComicId = comic.Id,
+									CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+									FirstCreatedBy = firstUserEntry.CreatedBy,
+									VerificationDate = DateTimeOffset.Now,
+								};
+								_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
+
+								// Remove old verified entry values and add new ones.
+								var verifiedEntryValues = firstUserEntry.CrowdSourcedFieldUserEntryValues
+									.Select(csfuev => new Models.CrowdSourcedFieldVerifiedEntryValue()
+									{
+										ComicId = comic.Id,
+										CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
+										Id = csfuev.Id,
+										Value = csfuev.Value
+									})
+									.ToList();
+								_context.CrowdSourcedFieldVerifiedEntryValues.AddRange(verifiedEntryValues);
+
+								// Save changes
+								await _context.SaveChangesAsync();
+							}
+						}
+						else
+						{
+							// Threshold not met, remove any VerifiedEntry previously added.
+							if (verifiedEntry != null)
+							{
+								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
+								_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(verifiedEntry.CrowdSourcedFieldVerifiedEntryValues);
+
+								await _context.SaveChangesAsync();
+							}
+						}
+					}
+
+					await transaction.CommitAsync();
+					return Json(result);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error");
+					await transaction.RollbackAsync();
+					throw;
+				}
 			}
-
-			await transaction.CommitAsync();
-
-			return Json(result);
 		}
 
 		[HttpPut]
