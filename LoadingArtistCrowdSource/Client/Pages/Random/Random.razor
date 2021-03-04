@@ -11,7 +11,7 @@
 		try
 		{
 			string randomComicCode = await Api.GetRandomComicCode();
-			NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(randomComicCode));
+			NavigationManager.NavigateTo("/comic/" + Uri.EscapeDataString(randomComicCode));
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

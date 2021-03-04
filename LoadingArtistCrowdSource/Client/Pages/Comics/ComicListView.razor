@@ -52,7 +52,7 @@
 					@foreach (var comic in year.Comics.OrderBy(c => c.Id))
 					{
 						<div class="comic-thumbnail-link">
-							<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
+							<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{Uri.EscapeDataString(comic.Code)}")">
 								<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Title" alt="@comic.Title" />
 								<center class="comic-title">
 									@comic.Title
@@ -71,7 +71,7 @@ else if (view == ComicListViewType.Thumbnail)
 		@foreach (var comic in Comics)
 		{
 			<div class="comic-thumbnail-link">
-				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{System.Web.HttpUtility.UrlEncode(comic.Code)}")">
+				<NavLink class="btn btn-link d-flex flex-column" href="@($"comic/{Uri.EscapeDataString(comic.Code)}")">
 					<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="@comic.Title" alt="@comic.Title" />
 					<center class="comic-title">
 						@comic.Title
@@ -98,7 +98,7 @@ else
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Field="@(c => c.Code)">
 			<Template>
-				<NavLink class="nav-link" href="@($"comic/{System.Web.HttpUtility.UrlEncode(context.Code)}")">
+				<NavLink class="nav-link" href="@($"comic/{Uri.EscapeDataString(context.Code)}")">
 					<span class="oi oi-plus" aria-hidden="true"></span> View
 				</NavLink>
 			</Template>

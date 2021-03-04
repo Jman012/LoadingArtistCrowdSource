@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
 using LoadingArtistCrowdSource.Shared.Enums;
 using LoadingArtistCrowdSource.Shared.Models;
+using LoadingArtistCrowdSource.Shared.Utilities;
 
 namespace LoadingArtistCrowdSource.Client.Services
 {
@@ -36,15 +37,15 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<ComicPageViewModel> GetComic(string code)
 		{
-			return await _publicClient.GetFromJsonAsync<ComicPageViewModel>($"api/comic/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new ComicPageViewModel();
+			return await _publicClient.GetFromJsonAsync<ComicPageViewModel>($"api/comic/{Uri.EscapeDataString(code)}", _serializationOptions) ?? new ComicPageViewModel();
 		}
 		public async Task<UserEntrySubmissionResult> PutUserEntryValues(string comicCode, string fieldCode, List<string> values)
 		{
-			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{System.Web.HttpUtility.UrlEncode(comicCode)}/entry/{System.Web.HttpUtility.UrlEncode(fieldCode)}", values, _serializationOptions);
+			return await _authClient.PutAsJsonAsync<List<string>, UserEntrySubmissionResult>($"api/comic/{Uri.EscapeDataString(comicCode)}/entry/{Uri.EscapeDataString(fieldCode)}", values, _serializationOptions);
 		}
 		public async Task PutComicMetadata(string comicCode, ComicViewModel vm)
 		{
-			var response = await _authClient.PutAsJsonAsync($"api/comic/{System.Web.HttpUtility.UrlEncode(comicCode)}/edit", vm, _serializationOptions);
+			var response = await _authClient.PutAsJsonAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/edit", vm, _serializationOptions);
 			response.EnsureSuccessStatusCode();
 		}
 		#endregion
@@ -56,11 +57,11 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<FieldDefinitionFormViewModel> GetField(string code)
 		{
-			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{System.Web.HttpUtility.UrlEncode(code)}", _serializationOptions) ?? new FieldDefinitionFormViewModel();
+			return await _authClient.GetFromJsonAsync<FieldDefinitionFormViewModel>($"api/field/{Uri.EscapeDataString(code)}", _serializationOptions) ?? new FieldDefinitionFormViewModel();
 		}
 		public async Task<string?> PutField(FieldDefinitionFormViewModel vm)
 		{
-			var response = await _authClient.PutAsJsonAsync($"api/field/{System.Web.HttpUtility.UrlEncode(vm.Code)}", vm, _serializationOptions);
+			var response = await _authClient.PutAsJsonAsync($"api/field/{Uri.EscapeDataString(vm.Code)}", vm, _serializationOptions);
 			if (response.IsSuccessStatusCode)
 			{
 				return null;

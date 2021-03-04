@@ -50,7 +50,6 @@ namespace LoadingArtistCrowdSource.Shared.Utilities
 
 			return value.ToString()!;
 		}
-
 	}
 
 	public class ArrayEqualityComparer<T> : IEqualityComparer<T[]>

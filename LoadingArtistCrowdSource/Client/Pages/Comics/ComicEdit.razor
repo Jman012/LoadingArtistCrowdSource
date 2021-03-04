@@ -83,11 +83,11 @@
 		isSubmitting = false;
 
 		ToastService.ShowSuccess("The comic metadata has been updated");
-		NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(Code));
+		NavigationManager.NavigateTo("/comic/" + Uri.EscapeDataString(Code));
 	}
 
 	private void HandleCancel()
 	{
-		NavigationManager.NavigateTo("/comic/" + System.Web.HttpUtility.UrlEncode(Code));
+		NavigationManager.NavigateTo("/comic/" + Uri.EscapeDataString(Code));
 	}
 }
