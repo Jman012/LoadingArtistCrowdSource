@@ -67,7 +67,7 @@
 		}
 		else
 		{
-			<Collapsible @ref="collapsibles[index]" IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
+			<Collapsible @ref="collapsibles[field.Code]" IsCollapsed="true" IdPrefix="@("VerifiedEntry_" + field.Code)" ButtonClass="list-group-item list-group-item-action" ChildClass="list-group-item">
 				<HeaderContent Context="isCollapsed">
 					<div class="d-flex w-100 justify-content-between">
 						<div class="d-flex align-items-center">
@@ -148,7 +148,7 @@
 	[Parameter]
 	public EventCallback OnComicNeedsRefresh { get; set; } = new EventCallback();
 
-	public Collapsible[] collapsibles { get; set; } = new Collapsible[] { };
+	public Dictionary<string, Collapsible> collapsibles { get; set; } = new Dictionary<string, Collapsible>();
 	private string? userName { get; set; }
 	private UserEntryEditFormModal userEntryModal { get; set; } = new UserEntryEditFormModal();
 
@@ -173,14 +173,14 @@
 			userName = user.Identity!.Name;
 		}
 		HandleClearFilter();
-		collapsibles = Fields.Select(f => new Collapsible()).ToArray();
+		//collapsibles = Fields.Select(f => new Collapsible()).ToArray();
 		await base.OnInitializedAsync();
 	}
 
 	protected override async Task OnParametersSetAsync()
 	{
 		performFilter();
-		collapsibles = Fields.Select(f => new Collapsible()).ToArray();
+		//collapsibles = Fields.Select(f => new Collapsible()).ToArray();
 
 		await base.OnParametersSetAsync();
 	}
@@ -286,7 +286,7 @@
 
 	private void ExpandAll()
 	{
-		foreach (var c in collapsibles)
+		foreach (var c in collapsibles.Values)
 		{
 			c.Expand();
 		}
@@ -294,7 +294,7 @@
 
 	private void CollapseAll()
 	{
-		foreach (var c in collapsibles)
+		foreach (var c in collapsibles.Values)
 		{
 			c.Collapse();
 		}
