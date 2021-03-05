@@ -17,7 +17,6 @@ namespace LoadingArtistCrowdSource.Shared.Logic
 				case Enums.CrowdSourcedFieldType.MultiDropdown:
 				case Enums.CrowdSourcedFieldType.RadioButtons:
 					return true;
-				case Enums.CrowdSourcedFieldType.Checkbox:
 				case Enums.CrowdSourcedFieldType.FreeformTextarea:
 				case Enums.CrowdSourcedFieldType.FreeformTextfield:
 				case Enums.CrowdSourcedFieldType.IntegerNumber:

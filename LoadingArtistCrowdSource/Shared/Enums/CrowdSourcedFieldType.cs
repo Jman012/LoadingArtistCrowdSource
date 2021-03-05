@@ -13,9 +13,6 @@ namespace LoadingArtistCrowdSource.Shared.Enums
 		[Description("Section")]
 		Section,
 
-		[Description("Checkbox")]
-		Checkbox,
-
 		[Description("Checkboxes")]
 		Checkboxes,
 

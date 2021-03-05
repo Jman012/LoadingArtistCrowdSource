@@ -104,18 +104,6 @@
 					},
 				};
 				break;
-			case CrowdSourcedFieldType.Checkbox:
-				fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>()
-			{
-					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "Yes" },
-					new CrowdSourcedFieldDefinitionOptionViewModel() { Code = true.ToString(), Text = "No" },
-				};
-				FilterData.FieldValues = new SearchEntryOptionViewModel[]
-				{
-					new SearchEntryOptionViewModel() { Code = true.ToString() },
-					new SearchEntryOptionViewModel() { Code = false.ToString() },
-					};
-				break;
 			default:
 				fieldOptions = Field.Options;
 				FilterData.FieldValues = fieldOptions.Select(o => new SearchEntryOptionViewModel() { Code = o.Code, Filtered = false }).ToArray();

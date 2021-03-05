@@ -14,7 +14,6 @@
 		<ModalBody>
 			<EditForm @ref="form" Model="userEntry" Context="editContext">
 				<DataAnnotationsValidator />
-				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
 				<Container Fluid="false">
 					<Row>
@@ -28,22 +27,13 @@
 								</NotAuthorized>
 								<Authorized>
 									<h5>Your Response</h5>
+									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (modal.Visible)
 									{
 										switch (comicField.Type)
 										{
-											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
-												<div class="form-group form-check">
-													<InputCheckbox id="checkbox"
-																name="checkbox"
-																class="form-check-input"
-																@bind-Value="boolAnswer" />
-													<label for="checkbox" class="form-check-label">@comicField.Name</label>
-												</div>
-												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
-
 												for (int i = 0; i < comicField.Options.Count; i++)
 												{
 													var index = i;
@@ -62,7 +52,7 @@
 												<div class="form-group">
 													<label for="select">@comicField.Name</label>
 
-													<InputSelect id="select" name="select" class="form-control" @bind-Value="stringAnswer">
+													<InputSelect id="select" name="select" class="custom-select" @bind-Value="stringAnswer">
 														<option value=""></option>
 														@foreach (var option in comicField.Options)
 																	{
@@ -108,19 +98,19 @@
 
 													<InputMultiSelect id="select"
 																	name="select"
-																	class="form-control"
-																	size="8"
+																	class="form-control custom-select"
+																	size="10"
 																	@bind-Value="stringAnswers2"
 																	Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-												<InputRadioGroup @bind-Value="stringAnswer">
+												<InputRadioGroup @bind-Value="stringAnswer" Name="radio">
 													@foreach (var option in comicField.Options)
 																{
 														<div class="form-check">
 															<InputRadio id="@($"radio-{option.Code}")"
-																		name="@($"radio-{option.Code}")"
+																		Name="radio"
 																		Value="option.Code" />
 															<label class="form-check-label" for="@($"radio-{option.Code}")">
 																@option.Text
@@ -265,7 +255,6 @@
 	private bool isLastInFields => indexInFields == Fields.Count - 1;
 
 	#region Answer Variables
-	private bool boolAnswer { get; set; }
 	private List<ValueWrapper<bool>> boolAnswers { get; set; } = new List<ValueWrapper<bool>>();
 	private string stringAnswer { get; set; } = "";
 	private List<ValueWrapper<string>> stringAnswers { get; set; } = new List<ValueWrapper<string>>();
@@ -300,9 +289,6 @@
 
 		switch (comicField.Type)
 		{
-			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
-				boolAnswer = bool.TryParse(userEntry.Values.FirstOrDefault(), out bool isChecked) ? isChecked : false;
-				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
 				boolAnswers = comicField.Options.Select(o => new ValueWrapper<bool>(setValues.Contains(o.Code))).ToList();
 				break;
@@ -338,20 +324,9 @@
 
 	private async Task HandleSubmit()
 	{
-		if (!form.EditContext!.Validate())
-		{
-			return;
-		}
-
 		List<string> values = new List<string>();
 		switch (comicField.Type)
 		{
-			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
-				values = new List<string>()
-{
-					boolAnswer.ToString(),
-				};
-				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
 				values = comicField.Options.Zip(boolAnswers).Where(x => x.Second.Value).Select(x => x.First.Code).ToList();
 				break;
@@ -359,13 +334,13 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 				values = new List<string>()
-{
+				{
 					stringAnswer,
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
-{
+				{
 					intAnswer?.ToString() ?? "",
 				};
 				break;
@@ -373,10 +348,19 @@
 				values = stringAnswers2.ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-				values = stringAnswers.Select(sa => sa.Value).ToList();
+				values = new List<string>()
+				{
+					stringAnswer,
+				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
 				break;
+		}
+
+		userEntry.Values = values;
+		if (!form.EditContext!.Validate())
+		{
+			return;
 		}
 
 		isSubmitting = true;
@@ -414,7 +398,6 @@
 			Type = CompletionType.SubmitAndNext,
 			Field = comicField,
 		});
-		//modal.Hide();
 	}
 
 	private async Task HandleBack()
