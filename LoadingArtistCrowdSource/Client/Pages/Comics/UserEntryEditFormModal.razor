@@ -12,21 +12,21 @@
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
 		<ModalBody>
-			<AuthorizeView>
-				<NotAuthorized>
-					<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
-				</NotAuthorized>
-				<Authorized>
-					<EditForm @ref="form" Model="userEntry" Context="editContext">
-						<DataAnnotationsValidator />
-						<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+			<EditForm @ref="form" Model="userEntry" Context="editContext">
+				<DataAnnotationsValidator />
+				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
-						<Container Fluid="false">
-							<Row>
-								<Column Display="Display.None.Block.OnWidescreen">
-									<img src="@comicImgSrc" class="img-fluid img-thumbnail" />
-								</Column>
-								<Column>
+				<Container Fluid="false">
+					<Row>
+						<Column Display="Display.None.Block.OnWidescreen" Class="border-right">
+							<img src="@comicImgSrc" class="img-fluid" />
+						</Column>
+						<Column>
+							<AuthorizeView>
+								<NotAuthorized>
+									<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
+								</NotAuthorized>
+								<Authorized>
 									<h5>Your Response</h5>
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (modal.Visible)
@@ -36,9 +36,9 @@
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkbox:
 												<div class="form-group form-check">
 													<InputCheckbox id="checkbox"
-																   name="checkbox"
-																   class="form-check-input"
-																   @bind-Value="boolAnswer" />
+																name="checkbox"
+																class="form-check-input"
+																@bind-Value="boolAnswer" />
 													<label for="checkbox" class="form-check-label">@comicField.Name</label>
 												</div>
 												break;
@@ -51,9 +51,9 @@
 													var valueWrapper = boolAnswers[index];
 													<div class="form-group form-check">
 														<InputCheckbox id="@($"checkbox-{option.Code}")"
-																	   name="@($"checkbox-{option.Code}")"
-																	   class="form-check-input"
-																	   @bind-Value="@valueWrapper.Value" />
+																	name="@($"checkbox-{option.Code}")"
+																	class="form-check-input"
+																	@bind-Value="@valueWrapper.Value" />
 														<label for="@($"checkbox-{option.Code}")" class="form-check-label">@option.Text</label>
 													</div>
 												}
@@ -76,10 +76,10 @@
 													<label for="textarea">@comicField.Name</label>
 
 													<InputTextArea id="textarea"
-																   name="textarea"
-																   class="form-control"
-																   rows="3"
-																   @bind-Value="stringAnswer" />
+																name="textarea"
+																class="form-control"
+																rows="3"
+																@bind-Value="stringAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
@@ -87,9 +87,9 @@
 													<label for="textfield">@comicField.Name</label>
 
 													<InputText id="textfield"
-															   name="textfield"
-															   class="form-control"
-															   @bind-Value="stringAnswer" />
+															name="textfield"
+															class="form-control"
+															@bind-Value="stringAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
@@ -97,9 +97,9 @@
 													<label for="textfield">@comicField.Name</label>
 
 													<InputNumber id="textfield"
-																 name="textfield"
-																 class="form-control"
-																 @bind-Value="intAnswer" />
+																name="textfield"
+																class="form-control"
+																@bind-Value="intAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
@@ -107,11 +107,11 @@
 													<label for="select">@comicField.Name</label>
 
 													<InputMultiSelect id="select"
-																	  name="select"
-																	  class="form-control"
-																	  size="8"
-																	  @bind-Value="stringAnswers2"
-																	  Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
+																	name="select"
+																	class="form-control"
+																	size="8"
+																	@bind-Value="stringAnswers2"
+																	Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
@@ -133,40 +133,54 @@
 												break;
 										}
 									}
-									<hr />
-									<h5>Description</h5>
-									<p>
-										@comicField.ShortDescription
-									</p>
-									<p>
-										@comicField.LongDescription
-									</p>
-									@if (comicField.Options.Any())
+								</Authorized>
+							</AuthorizeView>
+							
+							<hr />
+							<h5>Description</h5>
+							<p>
+								@comicField.ShortDescription
+							</p>
+							<p>
+								@comicField.LongDescription
+							</p>
+							<Table Narrow="true">
+								<TableBody>
+									<TableRow>
+										<TableRowHeader>Date Verified</TableRowHeader>
+										<TableRowCell>@comicField.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
+									</TableRow>
+									<TableRow>
+										<TableRowHeader>Submitters</TableRowHeader>
+										<TableRowCell>@string.Join(", ", comicField.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+							
+							@if (comicField.Options.Any())
+							{
+								<hr />
+								<h5>Option Descriptions</h5>
+								<ListGroup>
+									@foreach (var option in comicField.Options)
 									{
-										<hr />
-										<h5>Option Descriptions</h5>
-										<ListGroup>
-											@foreach (var option in comicField.Options)
+										<ListGroupItem>
+											<h5>@option.Text</h5>
+											<p>@option.Description</p>
+											@if (!string.IsNullOrEmpty(option.URL))
 											{
-												<ListGroupItem>
-													<h5>@option.Text</h5>
-													<p>@option.Description</p>
-													@if (!string.IsNullOrEmpty(option.URL))
-													{
-														<p>
-															<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
-														</p>
-													}
-												</ListGroupItem>
+												<p>
+													<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
+												</p>
 											}
-										</ListGroup>
+										</ListGroupItem>
 									}
-								</Column>
-							</Row>
-						</Container>
-					</EditForm>
-				</Authorized>
-			</AuthorizeView>
+								</ListGroup>
+							}
+						</Column>
+					</Row>
+				</Container>
+			</EditForm>
 		</ModalBody>
 		<ModalFooter>
 			<div class="w-100 d-flex flex-row justify-content-around flex-wrap">
