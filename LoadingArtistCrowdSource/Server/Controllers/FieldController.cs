@@ -24,10 +24,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
-		public FieldController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager)
+		private readonly ILogger<FieldController> _logger;
+		public FieldController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager, ILogger<FieldController> logger)
 		{
-			this._context = context;
-			this._userManager = userManager;
+			_context = context;
+			_userManager = userManager;
+			_logger = logger;
 		}
 
 		[HttpGet]
@@ -58,6 +60,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
+			fieldDef.CrowdSourcedFieldDefinitionOptions = fieldDef.CrowdSourcedFieldDefinitionOptions
+				.OrderBy(csfdo => csfdo.DisplayOrder).ToList();
+
 			return Json(modelMapper.MapFieldDefinitionForm(fieldDef, mapOptions: true));
 		}
 
@@ -77,53 +82,56 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return BadRequest("This Code is already taken by another field in the system.");
 			}
 
-			if (fieldDef == null)
+			using (var transaction = await _context.Database.BeginTransactionAsync())
 			{
-				fieldDef = new Models.CrowdSourcedFieldDefinition()
+				try
 				{
-					Code = vm.Code,
-					CreatedDate = DateTimeOffset.Now,
-					CreatedBy = userId,
-				};
-				_context.CrowdSourcedFieldDefinitions.Add(fieldDef);
-			}
+					// Create definition if needed
+					if (fieldDef == null)
+					{
+						fieldDef = new Models.CrowdSourcedFieldDefinition()
+						{
+							Code = vm.Code,
+							CreatedDate = DateTimeOffset.Now,
+							CreatedBy = userId,
+						};
+						_context.CrowdSourcedFieldDefinitions.Add(fieldDef);
+					}
 
-			fieldDef.IsActive = vm.IsActive;
-			fieldDef.Type = vm.Type;
-			fieldDef.DisplayOrder = 999;
-			fieldDef.Name = vm.Name;
-			fieldDef.ShortDescription = vm.ShortDescription;
-			fieldDef.LongDescription = vm.LongDescription;
-			fieldDef.LastUpdatedDate = DateTimeOffset.Now;
-			fieldDef.LastUpdatedBy = userId;
+					// Set definition properties
+					fieldDef.IsActive = vm.IsActive;
+					fieldDef.Type = vm.Type;
+					fieldDef.Name = vm.Name;
+					fieldDef.ShortDescription = vm.ShortDescription;
+					fieldDef.LongDescription = vm.LongDescription;
+					fieldDef.LastUpdatedDate = DateTimeOffset.Now;
+					fieldDef.LastUpdatedBy = userId;
+					await _context.SaveChangesAsync();
 
-			var hshFieldDefOptionCodes = new HashSet<string>(fieldDef.CrowdSourcedFieldDefinitionOptions.Select(csfdo => csfdo.Code));
-			var hshOptionVMCodes = new HashSet<string>(vm.Options.Select(o => o.Code));
-			// Delete
-			fieldDef.CrowdSourcedFieldDefinitionOptions.RemoveAll(csfdo => !hshOptionVMCodes.Contains(csfdo.Code));
-			// Update
-			foreach (var pair in fieldDef.CrowdSourcedFieldDefinitionOptions.Join(vm.Options, csfdo => csfdo.Code, ovm => ovm.Code, (csfdo, ovm) => Tuple.Create(csfdo, ovm)))
-			{
-				var csfdo = pair.Item1;
-				var ovm = pair.Item2;
+					// Remove all options
+					fieldDef.CrowdSourcedFieldDefinitionOptions.RemoveAll((_) => true);
+					await _context.SaveChangesAsync();
 
-				csfdo.Text = ovm.Text;
-				csfdo.Description = ovm.Description;
-				csfdo.URL = ovm.URL;
-			}
-			// Add
-			foreach (var optionVM in vm.Options.Where(ovm => !hshFieldDefOptionCodes.Contains(ovm.Code)))
-			{
-				fieldDef.CrowdSourcedFieldDefinitionOptions.Add(new Models.CrowdSourcedFieldDefinitionOption()
+					// Re-add all options with correct display order
+					fieldDef.CrowdSourcedFieldDefinitionOptions.AddRange(vm.Options.Select((optionVM, index) => new Models.CrowdSourcedFieldDefinitionOption()
+					{
+						Code = optionVM.Code,
+						Text = optionVM.Text,
+						Description = optionVM.Description,
+						URL = optionVM.URL,
+						DisplayOrder = index,
+					}));
+					await _context.SaveChangesAsync();
+
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
 				{
-					Code = optionVM.Code,
-					Text = optionVM.Text,
-					Description = optionVM.Description,
-					URL = optionVM.URL,
-				});
+					_logger.LogError(ex, "Unexpected error saving field definition and options");
+					await transaction.RollbackAsync();
+					throw;
+				}
 			}
-
-			await _context.SaveChangesAsync();
 
 			return Ok();
 		}

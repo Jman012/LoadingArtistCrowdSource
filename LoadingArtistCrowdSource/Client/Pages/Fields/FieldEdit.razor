@@ -58,29 +58,37 @@
 						</div>
 					</div>
 
-					<ListGroup>
+					<ListGroup ondragover="event.preventDefault();">
 						@for (int i = 0; i < fieldDef.Options.Count; i++)
 						{
 							var index = i;
 							var option = fieldDef.Options[index];
-							<ListGroupItem>
-								<div class="d-flex w-100 justify-content-between align-items-start">
-									<h5>@option.Text</h5>
-									<div>
-										<Button Outline="true" Color="Color.Secondary" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleEditOption(index))">
-											<span class="oi oi-pencil" aria-hidden="true"></span> Edit
-										</Button>
-										<Button Outline="true" Color="Color.Danger" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleRemoveOption(index))">
-											<span class="oi oi-trash" aria-hidden="true"></span> Delete
-										</Button>
+							<ListGroupItem draggable="true" @key="option.Code" @ondragstart="() => HandleDragStart(option)" @ondrop="() => HandleDragDrop(option)">
+								<div class="d-flex flex-row align-items-center w-100">
+									<div class="@($"grabbable mr-3 {(draggingOption == option ? "active" : "")}")">
+										<Icon Name="@("fa-grip-vertical")"></Icon>
+									</div>
+									<div class="w-100">
+										<div class="d-flex w-100 justify-content-between align-items-start">
+											<h5>@option.Text</h5>
+											<div>
+												<Button Outline="true" Color="Color.Secondary" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleEditOption(index))">
+													<span class="oi oi-pencil" aria-hidden="true"></span> Edit
+												</Button>
+												<Button Outline="true" Color="Color.Danger" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleRemoveOption(index))">
+													<span class="oi oi-trash" aria-hidden="true"></span> Delete
+												</Button>
+											</div>
+										</div>
+										<small class="text-muted">@option.Code</small>
+										<p>@option.Description</p>
+										@if (!string.IsNullOrEmpty(option.URL))
+										{
+											<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
+										}
 									</div>
 								</div>
-								<small class="text-muted">@option.Code</small>
-								<p>@option.Description</p>
-								@if (!string.IsNullOrEmpty(option.URL))
-								{
-									<NewTabLink Href="@option.URL">@option.URL</NewTabLink>
-								}
+								
 							</ListGroupItem>
 						}
 					</ListGroup>
@@ -125,6 +133,9 @@
 	private FieldOptionEditModal? editOptionModal { get; set; }
 	private CrowdSourcedFieldDefinitionOptionViewModel editingFieldOption { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel();
 
+	private CrowdSourcedFieldDefinitionOptionViewModel? draggingOption = null;
+
+
 	protected override async Task OnInitializedAsync()
 	{
 		if (Code == "new")
@@ -161,6 +172,7 @@
 		}
 	}
 
+	#region Options and Modal
 	private void HandleAddOption()
 	{
 		optionModal?.Open(new FieldOptionEditModal.State()
@@ -195,6 +207,7 @@
 			fieldDef.Options.Add(state.OptionVM);
 		}
 	}
+	#endregion Options and Modal
 
 	private async Task HandleValidSubmit()
 	{
@@ -225,4 +238,33 @@
 	{
 		NavigationManager.NavigateTo("/field");
 	}
+
+	#region Dragging
+	protected void HandleDragStart(CrowdSourcedFieldDefinitionOptionViewModel option)
+	{
+		draggingOption = option;
+	}
+
+	protected void HandleDragDrop(CrowdSourcedFieldDefinitionOptionViewModel option)
+	{
+		if (draggingOption == null)
+		{
+			return;
+		}
+		if (option.Code == draggingOption.Code)
+		{
+			draggingOption = null;
+			return;
+		}
+
+		var listOptions = fieldDef.Options.ToList();
+		var idxDragging = listOptions.IndexOf(draggingOption);
+		var idxDrop = listOptions.IndexOf(option);
+		listOptions.RemoveAt(idxDragging);
+		listOptions.Insert(idxDrop, draggingOption);
+		fieldDef.Options = listOptions.ToList();
+
+		draggingOption = null;
+	}
+	#endregion Dragging
 }

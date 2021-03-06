@@ -83,7 +83,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				LongDescription = csfd.LongDescription,
 				CreatedDate = csfd.CreatedDate,
 				LastUpdatedDate = csfd.LastUpdatedDate,
-				Options = csfd.CrowdSourcedFieldDefinitionOptions.Select(modelMapper.MapCrowdSourcedFieldDefinitionOption).ToList(),
+				Options = csfd.CrowdSourcedFieldDefinitionOptions
+					.OrderBy(csfdo => csfdo.DisplayOrder)
+					.Select(modelMapper.MapCrowdSourcedFieldDefinitionOption)
+					.ToList(),
 				UserEntries = lkpUserEntries.Contains(csfd.Id)
 					? lkpUserEntries[csfd.Id].Select(csfue => modelMapper.MapCrowdSourcedFieldUserEntry(csfue, mapCreatedBy: true)).ToList()
 					: new List<Shared.Models.CrowdSourcedFieldUserEntryViewModel>(),

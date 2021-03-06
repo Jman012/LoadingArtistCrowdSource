@@ -17,6 +17,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public string Text { get; set; } = "";
 		public string Description { get; set; } = "";
 		public string? URL { get; set; }
+		public int DisplayOrder { get; set; }
 
 		public CrowdSourcedFieldDefinition CrowdSourcedFieldDefinition { get; set; } = null!;
 	}

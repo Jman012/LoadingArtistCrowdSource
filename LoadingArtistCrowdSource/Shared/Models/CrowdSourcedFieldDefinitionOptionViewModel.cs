@@ -12,7 +12,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 	{
 		[Required]
 		[DisplayName("Code")]
-		[Description("A unique identifer among the options for this field. Changing this value on fields that have already been answered by users will cause disruptions to answers.")]
+		[Description("A unique identifer among the options for this field. Changing this value on fields that have already been answered by users will cause disruptions to answers. After initial creation, this will not be editable. Changing the display text below is allowed.")]
 		public string Code { get; set; } = "";
 		[Required]
 		public string Text { get; set; } = "";
