@@ -24,9 +24,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 	public class AdminController : Controller
 	{
-		private ApplicationDbContext _context { get; }
-		private HttpClient _httpClient { get; }
-		private ILogger<AdminController> _logger { get; }
+		private readonly ApplicationDbContext _context;
+		private readonly HttpClient _httpClient;
+		private readonly ILogger<AdminController> _logger;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 
 		public AdminController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, ILogger<AdminController> logger, UserManager<Models.ApplicationUser> userManager)

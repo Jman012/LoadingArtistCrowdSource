@@ -1,42 +1,37 @@
-﻿<a role="button" href="" id="@HeaderId" class="@ButtonClass" title="@TitleText" aria-expanded="@AriaExpanded" aria-controls="@CollapseId" @onclick="Toggle" @onclick:preventDefault="true">
-	@HeaderContent(isCollapsed)
+﻿<a role="button" href="" id="@_headerId" class="@ButtonClass" title="@_titleText" aria-expanded="@_ariaExpanded" aria-controls="@_collapseId" @onclick="Toggle" @onclick:preventDefault="true">
+	@HeaderContent(_isCollapsedCurrent)
 </a>
 
-<div id="@CollapseId" class="@StateClass @ChildClass" aria-labelledby="@HeaderId">
-	@ChildContent(isCollapsed)
+<div id="@_collapseId" class="@_stateClass @ChildClass" aria-labelledby="@_headerId">
+	@ChildContent(_isCollapsedCurrent)
 </div>
 
 
 @code {
-	private bool _isCollapsed { get; set; }
+	private bool _isCollapsed;
 	[Parameter]
 	public bool IsCollapsed { get; set; }
-
 	[Parameter]
 	public string IdPrefix { get; set; } = "";
-
 	[Parameter]
 	public string ButtonClass { get; set; } = "";
-
 	[Parameter]
 	public string ChildClass { get; set; } = "";
-
 	[Parameter]
 	public RenderFragment<bool> HeaderContent { get; set; } = null!;
-
 	[Parameter]
 	public RenderFragment<bool> ChildContent { get; set; } = null!;
 
-	private bool isCollapsed { get; set; }
-	private string TitleText => $"Click to {(isCollapsed ? "expand" : "collapse")}";
-	private string AriaExpanded => isCollapsed ? "false" : "true";
-	private string StateClass => isCollapsed ? "d-none" : "";
-	private string HeaderId => $"{IdPrefix}_Header";
-	private string CollapseId => $"{IdPrefix}_Collapse";
+	private bool _isCollapsedCurrent { get; set; }
+	private string _titleText => $"Click to {(_isCollapsedCurrent ? "expand" : "collapse")}";
+	private string _ariaExpanded => _isCollapsedCurrent ? "false" : "true";
+	private string _stateClass => _isCollapsedCurrent ? "d-none" : "";
+	private string _headerId => $"{IdPrefix}_Header";
+	private string _collapseId => $"{IdPrefix}_Collapse";
 
 	protected override void OnInitialized()
 	{
-		isCollapsed = IsCollapsed;
+		_isCollapsedCurrent = IsCollapsed;
 		base.OnInitialized();
 	}
 
@@ -44,23 +39,23 @@
 	{
 		if (_isCollapsed != IsCollapsed)
 		{
-			isCollapsed = _isCollapsed = IsCollapsed;
+			_isCollapsedCurrent = _isCollapsed = IsCollapsed;
 		}
 		base.OnParametersSet();
 	}
 
 	public void Toggle()
 	{
-		isCollapsed = !isCollapsed;
+		_isCollapsedCurrent = !_isCollapsedCurrent;
 	}
 
 	public void Expand()
 	{
-		isCollapsed = false;
+		_isCollapsedCurrent = false;
 	}
 
 	public void Collapse()
 	{
-		isCollapsed = true;
+		_isCollapsedCurrent = true;
 	}
 }

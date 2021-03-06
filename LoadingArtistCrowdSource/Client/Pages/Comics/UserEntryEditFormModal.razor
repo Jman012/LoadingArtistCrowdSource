@@ -4,21 +4,21 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
 
-<Modal @ref="modal" Class="custom-modal-dialog-scrollable">
+<Modal @ref="_modal" Class="custom-modal-dialog-scrollable">
 	<ModalBackdrop />
 	<ModalContent Size="ModalSize.Large">
 		<ModalHeader>
-			<ModalTitle>@comicField.Name</ModalTitle>
+			<ModalTitle>@_comicField.Name</ModalTitle>
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
 		<ModalBody>
-			<EditForm @ref="form" Model="userEntry" Context="editContext">
+			<EditForm @ref="_form" Model="_userEntry" Context="editContext">
 				<DataAnnotationsValidator />
 
 				<Container Fluid="false">
 					<Row>
 						<Column Display="Display.None.Block.OnWidescreen" Class="border-right">
-							<img src="@comicImgSrc" class="img-fluid" />
+							<img src="@_comicImgSrc" class="img-fluid" />
 						</Column>
 						<Column>
 							<AuthorizeView>
@@ -29,16 +29,16 @@
 									<h5>Your Response</h5>
 									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
-									@if (modal.Visible)
+									@if (_modal.Visible)
 									{
-										switch (comicField.Type)
+										switch (_comicField.Type)
 										{
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
-												for (int i = 0; i < comicField.Options.Count; i++)
+												for (int i = 0; i < _comicField.Options.Count; i++)
 												{
 													var index = i;
-													var option = comicField.Options[index];
-													var valueWrapper = boolAnswers[index];
+													var option = _comicField.Options[index];
+													var valueWrapper = _boolAnswers[index];
 													<div class="form-group form-check">
 														<InputCheckbox id="@($"checkbox-{option.Code}")"
 																	name="@($"checkbox-{option.Code}")"
@@ -50,11 +50,11 @@
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 												<div class="form-group">
-													<label for="select">@comicField.Name</label>
+													<label for="select">@_comicField.Name</label>
 
-													<InputSelect id="select" name="select" class="custom-select" @bind-Value="stringAnswer">
+													<InputSelect id="select" name="select" class="custom-select" @bind-Value="_stringAnswer">
 														<option value=""></option>
-														@foreach (var option in comicField.Options)
+														@foreach (var option in _comicField.Options)
 																	{
 															<option value="@option.Code">@option.Text</option>
 																	}
@@ -63,50 +63,50 @@
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 												<div class="form-group">
-													<label for="textarea">@comicField.Name</label>
+													<label for="textarea">@_comicField.Name</label>
 
 													<InputTextArea id="textarea"
 																name="textarea"
 																class="form-control"
 																rows="3"
-																@bind-Value="stringAnswer" />
+																@bind-Value="_stringAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 												<div class="form-group">
-													<label for="textfield">@comicField.Name</label>
+													<label for="textfield">@_comicField.Name</label>
 
 													<InputText id="textfield"
 															name="textfield"
 															class="form-control"
-															@bind-Value="stringAnswer" />
+															@bind-Value="_stringAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 												<div class="form-group">
-													<label for="textfield">@comicField.Name</label>
+													<label for="textfield">@_comicField.Name</label>
 
 													<InputNumber id="textfield"
 																name="textfield"
 																class="form-control"
-																@bind-Value="intAnswer" />
+																@bind-Value="_intAnswer" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
 												<div class="form-group">
-													<label for="select">@comicField.Name</label>
+													<label for="select">@_comicField.Name</label>
 
 													<InputMultiSelect id="select"
 																	name="select"
 																	class="form-control custom-select"
 																	size="10"
-																	@bind-Value="stringAnswers2"
-																	Options="comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
+																	@bind-Value="_stringAnswers2"
+																	Options="_comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-												<InputRadioGroup @bind-Value="stringAnswer" Name="radio">
-													@foreach (var option in comicField.Options)
+												<InputRadioGroup @bind-Value="_stringAnswer" Name="radio">
+													@foreach (var option in _comicField.Options)
 																{
 														<div class="form-check">
 															<InputRadio id="@($"radio-{option.Code}")"
@@ -129,30 +129,30 @@
 							<hr />
 							<h5>Description</h5>
 							<p>
-								@comicField.ShortDescription
+								@_comicField.ShortDescription
 							</p>
 							<p>
-								@comicField.LongDescription
+								@_comicField.LongDescription
 							</p>
 							<Table Narrow="true">
 								<TableBody>
 									<TableRow>
 										<TableRowHeader>Date Verified</TableRowHeader>
-										<TableRowCell>@comicField.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
+										<TableRowCell>@_comicField.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss tt")</TableRowCell>
 									</TableRow>
 									<TableRow>
 										<TableRowHeader>Submitters</TableRowHeader>
-										<TableRowCell>@string.Join(", ", comicField.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
+										<TableRowCell>@string.Join(", ", _comicField.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
 									</TableRow>
 								</TableBody>
 							</Table>
 							
-							@if (comicField.Options.Any())
+							@if (_comicField.Options.Any())
 							{
 								<hr />
 								<h5>Option Descriptions</h5>
 								<ListGroup>
-									@foreach (var option in comicField.Options)
+									@foreach (var option in _comicField.Options)
 									{
 										<ListGroupItem>
 											<h5>@option.Text</h5>
@@ -174,22 +174,22 @@
 		</ModalBody>
 		<ModalFooter>
 			<div class="w-100 d-flex flex-row justify-content-around flex-wrap">
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="isFirstInFields" Class="mr-2 mb-2 text-nowrap">
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="_isFirstInFields" Class="mr-2 mb-2 text-nowrap">
 					<Icon Name="IconName.AngleLeft"></Icon>
 					Back
 				</Button>
 
-				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="isLastInFields" Class="mr-2 mb-2 text-nowrap">
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="_isLastInFields" Class="mr-2 mb-2 text-nowrap">
 					Next&nbsp;
 					<Icon Name="IconName.AngleRight"></Icon>
 				</Button>
 
-				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(isSubmitting || userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
-					@if (isSubmitting)
+				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(_isSubmitting || _userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
+					@if (_isSubmitting)
 					{
 						<Spinner Small="true" Inline="true"></Spinner><text>&nbsp;</text>
 					}
-					@if (userEntry.CreatedDate == default)
+					@if (_userEntry.CreatedDate == default)
 					{
 						<text>Add Response</text>
 					}
@@ -241,25 +241,25 @@
 	[Parameter]
 	public IReadOnlyList<ComicFieldViewModel> Fields { get; set; } = new List<ComicFieldViewModel>();
 
-	private Modal modal { get; set; } = new Modal();
-	private EditForm form { get; set; } = new EditForm();
-	private string? userName { get; set; }
-	private ComicFieldViewModel comicField { get; set; } = new ComicFieldViewModel();
-	private string comicCode { get; set; } = "";
-	private string comicImgSrc { get; set; } = "";
-	private CrowdSourcedFieldUserEntryViewModel userEntry { get; set; } = new CrowdSourcedFieldUserEntryViewModel();
-	private bool isSubmitting { get; set; } = false;
+	private Modal _modal = new Modal();
+	private EditForm _form = new EditForm();
+	private string? _userName;
+	private ComicFieldViewModel _comicField = new ComicFieldViewModel();
+	private string _comicCode = "";
+	private string _comicImgSrc = "";
+	private CrowdSourcedFieldUserEntryViewModel _userEntry = new CrowdSourcedFieldUserEntryViewModel();
+	private bool _isSubmitting = false;
 
-	private int indexInFields => Fields.Select((item, index) => new { item, index }).FirstOrDefault(x => x.item.Code == comicField.Code)?.index ?? 0;
-	private bool isFirstInFields => indexInFields == 0 && Fields.Count > 0;
-	private bool isLastInFields => indexInFields == Fields.Count - 1;
+	private int _indexInFields => Fields.Select((item, index) => new { item, index }).FirstOrDefault(x => x.item.Code == _comicField.Code)?.index ?? 0;
+	private bool _isFirstInFields => _indexInFields == 0 && Fields.Count > 0;
+	private bool _isLastInFields => _indexInFields == Fields.Count - 1;
 
 	#region Answer Variables
-	private List<ValueWrapper<bool>> boolAnswers { get; set; } = new List<ValueWrapper<bool>>();
-	private string stringAnswer { get; set; } = "";
-	private List<ValueWrapper<string>> stringAnswers { get; set; } = new List<ValueWrapper<string>>();
-	private string[] stringAnswers2 { get; set; } = new string[] { };
-	private int? intAnswer { get; set; }
+	private List<ValueWrapper<bool>> _boolAnswers = new List<ValueWrapper<bool>>();
+	private string _stringAnswer = "";
+	private List<ValueWrapper<string>> _stringAnswers = new List<ValueWrapper<string>>();
+	private string[] _stringAnswers2 = new string[] { };
+	private int? _intAnswer;
 	#endregion Answer Variables
 
 	protected override async Task OnInitializedAsync()
@@ -267,46 +267,46 @@
 		var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 		if (user.Identity!.IsAuthenticated)
 		{
-			userName = user.Identity!.Name;
+			_userName = user.Identity!.Name;
 		}
 		await base.OnInitializedAsync();
 	}
 
 	public void Open(State state)
 	{
-		comicField = state.ComicField;
-		comicCode = state.ComicCode;
-		comicImgSrc = state.ComicImgSrc;
+		_comicField = state.ComicField;
+		_comicCode = state.ComicCode;
+		_comicImgSrc = state.ComicImgSrc;
 
-		if (userName != null)
+		if (_userName != null)
 		{
-			userEntry = comicField.UserEntries
-				.FirstOrDefault(cf => cf.CreatedByUser.UserName == userName)
+			_userEntry = _comicField.UserEntries
+				.FirstOrDefault(cf => cf.CreatedByUser.UserName == _userName)
 				?? new CrowdSourcedFieldUserEntryViewModel();
 		}
 
-		var setValues = new HashSet<string>(userEntry.Values);
+		var setValues = new HashSet<string>(_userEntry.Values);
 
-		switch (comicField.Type)
+		switch (_comicField.Type)
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
-				boolAnswers = comicField.Options.Select(o => new ValueWrapper<bool>(setValues.Contains(o.Code))).ToList();
+				_boolAnswers = _comicField.Options.Select(o => new ValueWrapper<bool>(setValues.Contains(o.Code))).ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
-				stringAnswer = userEntry.Values.FirstOrDefault() ?? "";
+				_stringAnswer = _userEntry.Values.FirstOrDefault() ?? "";
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
-				var first = userEntry.Values.FirstOrDefault();
+				var first = _userEntry.Values.FirstOrDefault();
 				int num = 0;
-				intAnswer = first != null && int.TryParse(first!, out num) ? num : null;
+				_intAnswer = first != null && int.TryParse(first!, out num) ? num : null;
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
-				stringAnswers2 = userEntry.Values.ToArray();
+				_stringAnswers2 = _userEntry.Values.ToArray();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-				stringAnswers = userEntry.Values.Select(v => new ValueWrapper<string>(v)).ToList();
+				_stringAnswers = _userEntry.Values.Select(v => new ValueWrapper<string>(v)).ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
 
@@ -314,61 +314,61 @@
 		}
 
 		StateHasChanged();
-		modal.Show();
+		_modal.Show();
 	}
 
 	public void Close()
 	{
-		modal.Hide();
+		_modal.Hide();
 	}
 
 	private async Task HandleSubmit()
 	{
 		List<string> values = new List<string>();
-		switch (comicField.Type)
+		switch (_comicField.Type)
 		{
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes:
-				values = comicField.Options.Zip(boolAnswers).Where(x => x.Second.Value).Select(x => x.First.Code).ToList();
+				values = _comicField.Options.Zip(_boolAnswers).Where(x => x.Second.Value).Select(x => x.First.Code).ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 				values = new List<string>()
 				{
-					stringAnswer,
+					_stringAnswer,
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				values = new List<string>()
 				{
-					intAnswer?.ToString() ?? "",
+					_intAnswer?.ToString() ?? "",
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
-				values = stringAnswers2.ToList();
+				values = _stringAnswers2.ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 				values = new List<string>()
 				{
-					stringAnswer,
+					_stringAnswer,
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
 				break;
 		}
 
-		userEntry.Values = values;
-		if (!form.EditContext!.Validate())
+		_userEntry.Values = values;
+		if (!_form.EditContext!.Validate())
 		{
 			return;
 		}
 
-		isSubmitting = true;
+		_isSubmitting = true;
 		StateHasChanged();
 		UserEntrySubmissionResult result;
 		try
 		{
-			result = await Api.PutUserEntryValues(comicCode, comicField.Code, values);
+			result = await Api.PutUserEntryValues(_comicCode, _comicField.Code, values);
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
@@ -377,11 +377,11 @@
 		}
 		catch (System.Net.Http.HttpRequestException ex)
 		{
-			isSubmitting = false;
+			_isSubmitting = false;
 			ToastService.ShowError($"There was a problem saving your answer: {ex.Message}");
 			return;
 		}
-		isSubmitting = false;
+		_isSubmitting = false;
 		StateHasChanged();
 
 		if (result.IsAlertVerified())
@@ -396,7 +396,7 @@
 		await OnSubmit.InvokeAsync(new Completion()
 		{
 			Type = CompletionType.SubmitAndNext,
-			Field = comicField,
+			Field = _comicField,
 		});
 	}
 
@@ -405,7 +405,7 @@
 		await OnSubmit.InvokeAsync(new Completion()
 		{
 			Type = CompletionType.Back,
-			Field = comicField,
+			Field = _comicField,
 		});
 	}
 
@@ -414,7 +414,7 @@
 		await OnSubmit.InvokeAsync(new Completion()
 		{
 			Type = CompletionType.SkipNext,
-			Field = comicField,
+			Field = _comicField,
 		});
 	}
 
@@ -423,7 +423,7 @@
 		await OnSubmit.InvokeAsync(new Completion()
 		{
 			Type = CompletionType.Cancel,
-			Field = comicField,
+			Field = _comicField,
 		});
 	}
 }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
@@ -17,17 +19,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 {
 	public class LACSApi
 	{
-		private HttpClient _authClient { get; }
-		private HttpClient _publicClient { get; }
-		private System.Text.Json.JsonSerializerOptions _serializationOptions { get; }
+		private readonly HttpClient _authClient;
+		private readonly HttpClient _publicClient;
+		private readonly JsonSerializerOptions _serializationOptions;
 		public LACSApi(IHttpClientFactory httpClientFactory, HttpClient authClient)
 		{
 			_authClient = authClient;
-			//_authClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.ServerAPI");
 			_publicClient = httpClientFactory.CreateClient("LoadingArtistCrowdSource.PublicServerAPI");
 
-			_serializationOptions = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
-			_serializationOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+			_serializationOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+			_serializationOptions.Converters.Add(new JsonStringEnumConverter());
 		}
 
 		#region ComicController

@@ -2,7 +2,7 @@
 @inject IJSRuntime JsRuntime
 @inherits InputBase<string[]>
 
-<select @ref="selectRef" multiple class="@CssClass" @onchange="HandleChange" @attributes="AdditionalAttributes">
+<select @ref="_selectRef" multiple class="@CssClass" @onchange="HandleChange" @attributes="AdditionalAttributes">
 	@foreach (var option in Options)
 	{
 		<option value="@option.Key" selected="@(CurrentValue?.Contains(option.Key) ?? false)">@option.Value</option>
@@ -13,7 +13,7 @@
 	[Parameter]
 	public KeyValuePair<string, string>[] Options { get; set; } = new KeyValuePair<string, string>[] { };
 
-	private ElementReference? selectRef { get; set; }
+	private ElementReference? _selectRef { get; set; }
 
 	protected override bool TryParseValueFromString(string? value, [MaybeNullWhen(false)] out string[] result, [NotNullWhen(false)] out string? validationErrorMessage)
 	{
@@ -24,7 +24,7 @@
 
 	public async Task<List<string>> GetAllSelections()
 	{
-		return (await JsRuntime.InvokeAsync<List<string>>("getSelectedValues", selectRef)).ToList();
+		return (await JsRuntime.InvokeAsync<List<string>>("getSelectedValues", _selectRef)).ToList();
 	}
 
 	private async Task HandleChange(ChangeEventArgs e)

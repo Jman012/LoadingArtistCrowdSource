@@ -1,21 +1,21 @@
-﻿<Modal @ref="modal">
+﻿<Modal @ref="_modal">
 	<ModalBackdrop />
 	<ModalContent>
 		<ModalHeader>
 			<ModalTitle>
-				@(isNew ? "Add" : "Edit") Field Option
+				@(_isNew ? "Add" : "Edit") Field Option
 			</ModalTitle>
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
 		<ModalBody>
-			<EditForm @ref="form" Model="optionVM">
+			<EditForm @ref="_form" Model="_optionVM">
 				<DataAnnotationsValidator />
 				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
-				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Code" Disabled="!isNew"></FormTextfield>
-				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.Text"></FormTextfield>
-				<FormTextarea NamePrefix="namePrefix" @bind-Value="optionVM.Description"></FormTextarea>
-				<FormTextfield NamePrefix="namePrefix" @bind-Value="optionVM.URL"></FormTextfield>
+				<FormTextfield NamePrefix="_namePrefix" @bind-Value="_optionVM.Code" Disabled="!_isNew"></FormTextfield>
+				<FormTextfield NamePrefix="_namePrefix" @bind-Value="_optionVM.Text"></FormTextfield>
+				<FormTextarea NamePrefix="_namePrefix" @bind-Value="_optionVM.Description"></FormTextarea>
+				<FormTextfield NamePrefix="_namePrefix" @bind-Value="_optionVM.URL"></FormTextfield>
 			</EditForm>
 		</ModalBody>
 		<ModalFooter>
@@ -29,46 +29,46 @@
 
 	public struct State
 	{
-		public CrowdSourcedFieldDefinitionOptionViewModel OptionVM { get; set; }
-		public int? Index { get; set; }
+		public CrowdSourcedFieldDefinitionOptionViewModel OptionVM;
+		public int? Index;
 	}
 
 	[Parameter]
 	public EventCallback<State> OnSubmit { get; set; }
 
-	private CrowdSourcedFieldDefinitionOptionViewModel optionVM { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel();
-	private int? index { get; set; }
-	private bool isNew => !index.HasValue;
+	private CrowdSourcedFieldDefinitionOptionViewModel _optionVM = new CrowdSourcedFieldDefinitionOptionViewModel();
+	private int? _index;
+	private bool _isNew => !_index.HasValue;
 
-	private Modal modal { get; set; } = new Modal();
-	private EditForm form { get; set; } = new EditForm();
-	private string namePrefix => $"{(isNew ? "Add" : "Edit")}_Option_";
+	private Modal _modal = new Modal();
+	private EditForm _form = new EditForm();
+	private string _namePrefix => $"{(_isNew ? "Add" : "Edit")}_Option_";
 
 	public void Open(State state)
 	{
-		optionVM = state.OptionVM;
-		index = state.Index;
+		_optionVM = state.OptionVM;
+		_index = state.Index;
 		StateHasChanged();
-		modal.Show();
+		_modal.Show();
 	}
 
 	public void Close()
 	{
-		modal.Hide();
+		_modal.Hide();
 	}
 
 	private async Task HandleSubmit()
 	{
-		if (!form.EditContext!.Validate())
+		if (!_form.EditContext!.Validate())
 		{
 			return;
 		}
 
 		await OnSubmit.InvokeAsync(new State()
 		{
-			OptionVM = optionVM,
-			Index = index,
+			OptionVM = _optionVM,
+			Index = _index,
 		});
-		modal.Hide();
+		_modal.Hide();
 	}
 }

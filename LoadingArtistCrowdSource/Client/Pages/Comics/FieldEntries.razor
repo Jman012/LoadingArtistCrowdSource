@@ -1,9 +1,9 @@
 ﻿@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="input-group mb-2">
-	<input type="text" class="form-control" placeholder="Search Fields" aria-label="Search" value="@filter" @oninput="HandleSearchInput">
+	<input type="text" class="form-control" placeholder="Search Fields" aria-label="Search" value="@_filtertext" @oninput="HandleSearchInput">
 	<div class="input-group-append">
-		@if (isFiltering)
+		@if (_isFiltering)
 		{
 			<button class="btn btn-outline-secondary" type="button" @onclick="HandleClearFilter">
 				<span class="oi oi-x" aria-hidden="true"></span>
@@ -51,7 +51,7 @@
 
 <ListGroup>
 	@{ var i = 0; }
-	@foreach (var field in filteredFields)
+	@foreach (var field in _filteredFields)
 	{
 		var index = i++;
 		var theField = field;
@@ -90,7 +90,7 @@
 	}
 </ListGroup>
 
-<UserEntryEditFormModal @ref="userEntryModal" OnSubmit="HandleUserEntrySubmitted" Fields="filteredFieldsWithoutSections"></UserEntryEditFormModal>
+<UserEntryEditFormModal @ref="_userEntryModal" OnSubmit="HandleUserEntrySubmitted" Fields="_filteredFieldsWithoutSections"></UserEntryEditFormModal>
 
 @code {
 	[Parameter]
@@ -104,13 +104,13 @@
 	[Parameter]
 	public EventCallback OnComicNeedsRefresh { get; set; } = new EventCallback();
 
-	private string? userName { get; set; }
-	private UserEntryEditFormModal userEntryModal { get; set; } = new UserEntryEditFormModal();
+	private string? _userName;
+	private UserEntryEditFormModal _userEntryModal = new UserEntryEditFormModal();
 
-	private IReadOnlyList<ComicFieldViewModel> filteredFields { get; set; } = new List<ComicFieldViewModel>();
-	private IReadOnlyList<ComicFieldViewModel> filteredFieldsWithoutSections { get; set; } = new List<ComicFieldViewModel>();
-	private bool isFiltering { get; set; } = false;
-	private string? filter { get; set; }
+	private IReadOnlyList<ComicFieldViewModel> _filteredFields = new List<ComicFieldViewModel>();
+	private IReadOnlyList<ComicFieldViewModel> _filteredFieldsWithoutSections = new List<ComicFieldViewModel>();
+	private bool _isFiltering = false;
+	private string? _filtertext;
 	private bool _filterCheckAnswered = false;
 	private bool filterCheckAnswered { get { return _filterCheckAnswered; } set { _filterCheckAnswered = value; performFilter(); } }
 	private bool _filterCheckNoData = false;
@@ -125,7 +125,7 @@
 		var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 		if (user.Identity!.IsAuthenticated)
 		{
-			userName = user.Identity!.Name;
+			_userName = user.Identity!.Name;
 		}
 		HandleClearFilter();
 		await base.OnInitializedAsync();
@@ -140,7 +140,7 @@
 
 	private void HandleAnswerField(ComicFieldViewModel field)
 	{
-		userEntryModal.Open(new UserEntryEditFormModal.State()
+		_userEntryModal.Open(new UserEntryEditFormModal.State()
 		{
 			ComicField = field,
 			ComicCode = ComicCode,
@@ -150,14 +150,14 @@
 
 	private async Task HandleUserEntrySubmitted(UserEntryEditFormModal.Completion completion)
 	{
-		int index = filteredFieldsWithoutSections.Select((item, index) => new { item, index }).First(x => x.item.Code == completion.Field.Code).index;
-		ComicFieldViewModel? previous = index - 1 < 0 ? (ComicFieldViewModel?)null : filteredFieldsWithoutSections[index - 1];
-		ComicFieldViewModel? next = index + 1 >= filteredFieldsWithoutSections.Count ? (ComicFieldViewModel?)null : filteredFieldsWithoutSections[index + 1];
+		int index = _filteredFieldsWithoutSections.Select((item, index) => new { item, index }).First(x => x.item.Code == completion.Field.Code).index;
+		ComicFieldViewModel? previous = index - 1 < 0 ? (ComicFieldViewModel?)null : _filteredFieldsWithoutSections[index - 1];
+		ComicFieldViewModel? next = index + 1 >= _filteredFieldsWithoutSections.Count ? (ComicFieldViewModel?)null : _filteredFieldsWithoutSections[index + 1];
 
 		switch (completion.Type)
 		{
 			case UserEntryEditFormModal.CompletionType.Back:
-				userEntryModal.Open(new UserEntryEditFormModal.State()
+				_userEntryModal.Open(new UserEntryEditFormModal.State()
 				{
 					ComicField = previous ?? new ComicFieldViewModel(),
 					ComicCode = ComicCode,
@@ -165,7 +165,7 @@
 				});
 				break;
 			case UserEntryEditFormModal.CompletionType.SkipNext:
-				userEntryModal.Open(new UserEntryEditFormModal.State()
+				_userEntryModal.Open(new UserEntryEditFormModal.State()
 				{
 					ComicField = next ?? new ComicFieldViewModel(),
 					ComicCode = ComicCode,
@@ -175,11 +175,11 @@
 			case UserEntryEditFormModal.CompletionType.SubmitAndNext:
 				if (next == null)
 				{
-					userEntryModal.Close();
+					_userEntryModal.Close();
 				}
 				else
 				{
-					userEntryModal.Open(new UserEntryEditFormModal.State()
+					_userEntryModal.Open(new UserEntryEditFormModal.State()
 					{
 						ComicField = next ?? new ComicFieldViewModel(),
 						ComicCode = ComicCode,
@@ -190,7 +190,7 @@
 				break;
 			case UserEntryEditFormModal.CompletionType.Cancel:
 			default:
-				userEntryModal.Close();
+				_userEntryModal.Close();
 				break;
 		}
 
@@ -198,42 +198,42 @@
 
 	private void HandleSearchInput(ChangeEventArgs e)
 	{
-		filter = e.Value as string;
+		_filtertext = e.Value as string;
 		performFilter();
 	}
 
 	private void performFilter()
 	{
-		IEnumerable<ComicFieldViewModel> filteredFields = Fields;
+		IEnumerable<ComicFieldViewModel> _filteredFields = Fields;
 
-		if (!string.IsNullOrEmpty(filter))
+		if (!string.IsNullOrEmpty(_filtertext))
 		{
-			filteredFields = filteredFields.Where(f => f.Type == CrowdSourcedFieldType.Section || f.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.ShortDescription.Contains(filter, StringComparison.OrdinalIgnoreCase) || f.LongDescription.Contains(filter, StringComparison.OrdinalIgnoreCase));
-			isFiltering = true;
+			_filteredFields = _filteredFields.Where(f => f.Type == CrowdSourcedFieldType.Section || f.Name.Contains(_filtertext, StringComparison.OrdinalIgnoreCase) || f.ShortDescription.Contains(_filtertext, StringComparison.OrdinalIgnoreCase) || f.LongDescription.Contains(_filtertext, StringComparison.OrdinalIgnoreCase));
+			_isFiltering = true;
 		}
 		else
 		{
-			isFiltering = false;
+			_isFiltering = false;
 		}
 		if (_filterCheckAnswered || _filterCheckNoData || _filterCheckCollectingData || _filterCheckAcceptedAnswer)
 		{
-			filteredFields = filteredFields.Where(f =>
+			_filteredFields = _filteredFields.Where(f =>
 				f.Type == CrowdSourcedFieldType.Section ||
-				(_filterCheckAnswered && f.UserEntries.Any(ue => ue.CreatedByUser.UserName == userName)) ||
+				(_filterCheckAnswered && f.UserEntries.Any(ue => ue.CreatedByUser.UserName == _userName)) ||
 				(_filterCheckNoData && !f.UserEntries.Any()) ||
 				(_filterCheckCollectingData && f.UserEntries.Any() && f.VerifiedEntry == null) ||
 				(_filterCheckAcceptedAnswer && f.VerifiedEntry != null));
 		}
-		this.filteredFields = filteredFields.ToList();
-		this.filteredFieldsWithoutSections = this.filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
+		this._filteredFields = _filteredFields.ToList();
+		this._filteredFieldsWithoutSections = this._filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
 	}
 
 	private void HandleClearFilter()
 	{
-		filter = "";
-		filteredFields = Fields.ToList();
-		filteredFieldsWithoutSections = filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
-		isFiltering = false;
+		_filtertext = "";
+		_filteredFields = Fields.ToList();
+		_filteredFieldsWithoutSections = _filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
+		_isFiltering = false;
 	}
 
 }

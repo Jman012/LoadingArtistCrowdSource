@@ -5,11 +5,11 @@
 @typeparam TValue
 
 <div class="form-group">
-	<DisplayName For="@memberName"
+	<DisplayName For="@_memberName"
 				 ForField="@ValueExpression"></DisplayName>
 
-	<InputSelect id="@memberName"
-				 name="@memberName"
+	<InputSelect id="@_memberName"
+				 name="@_memberName"
 				 class="form-control"
 				 disabled="@Disabled"
 				 Value="@Value"
@@ -19,9 +19,9 @@
 		@ChildContent
 	</InputSelect>
 
-	@if (!string.IsNullOrEmpty(memberDescription))
+	@if (!string.IsNullOrEmpty(_memberDescription))
 	{
-		<small class="form-text text-muted">@memberDescription</small>
+		<small class="form-text text-muted">@_memberDescription</small>
 	}
 </div>
 
@@ -34,22 +34,20 @@
 	public EventCallback<TValue> ValueChanged { get; set; }
 	[Parameter]
 	public Expression<Func<TValue>>? ValueExpression { get; set; }
-
 	[Parameter]
 	public bool Disabled { get; set; }
-
 	[Parameter(CaptureUnmatchedValues = true)]
 	public IDictionary<string, object>? AdditionalAttributes { get; set; }
 	[Parameter]
 	public RenderFragment? ChildContent { get; set; }
 
-	private string memberName { get; set; } = "";
-	private string memberDescription { get; set; } = "";
+	private string _memberName = "";
+	private string _memberDescription = "";
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		memberName = NamePrefix + Utilities.GetMemberName(ValueExpression!);
-		memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
+		_memberName = NamePrefix + Utilities.GetMemberName(ValueExpression!);
+		_memberDescription = Utilities.GetDescriptionAttributeValue(ValueExpression!);
 	}
 }

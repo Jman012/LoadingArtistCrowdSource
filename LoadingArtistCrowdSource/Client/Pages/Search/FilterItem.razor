@@ -21,7 +21,7 @@
 			default:
 				<li class="dropdown-item-text">
 					<div class="input-group">
-						<input type="text" value="@searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
+						<input type="text" value="@_searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
 						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
 							<i class="fa fa-times"></i>
 						</button>
@@ -40,7 +40,7 @@
 					}
 				</InputRadioGroup>
 				<li class="dropdown-divider"></li>
-				@foreach (var option in searchedOptions)
+				@foreach (var option in _searchedOptions)
 				{
 					<li>
 						<label>
@@ -58,24 +58,23 @@
 
 	[Parameter]
 	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
-
 	[Parameter]
 	public SearchEntryViewModel FilterData { get; set; } = new SearchEntryViewModel();
 	[Parameter]
 	public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
 
-	private List<CrowdSourcedFieldDefinitionOptionViewModel> fieldOptions { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
+	private List<CrowdSourcedFieldDefinitionOptionViewModel> _fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 
-	private string? searchText { get; set; }
-	private (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] searchedOptions { get; set; } = new (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] { };
+	private string? _searchText;
+	private (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] _searchedOptions = new (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] { };
 
 	private string dropdownText
 	{
 		get
 		{
-			if (FilterData.FieldValues.Zip(fieldOptions).Any(o => o.First.Filtered))
+			if (FilterData.FieldValues.Zip(_fieldOptions).Any(o => o.First.Filtered))
 			{
-				string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
+				string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(_fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
 				return $"{Field.Name}: {values}";
 			}
 			else
@@ -94,7 +93,7 @@
 			case CrowdSourcedFieldType.IntegerNumber:
 			case CrowdSourcedFieldType.FreeformTextfield:
 			case CrowdSourcedFieldType.FreeformTextarea:
-				fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
+				_fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 				FilterData.FieldValues = new SearchEntryOptionViewModel[]
 				{
 					new SearchEntryOptionViewModel()
@@ -105,8 +104,8 @@
 				};
 				break;
 			default:
-				fieldOptions = Field.Options;
-				FilterData.FieldValues = fieldOptions.Select(o => new SearchEntryOptionViewModel() { Code = o.Code, Filtered = false }).ToArray();
+				_fieldOptions = Field.Options;
+				FilterData.FieldValues = _fieldOptions.Select(o => new SearchEntryOptionViewModel() { Code = o.Code, Filtered = false }).ToArray();
 				break;
 		}
 		await DidChange();
@@ -116,29 +115,29 @@
 
 	private void HandleSearchInput(ChangeEventArgs e)
 	{
-		searchText = e.Value as string;
+		_searchText = e.Value as string;
 		performSearch();
 	}
 
 	private void ClearSearchInput()
 	{
-		searchText = "";
+		_searchText = "";
 		performSearch();
 	}
 
 	private void performSearch()
 	{
-		if (string.IsNullOrEmpty(searchText))
+		if (string.IsNullOrEmpty(_searchText))
 		{
-			searchedOptions = FilterData.FieldValues
-				.Zip(fieldOptions)
+			_searchedOptions = FilterData.FieldValues
+				.Zip(_fieldOptions)
 				.ToArray();
 		}
 		else
 		{
-			searchedOptions = FilterData.FieldValues
-				.Zip(fieldOptions)
-				.Where(o => o.Second.Text.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+			_searchedOptions = FilterData.FieldValues
+				.Zip(_fieldOptions)
+				.Where(o => o.Second.Text.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
 				.ToArray();
 		}
 	}

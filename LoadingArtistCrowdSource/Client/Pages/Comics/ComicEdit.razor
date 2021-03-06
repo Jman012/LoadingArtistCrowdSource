@@ -11,29 +11,29 @@
 		<Column>
 			<h3>Edit: </h3>
 
-			@if (comic.Code == "")
+			@if (_comic.Code == "")
 			{
 				<Spinner></Spinner>
 			}
 			else
 			{
-				<EditForm Model="comic" OnValidSubmit="HandleValidSubmit">
+				<EditForm Model="_comic" OnValidSubmit="HandleValidSubmit">
 					<DataAnnotationsValidator />
 					<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
-					@*<FormNumber @bind-Value="comic.Id" Disabled="true"></FormNumber>*@
-					<FormTextfield @bind-Value="comic.Code"></FormTextfield>
-					<FormTextfield @bind-Value="comic.Permalink"></FormTextfield>
-					@*<FormTextfield Value="@comic.ComicPublishedDate.ToString()" Disabled="true"></FormTextfield>*@
-					<FormTextfield @bind-Value="comic.Title"></FormTextfield>
-					<FormTextarea @bind-Value="comic.Tooltip" rows="5"></FormTextarea>
-					<FormTextarea @bind-Value="comic.Description" rows="5"></FormTextarea>
-					<FormTextfield @bind-Value="comic.ImageUrlSrc"></FormTextfield>
-					<FormTextfield @bind-Value="comic.ImageThumbnailUrlSrc"></FormTextfield>
-					<FormTextfield @bind-Value="comic.ImageWideThumbnailUrlSrc"></FormTextfield>
+					@*<FormNumber @bind-Value="_comic.Id" Disabled="true"></FormNumber>*@
+					<FormTextfield @bind-Value="_comic.Code"></FormTextfield>
+					<FormTextfield @bind-Value="_comic.Permalink"></FormTextfield>
+					@*<FormTextfield Value="@_comic.ComicPublishedDate.ToString()" Disabled="true"></FormTextfield>*@
+					<FormTextfield @bind-Value="_comic.Title"></FormTextfield>
+					<FormTextarea @bind-Value="_comic.Tooltip" rows="5"></FormTextarea>
+					<FormTextarea @bind-Value="_comic.Description" rows="5"></FormTextarea>
+					<FormTextfield @bind-Value="_comic.ImageUrlSrc"></FormTextfield>
+					<FormTextfield @bind-Value="_comic.ImageThumbnailUrlSrc"></FormTextfield>
+					<FormTextfield @bind-Value="_comic.ImageWideThumbnailUrlSrc"></FormTextfield>
 
-					<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="isSubmitting">
-						@if (isSubmitting)
+					<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="_isSubmitting">
+						@if (_isSubmitting)
 						{
 							<Spinner Inline="true" Small="true"></Spinner>
 						}
@@ -50,14 +50,14 @@
 	[Parameter]
 	public string Code { get; set; } = "";
 
-	private ComicViewModel comic { get; set; } = new ComicViewModel();
-	private bool isSubmitting { get; set; }
+	private ComicViewModel _comic = new ComicViewModel();
+	private bool _isSubmitting;
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			comic = (await Api.GetComic(Code)).ComicViewModel;
+			_comic = (await Api.GetComic(Code)).ComicViewModel;
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
@@ -70,17 +70,17 @@
 
 	private async Task HandleValidSubmit()
 	{
-		isSubmitting = true;
+		_isSubmitting = true;
 		try
 		{
-			await Api.PutComicMetadata(Code, comic);
+			await Api.PutComicMetadata(Code, _comic);
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
 			exception.Redirect();
 			return;
 		}
-		isSubmitting = false;
+		_isSubmitting = false;
 
 		ToastService.ShowSuccess("The comic metadata has been updated");
 		NavigationManager.NavigateTo("/comic/" + Uri.EscapeDataString(Code));

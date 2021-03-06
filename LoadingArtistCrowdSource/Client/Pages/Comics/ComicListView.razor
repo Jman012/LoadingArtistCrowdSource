@@ -8,19 +8,19 @@
 		<Buttons>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
-					Active="view == ComicListViewType.GroupedByYear"
+					Active="_view == ComicListViewType.GroupedByYear"
 					Clicked="GroupedByYear">
 				<Icon Name="@("fa-th-large")" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
-					Active="view == ComicListViewType.Thumbnail"
+					Active="_view == ComicListViewType.Thumbnail"
 					Clicked="Thumbnail">
 				<Icon Name="@("fa-th")" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
-					Active="view == ComicListViewType.Table"
+					Active="_view == ComicListViewType.Table"
 					Clicked="Table">
 				<Icon Name="@("fa-th-list")" />
 			</Button>
@@ -28,19 +28,17 @@
 	</div>
 </div>
 
-@if (view == ComicListViewType.GroupedByYear)
+@if (_view == ComicListViewType.GroupedByYear)
 {
-	var i = 0;
 	<div class="d-flex">
 		<div class="flex-fill"></div>
 		<div>
 			<Button Type="ButtonType.Button" Class="btn-link" Clicked="ExpandAll">Expand</Button>/<Button Type="ButtonType.Button" Class="btn-link" Clicked="CollapseAll">Collapse</Button>
 		</div>
 	</div>
-	@foreach (var year in ComicsGroupedByYear.OrderBy(y => y.Year))
+	@foreach (var year in _comicsGroupedByYear.OrderBy(y => y.Year))
 	{
-		var index = i++;
-		<Collapsible @ref="GroupedByYearCollapsibles[index]" IsCollapsed="true" IdPrefix="@year.Year.ToString()">
+		<Collapsible @ref="_groupedByYearCollapsibles[year.Year]" IsCollapsed="true" IdPrefix="@year.Year.ToString()">
 			<HeaderContent Context="isCollapsed">
 				<h3 class="header-collapsible">
 					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
@@ -65,7 +63,7 @@
 		</Collapsible>
 	}
 }
-else if (view == ComicListViewType.Thumbnail)
+else if (_view == ComicListViewType.Thumbnail)
 {
 	<div class="d-flex flex-wrap">
 		@foreach (var comic in Comics)
@@ -108,21 +106,22 @@ else
 }
 
 @code {
-	class GroupedYear
+	private class GroupedYear
 	{
-		public int Year;
-		public IEnumerable<ComicListItemViewModel> Comics = new ComicListItemViewModel[] { };
+		public int Year { get; set; }
+		public IEnumerable<ComicListItemViewModel> Comics { get; set; } = new ComicListItemViewModel[] { };
 	}
 
-	const string Cookie = "ComicListViewType";
+	private const string Cookie = "ComicListViewType";
+
 	[Parameter]
 	public IEnumerable<ComicListItemViewModel> Comics { get; set; } = new ComicListItemViewModel[] { };
 	[Parameter]
 	public RenderFragment? HeaderContent { get; set; }
 
-	private ComicListViewType view { get; set; } = ComicListViewType.GroupedByYear;
-	private IEnumerable<GroupedYear> ComicsGroupedByYear { get; set; } = new GroupedYear[] { };
-	private Collapsible[] GroupedByYearCollapsibles { get; set; } = new Collapsible[] { };
+	private ComicListViewType _view = ComicListViewType.GroupedByYear;
+	private IEnumerable<GroupedYear> _comicsGroupedByYear = new GroupedYear[] { };
+	private Dictionary<int, Collapsible> _groupedByYearCollapsibles = new Dictionary<int, Collapsible>();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -131,37 +130,36 @@ else
 		{
 			if (System.Enum.TryParse(cookieValue, out ComicListViewType cookieView))
 			{
-				this.view = cookieView;
+				_view = cookieView;
 			}
 		}
 
-		ComicsGroupedByYear = Comics.GroupBy(c => c.ComicPublishedDate.Year, c => c, (year, c) => new GroupedYear { Year = year, Comics = c });
-		GroupedByYearCollapsibles = ComicsGroupedByYear.Select(y => new Collapsible()).ToArray();
+		_comicsGroupedByYear = Comics.GroupBy(c => c.ComicPublishedDate.Year, c => c, (year, c) => new GroupedYear { Year = year, Comics = c });
 
 		await base.OnInitializedAsync();
 	}
 
 	private async Task GroupedByYear()
 	{
-		view = ComicListViewType.GroupedByYear;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+		_view = ComicListViewType.GroupedByYear;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
 	}
 
 	private async Task Thumbnail()
 	{
-		view = ComicListViewType.Thumbnail;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+		_view = ComicListViewType.Thumbnail;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
 	}
 
 	private async Task Table()
 	{
-		view = ComicListViewType.Table;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, view.ToString());
+		_view = ComicListViewType.Table;
+		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
 	}
 
 	private void ExpandAll()
 	{
-		foreach (var c in GroupedByYearCollapsibles)
+		foreach (var c in _groupedByYearCollapsibles.Values)
 		{
 			c.Expand();
 		}
@@ -169,7 +167,7 @@ else
 
 	private void CollapseAll()
 	{
-		foreach (var c in GroupedByYearCollapsibles)
+		foreach (var c in _groupedByYearCollapsibles.Values)
 		{
 			c.Collapse();
 		}

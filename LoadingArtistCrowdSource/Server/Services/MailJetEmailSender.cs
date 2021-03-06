@@ -17,25 +17,25 @@ namespace LoadingArtistCrowdSource.Server.Services
 {
 	public class MailJetEmailSender : IEmailSender
 	{
-		public IConfiguration Configuration { get; }
-		private ILogger _logger { get; }
+		private readonly IConfiguration _configuration;
+		private readonly ILogger _logger;
 
 		public MailJetEmailSender(IConfiguration configuration, ILogger<MailJetEmailSender> logger)
 		{
-			Configuration = configuration;
+			_configuration = configuration;
 			_logger = logger;
 		}
 
 		public Task SendEmailAsync(string email, string subject, string message)
 		{
 			return Execute(
-				Configuration.GetValue<string>("MailJet:ApiKey"),
-				Configuration.GetValue<string>("MailJet:ApiSecret"),
+				_configuration.GetValue<string>("MailJet:ApiKey"),
+				_configuration.GetValue<string>("MailJet:ApiSecret"),
 				subject,
 				message,
 				email,
-				Configuration.GetValue<string>("LACS:FromEmailAddress"),
-				Configuration.GetValue<string>("LACS:FromEmailName"));
+				_configuration.GetValue<string>("LACS:FromEmailAddress"),
+				_configuration.GetValue<string>("LACS:FromEmailName"));
 		}
 
 		public async Task Execute(string apiKey, string apiSecret, string subject, string message, string toEmailAddress, string fromEmailAddress, string fromEmailName)

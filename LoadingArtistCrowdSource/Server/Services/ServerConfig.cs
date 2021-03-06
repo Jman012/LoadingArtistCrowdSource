@@ -10,14 +10,14 @@ namespace LoadingArtistCrowdSource.Server.Services
 {
 	public static class ServerConfig
 	{
-		public static readonly string Discord_ClientID = "Discord:ClientId";
-		public static readonly string Discord_ClientSecret = "Discord:ClientSecret";
+		public const string Discord_ClientID = "Discord:ClientId";
+		public const string Discord_ClientSecret = "Discord:ClientSecret";
 
-		public static readonly string MailJet_ApiKey = "MailJet:ApiKey";
-		public static readonly string MailJet_ApiSecret = "MailJet:ApiSecret";
+		public const string MailJet_ApiKey = "MailJet:ApiKey";
+		public const string MailJet_ApiSecret = "MailJet:ApiSecret";
 
-		public static readonly string LACS_FromEmailAddress = "LACS:FromEmailAddress";
-		public static readonly string LACS_FromEmailName = "LACS:FromEmailName";
+		public const string LACS_FromEmailAddress = "LACS:FromEmailAddress";
+		public const string LACS_FromEmailName = "LACS:FromEmailName";
 
 		public static void AssertConfigAvailable(IConfiguration configuration)
 		{

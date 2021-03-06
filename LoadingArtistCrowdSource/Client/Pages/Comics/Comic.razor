@@ -4,7 +4,7 @@
 @inject Services.LACSApi Api
 
 <Container Fluid="false">
-	@if (!loaded)
+	@if (!_loaded)
 	{
 		<Row>
 			<Column>
@@ -12,17 +12,17 @@
 			</Column>
 		</Row>
 	}
-	<div class="@(loaded ? "" : "d-none")">
+	<div class="@(_loaded ? "" : "d-none")">
 		<Row>
 			<Column>
-				<ComicNavigation ComicPage="comicPage"></ComicNavigation>
+				<ComicNavigation ComicPage="_comicPage"></ComicNavigation>
 			</Column>
 		</Row>
 
 		<Row>
 			<Column>
 				<div class="d-flex justify-content-center">
-					<h1>@comic.Title</h1>
+					<h1>@_comic.Title</h1>
 				</div>
 			</Column>
 		</Row>
@@ -39,39 +39,39 @@
 					<TableBody>
 						<TableRow>
 							<TableHeaderCell>Identifier</TableHeaderCell>
-							<TableRowCell>@comic.Code</TableRowCell>
+							<TableRowCell>@_comic.Code</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Number</TableHeaderCell>
-							<TableRowCell>@comic.Id</TableRowCell>
+							<TableRowCell>@_comic.Id</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Permalink</TableHeaderCell>
-							<TableRowCell><NewTabLink Href="@comic.Permalink">@comic.Permalink</NewTabLink></TableRowCell>
+							<TableRowCell><NewTabLink Href="@_comic.Permalink">@_comic.Permalink</NewTabLink></TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Published</TableHeaderCell>
-							<TableRowCell>@comic.ComicPublishedDate.ToString("yyyy-MM-dd mm:dd:ss K")</TableRowCell>
+							<TableRowCell>@_comic.ComicPublishedDate.ToString("yyyy-MM-dd mm:dd:ss K")</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Image</TableHeaderCell>
-							<TableRowCell><NewTabLink Href="@comic.ImageUrlSrc">@comic.ImageUrlSrc</NewTabLink></TableRowCell>
+							<TableRowCell><NewTabLink Href="@_comic.ImageUrlSrc">@_comic.ImageUrlSrc</NewTabLink></TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Thumbnail</TableHeaderCell>
 							<TableRowCell>
-								<NewTabLink Href="@comic.ImageThumbnailUrlSrc">
-									<img src="@comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" class="img-fluid" style="max-height: 128px;" />
+								<NewTabLink Href="@_comic.ImageThumbnailUrlSrc">
+									<img src="@_comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" class="img-fluid" style="max-height: 128px;" />
 								</NewTabLink>
 							</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Wide Thumbnail</TableHeaderCell>
 							<TableRowCell>
-								@if (comic.ImageWideThumbnailUrlSrc != null)
+								@if (_comic.ImageWideThumbnailUrlSrc != null)
 								{
-									<NewTabLink Href="@comic.ImageWideThumbnailUrlSrc">
-										<img src="@comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" class="img-fluid" style="max-height: 128px;" />
+									<NewTabLink Href="@_comic.ImageWideThumbnailUrlSrc">
+										<img src="@_comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" class="img-fluid" style="max-height: 128px;" />
 									</NewTabLink>
 								}
 								else
@@ -82,11 +82,11 @@
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Tooltip</TableHeaderCell>
-							<TableRowCell>@((MarkupString)(comic.Tooltip ?? ""))</TableRowCell>
+							<TableRowCell>@((MarkupString)(_comic.Tooltip ?? ""))</TableRowCell>
 						</TableRow>
 						<TableRow>
 							<TableHeaderCell>Description</TableHeaderCell>
-							<TableRowCell><p>@((MarkupString)(comic.Description ?? ""))</p></TableRowCell>
+							<TableRowCell><p>@((MarkupString)(_comic.Description ?? ""))</p></TableRowCell>
 						</TableRow>
 					</TableBody>
 				</Table>
@@ -94,8 +94,8 @@
 				<h3>Comic Image</h3>
 				<p>
 					<center>
-						<a href="@comic.ImageUrlSrc" target="_blank">
-							<img src="@comic.ImageUrlSrc" width="550" title="Comic image" alt="Comic image" class="comic-image img-thumbnail" />
+						<a href="@_comic.ImageUrlSrc" target="_blank">
+							<img src="@_comic.ImageUrlSrc" width="550" title="Comic image" alt="Comic image" class="comic-image img-thumbnail" />
 						</a>
 					</center>
 				</p>
@@ -103,10 +103,10 @@
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
 				<h3>Crowd Sourced Data</h3>
 				<div class="entry-list">
-					<FieldEntries ComicCode="@comic.Code" 
-								  ComicImgSrc="@comic.ImageUrlSrc" 
-								  ComicProgress="@comicPage.Progress" 
-								  Fields="comic.ComicFields" 
+					<FieldEntries ComicCode="@_comic.Code" 
+								  ComicImgSrc="@_comic.ImageUrlSrc" 
+								  ComicProgress="@_comicPage.Progress" 
+								  Fields="_comic.ComicFields" 
 								  OnComicNeedsRefresh="HandleComicNedsRefresh"></FieldEntries>
 				</div>
 			</Column>
@@ -119,9 +119,9 @@
 	[Parameter]
 	public string Code { get; set; } = "";
 
-	private bool loaded { get; set; }
-	private ComicPageViewModel comicPage { get; set; } = new ComicPageViewModel();
-	private ComicViewModel comic => comicPage.ComicViewModel;
+	private bool _loaded;
+	private ComicPageViewModel _comicPage = new ComicPageViewModel();
+	private ComicViewModel _comic => _comicPage.ComicViewModel;
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -137,8 +137,8 @@
 	{
 		try
 		{
-			comicPage = await Api.GetComic(Code);
-			loaded = true;
+			_comicPage = await Api.GetComic(Code);
+			_loaded = true;
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
@@ -149,13 +149,13 @@
 
 	private async Task HandleComicNedsRefresh()
 	{
-		//loaded = false;
+		//_loaded = false;
 		StateHasChanged();
 
 		try
 		{
-			comicPage = await Api.GetComic(Code);
-			//loaded = true;
+			_comicPage = await Api.GetComic(Code);
+			//_loaded = true;
 			StateHasChanged();
 		}
 		catch (AccessTokenNotAvailableException exception)

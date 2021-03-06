@@ -1,13 +1,13 @@
 ﻿@if (Inline)
 {
-	<div class="@($"spinner-border {css}")" role="status">
+	<div class="@($"spinner-border {_css}")" role="status">
 		<span class="sr-only">Loading...</span>
 	</div>
 }
 else
 {
 	<div class="d-flex justify-content-center">
-		<div class="@($"spinner-border {css}")" role="status">
+		<div class="@($"spinner-border {_css}")" role="status">
 			<span class="sr-only">Loading...</span>
 		</div>
 	</div>
@@ -19,7 +19,7 @@ else
 	[Parameter]
 	public bool Inline { get; set; }
 
-	private string css
+	private string _css
 	{
 		get
 		{

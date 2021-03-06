@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject Services.LACSApi Api
 
-@if (fields == null)
+@if (_fields == null)
 {
 	<Spinner></Spinner>
 }
@@ -13,21 +13,21 @@ else
 			<Column>
 				<h1>Search</h1>
 
-				<EditForm Model="searchVM" OnValidSubmit="HandleValidSubmit">
+				<EditForm Model="_searchVM" OnValidSubmit="HandleValidSubmit">
 					<Row>
 						<Column>
-							<FormNumber @bind-Value="searchVM.Id"></FormNumber>
+							<FormNumber @bind-Value="_searchVM.Id"></FormNumber>
 						</Column>
 						<Column>
-							<FormTextfield @bind-Value="searchVM.Code"></FormTextfield>
+							<FormTextfield @bind-Value="_searchVM.Code"></FormTextfield>
 						</Column>
 					</Row>
 					<Row>
 						<Column>
-							<FormTextfield @bind-Value="searchVM.Title"></FormTextfield>
+							<FormTextfield @bind-Value="_searchVM.Title"></FormTextfield>
 						</Column>
 						<Column>
-							<FormTextfield @bind-Value="searchVM.Description"></FormTextfield>
+							<FormTextfield @bind-Value="_searchVM.Description"></FormTextfield>
 						</Column>
 					</Row>
 					<Row>
@@ -40,17 +40,17 @@ else
 					</Row>
 
 					<div class="d-flex flex-wrap">
-						@for (int i = 0; i < fields.Length; i++)
+						@for (int i = 0; i < _fields.Length; i++)
 						{
 							var index = i;
-							if (fields[index].Type == CrowdSourcedFieldType.Section)
+							if (_fields[index].Type == CrowdSourcedFieldType.Section)
 							{
-								<h5 style="width: 100%;">@fields[index].Name</h5>
+								<h5 style="width: 100%;">@_fields[index].Name</h5>
 							}
 							else
 							{
 								<div class="m-2">
-									<FilterItem Field="fields[index]" @bind-FilterData="searchVM.SearchEntries[index]"></FilterItem>
+									<FilterItem Field="_fields[index]" @bind-FilterData="_searchVM.SearchEntries[index]"></FilterItem>
 								</div>
 							}
 						}
@@ -61,15 +61,15 @@ else
 					</p>
 				</EditForm>
 
-				@if (comics == null)
+				@if (_comics == null)
 				{
 					<Spinner></Spinner>
 				}
 				else
 				{
-					<LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView Comics="comics">
+					<LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView Comics="_comics">
 						<HeaderContent>
-							<h3>Results (@comics.Length)</h3>
+							<h3>Results (@_comics.Length)</h3>
 						</HeaderContent>
 					</LoadingArtistCrowdSource.Client.Pages.Comics.ComicListView>
 				}
@@ -81,16 +81,16 @@ else
 
 @code {
 
-	private ComicFieldViewModel[]? fields { get; set; } = null;
-	private SearchViewModel searchVM { get; set; } = new SearchViewModel();
-	private ComicListItemViewModel[]? comics { get; set; } = new ComicListItemViewModel[] { };
+	private ComicFieldViewModel[]? _fields = null;
+	private SearchViewModel _searchVM = new SearchViewModel();
+	private ComicListItemViewModel[]? _comics = new ComicListItemViewModel[] { };
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			fields = await Api.GetSearchFields();
-			searchVM.SearchEntries = fields.Select(f => new SearchEntryViewModel()
+			_fields = await Api.GetSearchFields();
+			_searchVM.SearchEntries = _fields.Select(f => new SearchEntryViewModel()
 			{
 				FieldCode = f.Code,
 			}).ToArray();
@@ -106,20 +106,20 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		comics = null;
+		_comics = null;
 
 		var newSearchVM = new SearchViewModel()
 		{
-			Id = searchVM.Id,
-			Code = searchVM.Code,
-			Title = searchVM.Title,
-			Description = searchVM.Description,
-			SearchEntries = searchVM.SearchEntries.Where(se => se.FieldValues.Any(fv => fv.Filtered)).ToArray(),
+			Id = _searchVM.Id,
+			Code = _searchVM.Code,
+			Title = _searchVM.Title,
+			Description = _searchVM.Description,
+			SearchEntries = _searchVM.SearchEntries.Where(se => se.FieldValues.Any(fv => fv.Filtered)).ToArray(),
 		};
 
 		try
 		{
-			comics = await Api.PostSearch(newSearchVM);
+			_comics = await Api.PostSearch(newSearchVM);
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

@@ -24,20 +24,20 @@
 </Container>
 
 @code {
-	private IBrowserFile? importFeedFile { get; set; }
+	private IBrowserFile? _importFeedFile { get; set; }
 	private void HandleImportFeedFile(InputFileChangeEventArgs e)
 	{
-		importFeedFile = e.File;
+		_importFeedFile = e.File;
 	}
 	private async Task HandleImportFeed()
 	{
-		if (importFeedFile == null)
+		if (_importFeedFile == null)
 		{
 			ToastService.ShowWarning("No file selected");
 			return;
 		}
 
-		using (var readStream = importFeedFile.OpenReadStream(maxAllowedSize: 512000 * 20))
+		using (var readStream = _importFeedFile.OpenReadStream(maxAllowedSize: 512000 * 20))
 		{
 			try
 			{

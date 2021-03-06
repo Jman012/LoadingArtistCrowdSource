@@ -7,45 +7,45 @@
 @inject IToastService ToastService
 
 <Container Fluid="false">
-	@if (!loaded)
+	@if (!_loaded)
 	{
 		<Spinner></Spinner>
 	}
 	else
 	{
-		@if (isNew)
+		@if (_isNew)
 		{
-			<h3>New Field: @fieldDef.Name</h3>
+			<h3>New Field: @_fieldDef.Name</h3>
 		}
 		else
 		{
-			<h3>Edit Field: @fieldDef.Name</h3>
+			<h3>Edit Field: @_fieldDef.Name</h3>
 		}
 
-		<EditForm Model="fieldDef" OnValidSubmit="HandleValidSubmit">
+		<EditForm Model="_fieldDef" OnValidSubmit="HandleValidSubmit">
 			<DataAnnotationsValidator />
 			<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
 			<div class="form-row">
 				<div class="col-md-4">
-					<FormCheckbox @bind-Value="fieldDef.IsActive"></FormCheckbox>
+					<FormCheckbox @bind-Value="_fieldDef.IsActive"></FormCheckbox>
 				</div>
 				<div class="col-md-8">
-					<FormTextfield @bind-Value="fieldDef.Code" Disabled="true"></FormTextfield>
+					<FormTextfield @bind-Value="_fieldDef.Code" Disabled="true"></FormTextfield>
 				</div>
 			</div>
 
-			<FormTextfield @bind-Value="fieldDef.Name" @oninput="OnNameInput"></FormTextfield>
+			<FormTextfield @bind-Value="_fieldDef.Name" @oninput="OnNameInput"></FormTextfield>
 
-			<FormTextarea @bind-Value="fieldDef.ShortDescription"></FormTextarea>
+			<FormTextarea @bind-Value="_fieldDef.ShortDescription"></FormTextarea>
 
-			<FormTextarea @bind-Value="fieldDef.LongDescription"></FormTextarea>
+			<FormTextarea @bind-Value="_fieldDef.LongDescription"></FormTextarea>
 
-			<FormSelect @bind-Value="fieldDef.Type">
-				<SelectOptionsFromEnum Field="fieldDef.Type" IncludeEmpty="true"></SelectOptionsFromEnum>
+			<FormSelect @bind-Value="_fieldDef.Type">
+				<SelectOptionsFromEnum Field="_fieldDef.Type" IncludeEmpty="true"></SelectOptionsFromEnum>
 			</FormSelect>
 
-			@if (showOptions)
+			@if (_showOptions)
 			{
 				<div class="mb-3">
 					<div class="d-flex mb-3">
@@ -59,13 +59,13 @@
 					</div>
 
 					<ListGroup ondragover="event.preventDefault();">
-						@for (int i = 0; i < fieldDef.Options.Count; i++)
+						@for (int i = 0; i < _fieldDef.Options.Count; i++)
 						{
 							var index = i;
-							var option = fieldDef.Options[index];
+							var option = _fieldDef.Options[index];
 							<ListGroupItem draggable="true" @key="option.Code" @ondragstart="() => HandleDragStart(option)" @ondrop="() => HandleDragDrop(option)">
 								<div class="d-flex flex-row align-items-center w-100">
-									<div class="@($"grabbable mr-3 {(draggingOption == option ? "active" : "")}")">
+									<div class="@($"grabbable mr-3 {(_draggingOption == option ? "active" : "")}")">
 										<Icon Name="@("fa-grip-vertical")"></Icon>
 									</div>
 									<div class="w-100">
@@ -95,12 +95,12 @@
 				</div>
 			}
 
-			<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="isSubmitting">
-				@if (isSubmitting)
+			<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="_isSubmitting">
+				@if (_isSubmitting)
 				{
 					<Spinner Inline="true" Small="true"></Spinner>
 				}
-				@if (isNew)
+				@if (_isNew)
 				{
 					<text>Create</text>
 				}
@@ -115,7 +115,7 @@
 	}
 </Container>
 
-<FieldOptionEditModal @ref="optionModal" OnSubmit="HandleFieldOptionModal"></FieldOptionEditModal>
+<FieldOptionEditModal @ref="_optionModal" OnSubmit="HandleFieldOptionModal"></FieldOptionEditModal>
 
 @code {
 
@@ -124,36 +124,33 @@
 	[Parameter]
 	public string Code { get; set; } = "";
 
-	private bool loaded { get; set; } = true;
-	private FieldDefinitionFormViewModel fieldDef { get; set; } = new FieldDefinitionFormViewModel();
-	public bool isNew { get; set; } = true;
-	public bool isSubmitting { get; set; } = false;
-	private bool showOptions => FieldLogic.FieldTypeHasOptions(fieldDef.Type);
-	private FieldOptionEditModal? optionModal { get; set; }
-	private FieldOptionEditModal? editOptionModal { get; set; }
-	private CrowdSourcedFieldDefinitionOptionViewModel editingFieldOption { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel();
-
-	private CrowdSourcedFieldDefinitionOptionViewModel? draggingOption = null;
+	private bool _loaded = true;
+	private FieldDefinitionFormViewModel _fieldDef = new FieldDefinitionFormViewModel();
+	public bool _isNew = true;
+	public bool _isSubmitting = false;
+	private bool _showOptions => FieldLogic.FieldTypeHasOptions(_fieldDef.Type);
+	private FieldOptionEditModal? _optionModal;
+	private CrowdSourcedFieldDefinitionOptionViewModel? _draggingOption = null;
 
 
 	protected override async Task OnInitializedAsync()
 	{
 		if (Code == "new")
 		{
-			fieldDef = new FieldDefinitionFormViewModel()
+			_fieldDef = new FieldDefinitionFormViewModel()
 			{
 				IsNewField = true,
 			};
-			isNew = true;
+			_isNew = true;
 		}
 		else
 		{
-			isNew = false;
+			_isNew = false;
 			try
 			{
-				loaded = false;
-				fieldDef = await Api.GetField(Code);
-				loaded = true;
+				_loaded = false;
+				_fieldDef = await Api.GetField(Code);
+				_loaded = true;
 			}
 			catch (AccessTokenNotAvailableException exception)
 			{
@@ -165,17 +162,17 @@
 
 	private void OnNameInput(ChangeEventArgs ev)
 	{
-		if (isNew)
+		if (_isNew)
 		{
-			fieldDef.Code = (ev.Value as string)!.ToLower().Replace(" ", "-");
-			fieldDef.Code = s_rgxCode.Replace(fieldDef.Code, "");
+			_fieldDef.Code = (ev.Value as string)!.ToLower().Replace(" ", "-");
+			_fieldDef.Code = s_rgxCode.Replace(_fieldDef.Code, "");
 		}
 	}
 
 	#region Options and Modal
 	private void HandleAddOption()
 	{
-		optionModal?.Open(new FieldOptionEditModal.State()
+		_optionModal?.Open(new FieldOptionEditModal.State()
 		{
 			OptionVM = new CrowdSourcedFieldDefinitionOptionViewModel(),
 			Index = null,
@@ -184,49 +181,49 @@
 
 	private void HandleEditOption(int index)
 	{
-		optionModal?.Open(new FieldOptionEditModal.State()
+		_optionModal?.Open(new FieldOptionEditModal.State()
 		{
-			OptionVM = fieldDef.Options[index],
+			OptionVM = _fieldDef.Options[index],
 			Index = index,
 		});
 	}
 
 	private void HandleRemoveOption(int index)
 	{
-		fieldDef.Options.RemoveAt(index);
+		_fieldDef.Options.RemoveAt(index);
 	}
 
 	private void HandleFieldOptionModal(FieldOptionEditModal.State state)
 	{
 		if (state.Index.HasValue)
 		{
-			fieldDef.Options[state.Index.Value] = state.OptionVM;
+			_fieldDef.Options[state.Index.Value] = state.OptionVM;
 		}
 		else
 		{
-			fieldDef.Options.Add(state.OptionVM);
+			_fieldDef.Options.Add(state.OptionVM);
 		}
 	}
 	#endregion Options and Modal
 
 	private async Task HandleValidSubmit()
 	{
-		isSubmitting = true;
+		_isSubmitting = true;
 		string? result;
 		try
 		{
-			result = await Api.PutField(fieldDef);
+			result = await Api.PutField(_fieldDef);
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
 			exception.Redirect();
 			return;
 		}
-		isSubmitting = false;
+		_isSubmitting = false;
 		if (result == null)
 		{
 			NavigationManager.NavigateTo("/field");
-			ToastService.ShowInfo($"The field {fieldDef.Name} was saved", "Success");
+			ToastService.ShowInfo($"The field {_fieldDef.Name} was saved", "Success");
 		}
 		else
 		{
@@ -242,29 +239,29 @@
 	#region Dragging
 	protected void HandleDragStart(CrowdSourcedFieldDefinitionOptionViewModel option)
 	{
-		draggingOption = option;
+		_draggingOption = option;
 	}
 
 	protected void HandleDragDrop(CrowdSourcedFieldDefinitionOptionViewModel option)
 	{
-		if (draggingOption == null)
+		if (_draggingOption == null)
 		{
 			return;
 		}
-		if (option.Code == draggingOption.Code)
+		if (option.Code == _draggingOption.Code)
 		{
-			draggingOption = null;
+			_draggingOption = null;
 			return;
 		}
 
-		var listOptions = fieldDef.Options.ToList();
-		var idxDragging = listOptions.IndexOf(draggingOption);
+		var listOptions = _fieldDef.Options.ToList();
+		var idxDragging = listOptions.IndexOf(_draggingOption);
 		var idxDrop = listOptions.IndexOf(option);
 		listOptions.RemoveAt(idxDragging);
-		listOptions.Insert(idxDrop, draggingOption);
-		fieldDef.Options = listOptions.ToList();
+		listOptions.Insert(idxDrop, _draggingOption);
+		_fieldDef.Options = listOptions.ToList();
 
-		draggingOption = null;
+		_draggingOption = null;
 	}
 	#endregion Dragging
 }

@@ -5,7 +5,7 @@
 
 @typeparam TField
 
-<label for="@For" @attributes="AdditionalAttributes">@label</label>
+<label for="@For" @attributes="AdditionalAttributes">@_label</label>
 
 @code {
 
@@ -18,12 +18,12 @@
 	[Parameter(CaptureUnmatchedValues = true)]
 	public IDictionary<string, object>? AdditionalAttributes { get; set; }
 
-	private string label { get; set; } = "";
+	private string _label = "";
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		label = GetDisplayName();
+		_label = GetDisplayName();
 	}
 
 	private string GetDisplayName()

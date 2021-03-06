@@ -9,11 +9,11 @@
 <div class="d-flex">
 	<h1>Fields</h1>
 	<div class="flex-fill"></div>
-	@if (hasReordered)
+	@if (_hasReordered)
 	{
 		<div>
 			<Button Color="Color.Primary" Clicked="HandleSaveFieldOrder" class="mr-1">
-				@if (isSavingReorder)
+				@if (_isSavingReorder)
 				{
 					<Spinner Small="true" Inline="true"></Spinner>
 				}
@@ -32,7 +32,7 @@
 	</div>
 </div>
 
-@if (activeFields == null)
+@if (_activeFields == null)
 {
 	<Spinner></Spinner>
 }
@@ -53,10 +53,10 @@ else
 			</tr>
 		</thead>
 		<tbody>
-			@foreach (var field in activeFields)
+			@foreach (var field in _activeFields)
 			{
 				<tr draggable="true" @key="field.Code" @ondragstart="() => HandleDragStart(field)" @ondrop="() => HandleDragDrop(field)">
-					<td class="@($"grabbable {(draggingField == field ? "active" : "")}")"><Icon Name="@("fa-grip-vertical")"></Icon></td>
+					<td class="@($"grabbable {(_draggingField == field ? "active" : "")}")"><Icon Name="@("fa-grip-vertical")"></Icon></td>
 					<td>
 						@if (field.Type == CrowdSourcedFieldType.Section)
 						{
@@ -83,7 +83,7 @@ else
 	</table>
 
 	<h3>Inactive Fields</h3>
-	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="inactiveFields" PageSize="15">
+	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="_inactiveFields" PageSize="15">
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Name" Field="@(fd => fd.Name)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Type" Field="@(fd => fd.Type)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Created By" Field="@(fd => fd.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
@@ -101,7 +101,7 @@ else
 	</BlazorTable.Table>
 
 	<h3>Deleted Fields</h3>
-	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="deletedFields" PageSize="15">
+	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionViewModel" Items="_deletedFields" PageSize="15">
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Name" Field="@(fd => fd.Name)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Type" Field="@(fd => fd.Type)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Created By" Field="@(fd => fd.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
@@ -113,27 +113,27 @@ else
 }
 
 @code {
-	private CrowdSourcedFieldDefinitionViewModel[]? activeFields = null;
-	private CrowdSourcedFieldDefinitionViewModel[]? inactiveFields = null;
-	private CrowdSourcedFieldDefinitionViewModel[]? deletedFields = null;
-	private CrowdSourcedFieldDefinitionViewModel? draggingField = null;
-	private bool hasReordered = false;
-	private bool isSavingReorder = false;
+	private CrowdSourcedFieldDefinitionViewModel[]? _activeFields = null;
+	private CrowdSourcedFieldDefinitionViewModel[]? _inactiveFields = null;
+	private CrowdSourcedFieldDefinitionViewModel[]? _deletedFields = null;
+	private CrowdSourcedFieldDefinitionViewModel? _draggingField = null;
+	private bool _hasReordered = false;
+	private bool _isSavingReorder = false;
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
 			var allFields = await Api.GetFields();
-			activeFields = allFields
+			_activeFields = allFields
 				.Where(f => f.IsActive && !f.IsDeleted)
 				.OrderBy(f => f.DisplayOrder)
 				.ToArray();
-			inactiveFields = allFields
+			_inactiveFields = allFields
 				.Where(f => !f.IsActive && !f.IsDeleted)
 				.OrderBy(f => f.DisplayOrder)
 				.ToArray();
-			deletedFields = allFields
+			_deletedFields = allFields
 				.Where(f => f.IsDeleted)
 				.OrderBy(f => f.DisplayOrder)
 				.ToArray();
@@ -147,44 +147,44 @@ else
 
 	protected void HandleDragStart(CrowdSourcedFieldDefinitionViewModel field)
 	{
-		draggingField = field;
+		_draggingField = field;
 	}
 
 	protected void HandleDragDrop(CrowdSourcedFieldDefinitionViewModel field)
 	{
-		if (draggingField == null || activeFields == null)
+		if (_draggingField == null || _activeFields == null)
 		{
 			return;
 		}
-		if (field.Code == draggingField.Code)
+		if (field.Code == _draggingField.Code)
 		{
-			draggingField = null;
+			_draggingField = null;
 			return;
 		}
 
-		var listActiveFields = activeFields.ToList();
-		var idxDragging = listActiveFields.IndexOf(draggingField);
+		var listActiveFields = _activeFields.ToList();
+		var idxDragging = listActiveFields.IndexOf(_draggingField);
 		var idxDrop = listActiveFields.IndexOf(field);
 		listActiveFields.RemoveAt(idxDragging);
-		listActiveFields.Insert(idxDrop, draggingField);
-		activeFields = listActiveFields.ToArray();
+		listActiveFields.Insert(idxDrop, _draggingField);
+		_activeFields = listActiveFields.ToArray();
 
-		draggingField = null;
-		hasReordered = true;
+		_draggingField = null;
+		_hasReordered = true;
 	}
 
 	private async Task HandleSaveFieldOrder()
 	{
-		isSavingReorder = true;
-		string? result = await Api.PutFieldPositions(activeFields!.Select(f => f.Code).ToArray());
+		_isSavingReorder = true;
+		string? result = await Api.PutFieldPositions(_activeFields!.Select(f => f.Code).ToArray());
 		if (!string.IsNullOrEmpty(result))
 		{
 			ToastService.ShowError(result, "Error");
 		}
 		else
 		{
-			isSavingReorder = false;
-			hasReordered = false;
+			_isSavingReorder = false;
+			_hasReordered = false;
 			ToastService.ShowSuccess("The order of fields has been updated.", "Success");
 		}
 	}
