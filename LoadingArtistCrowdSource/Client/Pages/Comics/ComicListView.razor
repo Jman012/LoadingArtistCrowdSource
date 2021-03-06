@@ -38,7 +38,7 @@
 	</div>
 	@foreach (var year in _comicsGroupedByYear.OrderBy(y => y.Year))
 	{
-		<Collapsible @ref="_groupedByYearCollapsibles[year.Year]" IsCollapsed="true" IdPrefix="@year.Year.ToString()">
+		<Collapsible @ref="_groupedByYearCollapsibles[year.Year]" IsCollapsed="_initiallyCollapsed" IdPrefix="@year.Year.ToString()">
 			<HeaderContent Context="isCollapsed">
 				<h3 class="header-collapsible">
 					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
@@ -122,6 +122,7 @@ else
 	private ComicListViewType _view = ComicListViewType.GroupedByYear;
 	private IEnumerable<GroupedYear> _comicsGroupedByYear = new GroupedYear[] { };
 	private Dictionary<int, Collapsible> _groupedByYearCollapsibles = new Dictionary<int, Collapsible>();
+	private bool _initiallyCollapsed => Comics.Count() >= 20;
 
 	protected override async Task OnInitializedAsync()
 	{
