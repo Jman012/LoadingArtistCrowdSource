@@ -6,13 +6,13 @@
 		@if (_isFiltering)
 		{
 			<button class="btn btn-outline-secondary" type="button" @onclick="HandleClearFilter">
-				<span class="oi oi-x" aria-hidden="true"></span>
+				<SemanticIcon Name="x" Title="Click to clear the filter" />
 			</button>
 		}
 		else
 		{
 			<span class="input-group-text">
-				<span class="oi oi-magnifying-glass" aria-hidden="true"></span>
+				<SemanticIcon Name="search" Title="Type to filter the available options" />
 			</span>
 		}
 	</div>

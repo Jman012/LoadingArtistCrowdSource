@@ -46,9 +46,8 @@ namespace LoadingArtistCrowdSource.Client
 				{
 					options.ChangeTextOnKeyPress = true;
 				})
-				.AddBootstrapProviders()
-				.AddFontAwesomeIcons();
-
+				.AddBootstrapProviders();
+				
 			// Toast
 			builder.Services.AddBlazoredToast();
 

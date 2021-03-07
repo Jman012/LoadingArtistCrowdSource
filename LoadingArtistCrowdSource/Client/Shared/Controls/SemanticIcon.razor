@@ -1,0 +1,43 @@
+<svg aria-hidden="true" 
+	 focusable="false" 
+	 style="@(Size == null ? "" : $"font-size: {Size};")" 
+	 title="@Title" @attributes="_attributes">
+  <use href="/feather-sprite.svg#@Name"/>
+</svg>
+<span class="sr-only">@Title</span>
+
+@code {
+	[Parameter]
+	public string Name { get; set; } = "";
+	[Parameter]
+	public string Title { get; set; } = "";
+	[Parameter(CaptureUnmatchedValues = true)]
+	public IDictionary<string, object>? AdditionalAttributes { get; set; }
+	[Parameter]
+	public string? Size { get; set; }
+
+	private IDictionary<string, object> _attributes
+	{
+		get
+		{
+			var attrs = AdditionalAttributes ?? new Dictionary<string, object>();
+			string classes = attrs.TryGetValue("class", out object? theClass) ? (theClass as string) ?? "" : "";
+			attrs["class"] = "feather " + classes;
+			return attrs;
+		}
+	}
+
+	protected override void OnInitialized()
+	{
+		if (string.IsNullOrEmpty(Name))
+		{
+			throw new ArgumentException("Name must have a value", nameof(Name));
+		}
+		if (string.IsNullOrEmpty(Title))
+		{
+			throw new ArgumentException("Title must have a value", nameof(Title));
+		}
+
+		base.OnInitialized();
+	}
+}

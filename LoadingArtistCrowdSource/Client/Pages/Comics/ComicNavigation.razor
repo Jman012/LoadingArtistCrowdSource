@@ -1,23 +1,28 @@
 ﻿<div class="d-flex flex-row w-100 align-items-center justify-content-center mb-3">
-	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.FirstComicCode ?? "")}")" class="@($"btn btn-outline-primary mr-2 {(_showFirst ? "" : "disabled")}")" title="First">
-		<Icon Name="@("fa-angle-double-left")"></Icon>
-		<span class="sr-only">First Comic</span>
+	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.FirstComicCode ?? "")}")" 
+			 class="@($"btn btn-outline-primary mr-2 {(_showFirst ? "" : "disabled")}")" 
+			 title="First comic">
+		<SemanticIcon Name="chevrons-left" Title="First comic" />
 	</NavLink>
-	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.PreviousComicCode ?? "")}")" class="@($"btn btn-outline-primary mr-2 {(_showPrevious ? "" : "disabled")}")" title="Previous">
-		<Icon Name="@("fa-angle-left")"></Icon>
-		<span class="sr-only">Previous Comic</span>
+	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.PreviousComicCode ?? "")}")" 
+			 class="@($"btn btn-outline-primary mr-2 {(_showPrevious ? "" : "disabled")}")" 
+			 title="Previous comic">
+		<SemanticIcon Name="chevron-left" Title="Previous comic" />
 	</NavLink>
-	<NavLink href="/random" class="btn btn-outline-primary mr-2" title="Random Comic">
-		<Icon Name="IconName.Random"></Icon>
-		<span class="sr-only">Random Comic</span>
+	<NavLink href="/random" 
+			 class="btn btn-outline-primary mr-2" 
+			 title="Random Comic">
+		<SemanticIcon Name="shuffle" Title="Random comic" />
 	</NavLink>
-	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.NextComicCode ?? "")}")" class="@($"btn btn-outline-primary mr-2 {(_showNext ? "" : "disabled")}")" title="Next">
-		<Icon Name="@("fa-angle-right")"></Icon>
-		<span class="sr-only">Next Comic</span>
+	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.NextComicCode ?? "")}")" 
+			 class="@($"btn btn-outline-primary mr-2 {(_showNext ? "" : "disabled")}")" 
+			 title="Next comic">
+		<SemanticIcon Name="chevron-right" Title="Next comic" />
 	</NavLink>
-	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.LatestComicCode ?? "")}")" class="@($"btn btn-outline-primary mr-2 {(_showLatest || IsComicList ? "" : "disabled")}")" title="Latest">
-		<Icon Name="@("fa-angle-double-right")"></Icon>
-		<span class="sr-only">Latest Comic</span>
+	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicPage.LatestComicCode ?? "")}")" 
+			 class="@($"btn btn-outline-primary mr-2 {(_showLatest || IsComicList ? "" : "disabled")}")" 
+			 title="Latest comic">
+		<SemanticIcon Name="chevrons-right" Title="Latest comic" />
 	</NavLink>
 </div>
 

@@ -19,7 +19,7 @@
 				}
 				else
 				{
-					<Icon Name="IconName.Save"></Icon>
+					<HelperIcon Name="save" />
 				}
 				Save Order
 			</Button>
@@ -27,7 +27,7 @@
 	}
 	<div>
 		<NavLink class="btn btn-primary" href="field/new">
-			<span class="oi oi-plus" aria-hidden="true"></span> New Field
+			<HelperIcon Name="plus" /> New Field
 		</NavLink>
 	</div>
 </div>
@@ -56,7 +56,9 @@ else
 			@foreach (var field in _activeFields)
 			{
 				<tr draggable="true" @key="field.Code" @ondragstart="() => HandleDragStart(field)" @ondrop="() => HandleDragDrop(field)">
-					<td class="@($"grabbable {(_draggingField == field ? "active" : "")}")"><Icon Name="@("fa-grip-vertical")"></Icon></td>
+					<td class="@($"grabbable {(_draggingField == field ? "active" : "")}")">
+						<SemanticIcon Name="more-vertical" Title="Grab to drag and re-order" />
+					</td>
 					<td>
 						@if (field.Type == CrowdSourcedFieldType.Section)
 						{
@@ -74,7 +76,7 @@ else
 					<td>@field.LastUpdatedDate</td>
 					<td>
 						<NavLink class="nav-link" href="@($"field/{Uri.EscapeDataString(field.Code)}")">
-							<span class="oi oi-pencil" aria-hidden="true"></span> Edit
+							<HelperIcon Name="edit" /> Edit
 						</NavLink>
 					</td>
 				</tr>
@@ -93,7 +95,7 @@ else
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="" Field="@(fd => fd.Code)" Sortable="false" Filterable="false">
 			<Template>
 				<NavLink class="nav-link" href="@($"field/{Uri.EscapeDataString(context.Code)}")">
-					<span class="oi oi-pencil" aria-hidden="true"></span> Edit
+					<HelperIcon Name="edit" /> Edit
 				</NavLink>
 			</Template>
 		</BlazorTable.Column>

@@ -175,13 +175,13 @@
 		<ModalFooter>
 			<div class="w-100 d-flex flex-row justify-content-around flex-wrap">
 				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="_isFirstInFields" Class="mr-2 mb-2 text-nowrap">
-					<Icon Name="IconName.AngleLeft"></Icon>
+					<HelperIcon Name="chevron-left" />
 					Back
 				</Button>
 
 				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleSkip" Disabled="_isLastInFields" Class="mr-2 mb-2 text-nowrap">
 					Next&nbsp;
-					<Icon Name="IconName.AngleRight"></Icon>
+					<HelperIcon Name="chevron-right" />
 				</Button>
 
 				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(_isSubmitting || _userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
@@ -197,7 +197,7 @@
 					{
 						<text>Edit Response</text>
 					}
-					&nbsp;<Icon Name="IconName.AngleRight"></Icon>
+					&nbsp;<HelperIcon Name="chevron-right" />
 				</Button>
 			</div>
 		</ModalFooter>

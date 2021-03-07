@@ -14,39 +14,39 @@
 	<ul class="nav flex-column">
 		<li class="nav-item px-3">
 			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-				<span class="oi oi-home" aria-hidden="true"></span> Home
+				<HelperIcon Name="home" Size="1.5em" class="mr-3" /> Home
 			</NavLink>
 		</li>
 		<li class="nav-item px-3">
 			<NavLink class="nav-link" href="stats">
-				<span class="oi oi-bar-chart" aria-hidden="true"></span> Statistics
+				<HelperIcon Name="bar-chart-2" Size="1.5em" class="mr-3" /> Home Statistics
 			</NavLink>
 		</li>
 		<li class="nav-item px-3">
 			<NavLink class="nav-link" href="search">
-				<span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search
+				<HelperIcon Name="search" Size="1.5em" class="mr-3" /> Home Search
 			</NavLink>
 		</li>
 		<li class="nav-item px-3">
 			<NavLink class="nav-link" href="comic" Match="NavLinkMatch.Prefix">
-				<span class="oi oi-list-rich" aria-hidden="true"></span> Comics
+				<HelperIcon Name="list" Size="1.5em" class="mr-3" /> Comics
 			</NavLink>
 		</li>
 		<li class="nav-item px-3">
 			<NavLink class="nav-link" href="about" Match="NavLinkMatch.Prefix">
-				<span class="oi oi-people" aria-hidden="true"></span> About
+				<HelperIcon Name="users" Size="1.5em" class="mr-3" /> About
 			</NavLink>
 		</li>
 		<AuthorizeView Roles="@Roles.Administrator">
 			<Authorized>
 				<li class="nav-item px-3">
 					<NavLink class="nav-link" href="field" Match="NavLinkMatch.Prefix">
-						<span class="oi oi-script" aria-hidden="true"></span> Fields
+						<HelperIcon Name="sliders" Size="1.5em" class="mr-3" /> Fields
 					</NavLink>
 				</li>
 				<li class="nav-item px-3">
 					<NavLink class="nav-link" href="admin" Match="NavLinkMatch.Prefix">
-						<span class="oi oi-warning" aria-hidden="true"></span> Admin
+						<HelperIcon Name="lock" Size="1.5em" class="mr-3" /> Admin
 					</NavLink>
 				</li>
 			</Authorized>

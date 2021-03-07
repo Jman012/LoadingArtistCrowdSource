@@ -4,7 +4,7 @@
 {
 	<option value=""></option>
 }
-@foreach (var value in values)
+@foreach (var value in _values)
 {
 	<option value="@value.Key">@value.Value</option>
 }
@@ -15,7 +15,7 @@
 	[Parameter]
 	public bool IncludeEmpty { get; set; }
 
-	private List<KeyValuePair<string, string>> values { get; set; } = new List<KeyValuePair<string, string>>();
+	private List<KeyValuePair<string, string>> _values { get; set; } = new List<KeyValuePair<string, string>>();
 
 	protected override void OnInitialized()
 	{
@@ -24,7 +24,7 @@
 		var enumValues = System.Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
 		foreach (var value in enumValues)
 		{
-			values.Add(KeyValuePair.Create(value.ToString()!, Utilities.GetEnumDescription(value)));
+			_values.Add(KeyValuePair.Create(value.ToString()!, Utilities.GetEnumDescription(value)));
 		}
 	}
 }

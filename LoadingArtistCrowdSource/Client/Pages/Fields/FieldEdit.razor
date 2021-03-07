@@ -53,7 +53,7 @@
 						<div class="flex-fill"></div>
 						<div>
 							<Button Color="Color.Secondary" Clicked="HandleAddOption">
-								<span class="oi oi-plus" aria-hidden="true"></span> Add
+								<HelperIcon Name="plus" /> Add
 							</Button>
 						</div>
 					</div>
@@ -66,21 +66,23 @@
 							<ListGroupItem draggable="true" @key="option.Code" @ondragstart="() => HandleDragStart(option)" @ondrop="() => HandleDragDrop(option)">
 								<div class="d-flex flex-row align-items-center w-100">
 									<div class="@($"grabbable mr-3 {(_draggingOption == option ? "active" : "")}")">
-										<Icon Name="@("fa-grip-vertical")"></Icon>
+										<SemanticIcon Name="more-vertical" Title="Grab to drag and re-order" />
 									</div>
 									<div class="w-100">
 										<div class="d-flex w-100 justify-content-between align-items-start">
-											<h5>@option.Text</h5>
+											<div class="d-flex flex-column">
+												<div>@option.Text</div>
+												<small class="text-muted">@option.Code</small>
+											</div>
 											<div>
 												<Button Outline="true" Color="Color.Secondary" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleEditOption(index))">
-													<span class="oi oi-pencil" aria-hidden="true"></span> Edit
+													<HelperIcon Name="edit" /> Edit
 												</Button>
 												<Button Outline="true" Color="Color.Danger" Size="Size.Small" Class="flex-nowrap" Clicked="@(() => HandleRemoveOption(index))">
-													<span class="oi oi-trash" aria-hidden="true"></span> Delete
+													<HelperIcon Name="trash-2" /> Delete
 												</Button>
 											</div>
 										</div>
-										<small class="text-muted">@option.Code</small>
 										<p>@option.Description</p>
 										@if (!string.IsNullOrEmpty(option.URL))
 										{

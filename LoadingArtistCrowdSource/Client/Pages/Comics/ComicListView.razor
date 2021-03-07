@@ -9,20 +9,23 @@
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
 					Active="_view == ComicListViewType.GroupedByYear"
-					Clicked="GroupedByYear">
-				<Icon Name="@("fa-th-large")" />
+					Clicked="GroupedByYear"
+					title="Group comics by year">
+				<SemanticIcon Name="list" Title="Group comics by year" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
 					Active="_view == ComicListViewType.Thumbnail"
-					Clicked="Thumbnail">
-				<Icon Name="@("fa-th")" />
+					Clicked="Thumbnail"
+					title="Show all comics in a grid">
+				<SemanticIcon Name="grid" Title="Show all comics in a grid" />
 			</Button>
 			<Button Type="ButtonType.Button"
 					Color="Color.Light"
 					Active="_view == ComicListViewType.Table"
-					Clicked="Table">
-				<Icon Name="@("fa-th-list")" />
+					Clicked="Table"
+					title="Show all comics in a paginated table">
+				<SemanticIcon Name="align-justify" Title="Show all comics in a paginated table" />
 			</Button>
 		</Buttons>
 	</div>
@@ -41,7 +44,7 @@
 		<Collapsible @ref="_groupedByYearCollapsibles[year.Year]" IsCollapsed="_initiallyCollapsed" IdPrefix="@year.Year.ToString()">
 			<HeaderContent Context="isCollapsed">
 				<h3 class="header-collapsible">
-					<span class="collapse-icon oi @(isCollapsed ? "oi-chevron-right" : "oi-chevron-bottom")" aria-hidden="true"></span>
+					<HelperIcon Name="@(isCollapsed ? "chevron-right" : "chevron-down")" />
 					@year.Year <small class="text-muted">(@year.Comics.Count())</small>
 				</h3>
 			</HeaderContent>
@@ -97,7 +100,7 @@ else
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Field="@(c => c.Code)">
 			<Template>
 				<NavLink class="nav-link" href="@($"comic/{Uri.EscapeDataString(context.Code)}")">
-					<span class="oi oi-plus" aria-hidden="true"></span> View
+					<HelperIcon Name="plus" /> View
 				</NavLink>
 			</Template>
 		</BlazorTable.Column>

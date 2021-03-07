@@ -1,10 +1,10 @@
 {
-	"name": "LoadingArtistCrowdSource",
-	"short_name": "LoadingArtistCrowdSource",
+	"name": "Loading Artist Crowd Source",
+	"short_name": "LA Crowd Source",
 	"start_url": "./",
 	"display": "standalone",
 	"background_color": "#ffffff",
-	"theme_color": "#03173d",
+	"theme_color": "#ab4400",
 	"icons": [
 		{
 			"src": "icon-512.png",

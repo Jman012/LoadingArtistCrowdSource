@@ -1,6 +1,4 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
-html, body {
+﻿html, body {
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -71,7 +69,6 @@ a, .btn-link {
 
 
 /* Hacky fix because Blazorise does not support modal-dialog-scrollable yet. */
-
 .modal.custom-modal-dialog-scrollable>.modal-dialog {
 	display: -ms-flexbox;
 	display: flex;
@@ -101,6 +98,7 @@ a, .btn-link {
 		max-height: calc(100vh - 3.5rem)
 	}
 }
+/* End modal fix */
 
 .grabbable {
 	cursor: move; /* fallback if grab cursor is unsupported */
@@ -114,4 +112,15 @@ a, .btn-link {
 	cursor: grabbing;
 	cursor: -moz-grabbing;
 	cursor: -webkit-grabbing;
+}
+
+.feather {
+	width: 1em;
+	height: 1em;
+	margin-bottom: 0.25rem;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	fill: none;
 }
