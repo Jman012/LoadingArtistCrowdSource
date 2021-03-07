@@ -12,8 +12,8 @@
 				<li class="dropdown-item-text">
 					<div class="input-group">
 						<InputText class="form-control" @bind-Value="FilterData.FieldValues[0].Code"></InputText>
-						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
-							<i class="fa fa-times"></i>
+						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput" title="Click to clear search filter">
+							<SemanticIcon Name="x" Title="Click to clear search filter" />
 						</button>
 					</div>
 				</li>
@@ -22,8 +22,8 @@
 				<li class="dropdown-item-text">
 					<div class="input-group">
 						<input type="text" value="@_searchText" class="form-control form-control-sm" placeholder="Search..." @oninput="HandleSearchInput" />
-						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput">
-							<i class="fa fa-times"></i>
+						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput" >
+							<SemanticIcon Name="x" Title="Click to clear search filter" />
 						</button>
 					</div>
 				</li>
