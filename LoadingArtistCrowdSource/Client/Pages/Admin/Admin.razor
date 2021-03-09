@@ -1,6 +1,8 @@
 ﻿@page "/admin"
 @using System.IO
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.Administrator)]
 @inject LoadingArtistCrowdSource.Client.Services.LACSApi Api
 @inject IToastService ToastService
 

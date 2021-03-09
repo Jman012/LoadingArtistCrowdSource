@@ -24,7 +24,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 		public SearchController(ApplicationDbContext context)
 		{
-			this._context = context;
+			_context = context;
 		}
 
 		[HttpGet]

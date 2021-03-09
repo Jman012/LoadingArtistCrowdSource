@@ -182,5 +182,31 @@ namespace LoadingArtistCrowdSource.Server.Services
 
 			return vm;
 		}
+
+		public FeedbackViewModel MapFeedback(CrowdSourcedFieldDefinitionFeedback feedback, bool mapCreatedBy, bool mapCompletedBy)
+		{
+			FeedbackViewModel vm = new FeedbackViewModel()
+			{
+				ComicCode = feedback.Comic.Code,
+				FieldCode = feedback.CrowdSourcedFieldDefinition.Code,
+				Id = feedback.Id,
+				CreatedDate = feedback.CreatedDate,
+				Comment = feedback.Comment,
+				CompletionDate = feedback.CompletionDate,
+				CompletionType = feedback.CompletionType,
+				CompletionComment = feedback.CompletionComment,
+			};
+
+			if (mapCreatedBy)
+			{
+				vm.CreatedByUser = MapApplicationUser(feedback.CreatedByUser);
+			}
+			if (mapCompletedBy && feedback.CompletedByUser != null)
+			{
+				vm.CompletedByUser = MapApplicationUser(feedback.CompletedByUser);
+			}
+
+			return vm;
+		}
 	}
 }

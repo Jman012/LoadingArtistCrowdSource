@@ -6,14 +6,14 @@
 @using LoadingArtistCrowdSource.Shared.Models
 @inject Services.LACSApi Api
 
-@if (comics == null)
+@if (!_comics.Any())
 {
 	<Spinner></Spinner>
 }
 else
 {
-	<ComicNavigation ComicPage="comicPage" IsComicList="true"></ComicNavigation>
-	<ComicListView Comics="comics">
+	<ComicNavigation ComicPage="_comicPage" IsComicList="true"></ComicNavigation>
+	<ComicListView Comics="_comics">
 		<HeaderContent>
 			<h1>Comics</h1>
 		</HeaderContent>
@@ -21,23 +21,22 @@ else
 }
 
 @code {
-	private static ComicListItemViewModel[]? comics { get; set; } = null;
-	private ComicPageViewModel comicPage { get; set; } = new ComicPageViewModel();
+	private static ComicListItemViewModel[] _comics { get; set; } = new ComicListItemViewModel[] { };
+	private ComicPageViewModel _comicPage => new ComicPageViewModel()
+	{
+		LatestComicCode = _comics.LastOrDefault()?.Code,
+	};
 
 	protected override async Task OnInitializedAsync()
 	{
-		if (comics != null && comics.Any())
+		if (_comics.Any())
 		{
 			return;
 		}
 
 		try
 		{
-			comics = await Api.GetComics();
-			comicPage = new ComicPageViewModel()
-			{
-				LatestComicCode = comics.LastOrDefault()?.Code,
-			};
+			_comics = await Api.GetComics();
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

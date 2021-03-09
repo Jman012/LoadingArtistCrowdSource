@@ -17,6 +17,11 @@ namespace LoadingArtistCrowdSource.Server.Models
 	public class CrowdSourcedFieldDefinitionFeedback
 	{
 		/// <summary>
+		/// The comics Id this feedback is for.
+		/// </summary>
+		public int ComicId { get; set; }
+
+		/// <summary>
 		/// The field's Id this feedback is for.
 		/// </summary>
 		public Guid CrowdSourcedFieldDefinitionId { get; set; }
@@ -62,8 +67,9 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public string? CompletionComment { get; set; }
 
 
+		public Comic Comic { get; set; } = null!;
 		public CrowdSourcedFieldDefinition CrowdSourcedFieldDefinition { get; set; } = null!;
 		public ApplicationUser CreatedByUser { get; set; } = null!;
-		public ApplicationUser CompletedByUser { get; set; } = null!;
+		public ApplicationUser? CompletedByUser { get; set; }
 	}
 }

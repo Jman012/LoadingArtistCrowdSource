@@ -1,0 +1,68 @@
+@page "/feedback"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject Services.LACSApi Api
+
+<h1>Feedback</h1>
+
+<h2>Pending</h2>
+<BlazorTable.Table TableItem="FeedbackViewModel" Items="_pendingFeedbacks" PageSize="15">
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comic" Field="@(c => c.ComicCode)" Sortable="true" Filterable="true">
+		<Template>
+			<NavLink href="@($"/comic/{Uri.EscapeDataString(context.ComicCode)}")">@context.ComicCode</NavLink>
+		</Template>
+	</BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Field" Field="@(c => c.FieldCode)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="CreatedDate" Field="@(c => c.CreatedDate)" Sortable="true" Filterable="true">
+		<Template>
+			@context.CreatedDate.ToString("yyyy-MM-dd")
+		</Template>
+	</BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
+</BlazorTable.Table>
+
+<h2>Completed</h2>
+<BlazorTable.Table TableItem="FeedbackViewModel" Items="_completedFeedbacks" PageSize="15">
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comic" Field="@(c => c.ComicCode)" Sortable="true" Filterable="true">
+		<Template>
+			<NavLink href="@($"/comic/{Uri.EscapeDataString(context.ComicCode)}")">@context.ComicCode</NavLink>
+		</Template>
+	</BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Field" Field="@(c => c.FieldCode)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="CreatedDate" Field="@(c => c.CreatedDate)" Sortable="true" Filterable="true">
+		<Template>
+			@context.CreatedDate.ToString("yyyy-MM-dd")
+		</Template>
+	</BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completion Date" Field="@(c => c.CompletionDate)" Sortable="true" Filterable="true">
+		<Template>
+			@context.CompletionDate.Value.ToString("yyyy-MM-dd")
+		</Template>
+	</BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completed By" Field="@(c => c.CompletedByUser!.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completion Comment" Field="@(c => c.CompletionComment)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
+</BlazorTable.Table>
+
+@code {
+	private FeedbackViewModel[] _pendingFeedbacks = new FeedbackViewModel[] { };
+	private FeedbackViewModel[] _completedFeedbacks = new FeedbackViewModel[] { };
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			var feedbacks = await Api.GetFeedbackList();
+			_pendingFeedbacks = feedbacks.Where(f => f.CompletionDate == null).ToArray();
+			_completedFeedbacks = feedbacks.Where(f => f.CompletionDate != null).ToArray();
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+	}
+}

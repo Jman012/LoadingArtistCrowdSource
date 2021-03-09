@@ -1,10 +1,10 @@
 ﻿@page "/comic/{Code}/edit"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 @inject Services.LACSApi Api
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
-@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 
 <Container Fluid="false">
 	<Row>

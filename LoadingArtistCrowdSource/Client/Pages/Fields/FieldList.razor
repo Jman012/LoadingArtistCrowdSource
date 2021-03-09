@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LoadingArtistCrowdSource.Shared
 @using LoadingArtistCrowdSource.Shared.Models
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 @inject Services.LACSApi Api
 @inject IToastService ToastService
 

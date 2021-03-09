@@ -167,6 +167,17 @@
 									}
 								</ListGroup>
 							}
+
+							<div>
+								<AuthorizeView>
+									<Authorized>
+										<NavLink href="@($"/feedback/{Uri.EscapeDataString(_comicCode)}/{Uri.EscapeDataString(_comicField.Code)}/create")">Submit Feedback</NavLink>								
+									</Authorized>
+									<NotAuthorized>
+										<a href="authentication/login">Log in</a> to submit feedback
+									</NotAuthorized>
+								</AuthorizeView>
+							</div>
 						</Column>
 					</Row>
 				</Container>

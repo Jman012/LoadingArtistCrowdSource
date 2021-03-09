@@ -1,0 +1,78 @@
+@page "/feedback/{ComicCode}/{FieldCode}/create"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+<Container Fluid="false">
+	<Row>
+		<Column>
+			<h1>Create Feedback</h1>
+		</Column>
+	</Row>
+	<Row>
+		<Column>
+			<EditForm Model="_feedbackVM" OnValidSubmit="HandleValidSubmit">
+				<DataAnnotationsValidator />
+				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+
+				<FormTextfield @bind-Value="_feedbackVM.ComicCode" Disabled="true"></FormTextfield>
+				<FormTextfield @bind-Value="_feedbackVM.FieldCode" Disabled="true"></FormTextfield>
+				<FormTextarea @bind-Value="_feedbackVM.Comment"></FormTextarea>
+
+				<Button Type="ButtonType.Submit" Color="Color.Primary">
+					<HelperIcon Name="plus" /> Submit
+				</Button>
+				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel">
+					Cancel
+				</Button>
+			</EditForm>
+		</Column>
+	</Row>
+</Container>
+
+@code {
+	[Parameter]
+	public string ComicCode { get; set; } = "";
+	[Parameter]
+	public string FieldCode { get; set; } = "";
+
+	private FeedbackViewModel _feedbackVM = new FeedbackViewModel();
+
+	protected override void OnInitialized()
+	{
+		_feedbackVM.ComicCode = ComicCode;
+		_feedbackVM.FieldCode = FieldCode;
+	}
+
+	public async Task HandleValidSubmit()
+	{
+		string? result;
+		try
+		{
+			result = await Api.PostFeedback(_feedbackVM);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			ToastService.ShowError(result, "Error");
+		}
+		else
+		{
+			ToastService.ShowSuccess("Your feedback has been submitted", "Success");
+			NavigationManager.NavigateTo("/feedback");
+		}
+	}
+
+	public void HandleCancel()
+	{
+		NavigationManager.NavigateTo($"/comic/{Uri.EscapeDataString(ComicCode)}");
+	}
+}

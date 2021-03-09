@@ -111,5 +111,26 @@ namespace LoadingArtistCrowdSource.Client.Services
 			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion AdminController
+
+		#region FeedbackController
+		public async Task<FeedbackViewModel[]> GetFeedbackList()
+		{
+			return await _authClient.GetFromJsonAsync<FeedbackViewModel[]>("api/feedback", _serializationOptions) ?? new FeedbackViewModel[] { };
+		}
+		public async Task<FeedbackViewModel[]> GetFeedbackAdminList()
+		{
+			return await _authClient.GetFromJsonAsync<FeedbackViewModel[]>("api/feedback/admin", _serializationOptions) ?? new FeedbackViewModel[] { };
+		}
+		public async Task<string?> PostFeedback(FeedbackViewModel vm)
+		{
+			var response = await _authClient.PostAsJsonAsync($"/api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}", vm, _serializationOptions);
+			if (!response.IsSuccessStatusCode)
+			{
+				return await response.Content.ReadAsStringAsync();
+			}
+
+			return null;
+		}
+		#endregion FeedbackController
 	}
 }

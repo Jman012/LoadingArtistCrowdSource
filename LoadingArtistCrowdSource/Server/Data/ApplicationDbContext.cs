@@ -108,10 +108,16 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<CrowdSourcedFieldDefinitionFeedback>()
 				.HasKey(csfdf => new
 				{
+					csfdf.ComicId,
 					csfdf.CrowdSourcedFieldDefinitionId,
 					csfdf.Id,
 				});
 			// Relationships
+			builder.Entity<CrowdSourcedFieldDefinitionFeedback>()
+				.HasOne(csfdf => csfdf.Comic)
+				.WithMany(c => c.FieldFeedbacks)
+				.HasForeignKey(csfdf => csfdf.ComicId)
+				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<CrowdSourcedFieldDefinitionFeedback>()
 				.HasOne(csfdf => csfdf.CrowdSourcedFieldDefinition)
 				.WithMany(csfd => csfd.CrowdSourcedFieldDefinitionFeedbacks)

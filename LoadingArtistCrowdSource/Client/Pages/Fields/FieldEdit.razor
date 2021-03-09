@@ -1,7 +1,9 @@
 ﻿@page "/field/{Code}"
 @using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LoadingArtistCrowdSource.Shared.Models
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 @inject Services.LACSApi Api
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
