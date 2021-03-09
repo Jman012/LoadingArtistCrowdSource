@@ -117,10 +117,6 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.GetFromJsonAsync<FeedbackViewModel[]>("api/feedback", _serializationOptions) ?? new FeedbackViewModel[] { };
 		}
-		public async Task<FeedbackViewModel[]> GetFeedbackAdminList()
-		{
-			return await _authClient.GetFromJsonAsync<FeedbackViewModel[]>("api/feedback/admin", _serializationOptions) ?? new FeedbackViewModel[] { };
-		}
 		public async Task<string?> PostFeedback(FeedbackViewModel vm)
 		{
 			var response = await _authClient.PostAsJsonAsync($"/api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}", vm, _serializationOptions);
@@ -130,6 +126,14 @@ namespace LoadingArtistCrowdSource.Client.Services
 			}
 
 			return null;
+		}
+		public async Task<FeedbackViewModel[]> GetFeedbackQueueList()
+		{
+			return await _authClient.GetFromJsonAsync<FeedbackViewModel[]>("api/feedback/queue", _serializationOptions) ?? new FeedbackViewModel[] { };
+		}
+		public async Task<FeedbackViewModel> GetFeedback(string comicCode, string fieldCode, int id)
+		{
+			return await _authClient.GetFromJsonAsync<FeedbackViewModel>($"api/feedback/{Uri.EscapeDataString(comicCode)}/{Uri.EscapeDataString(fieldCode)}/{id}", _serializationOptions);
 		}
 		#endregion FeedbackController
 	}

@@ -1,20 +1,14 @@
-@page "/feedback"
+@page "/feedbackqueue"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@attribute [Authorize]
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 @inject Services.LACSApi Api
 
 <h1>Feedback</h1>
 
-<p>
-	Submit feedback requests to improve crowd-sourced data fields. 
-	This is useful when the available options do not adequately describe
-	a certain comic, or to improve descriptions and examples or the
-	field. Submit feedback from the comi page, when answering a field.
-</p>
-
 <h2>Pending</h2>
 <BlazorTable.Table TableItem="FeedbackViewModel" Items="_pendingFeedbacks" PageSize="15">
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="User" Field="@(c => c.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
 	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comic" Field="@(c => c.ComicCode)" Sortable="true" Filterable="true">
 		<Template>
 			<NavLink href="@($"/comic/{Uri.EscapeDataString(context.ComicCode)}")">@context.ComicCode</NavLink>
@@ -27,11 +21,19 @@
 		</Template>
 	</BlazorTable.Column>
 	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Action">
+		<Template>
+			<NavLink href="@($"/feedbackqueue/{Uri.EscapeDataString(context.ComicCode)}/{Uri.EscapeDataString(context.FieldCode)}/{context.Id}")">
+				<HelperIcon Name="plus" /> View
+			</NavLink>
+		</Template>
+	</BlazorTable.Column>
 	<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
 </BlazorTable.Table>
 
 <h2>Completed</h2>
 <BlazorTable.Table TableItem="FeedbackViewModel" Items="_completedFeedbacks" PageSize="15">
+	<BlazorTable.Column TableItem="FeedbackViewModel" Title="User" Field="@(c => c.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
 	<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comic" Field="@(c => c.ComicCode)" Sortable="true" Filterable="true">
 		<Template>
 			<NavLink href="@($"/comic/{Uri.EscapeDataString(context.ComicCode)}")">@context.ComicCode</NavLink>
@@ -62,7 +64,7 @@
 	{
 		try
 		{
-			var feedbacks = await Api.GetFeedbackList();
+			var feedbacks = await Api.GetFeedbackQueueList();
 			_pendingFeedbacks = feedbacks.Where(f => f.CompletionDate == null).ToArray();
 			_completedFeedbacks = feedbacks.Where(f => f.CompletionDate != null).ToArray();
 		}

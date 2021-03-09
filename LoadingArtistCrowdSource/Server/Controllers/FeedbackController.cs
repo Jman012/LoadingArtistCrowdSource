@@ -50,25 +50,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return feedbacks.Select(csfdf => modelMapper.MapFeedback(csfdf, mapCreatedBy: true, mapCompletedBy: true));
 		}
 
-		[HttpGet]
-		[Route("admin")]
-		[Authorize(Roles = Roles.AdminMod)]
-		public async Task<IEnumerable<FeedbackViewModel>> GetAdminList()
-		{
-			Services.ModelMapper modelMapper = new Services.ModelMapper();
-
-			List<Models.CrowdSourcedFieldDefinitionFeedback> feedbacks = await _context
-				.CrowdSourcedFieldDefinitionFeedbacks
-				.Include(csfdf => csfdf.Comic)
-				.Include(csfdf => csfdf.CrowdSourcedFieldDefinition)
-				.Include(csfdf => csfdf.CreatedByUser)
-				.Include(csfdf => csfdf.CompletedByUser)
-				.OrderBy(csfdf => csfdf.CreatedDate)
-				.ToListAsync();
-
-			return feedbacks.Select(csfdf => modelMapper.MapFeedback(csfdf, mapCreatedBy: true, mapCompletedBy: true));
-		}
-
 		[HttpPost]
 		[Route("{comicCode}/{fieldCode}")]
 		public async Task<IActionResult> PostFeedback(
@@ -104,5 +85,54 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok();
 		}
 
+		[HttpGet]
+		[Route("queue")]
+		[Authorize(Roles = Roles.AdminMod)]
+		public async Task<IEnumerable<FeedbackViewModel>> GetQueueList()
+		{
+			Services.ModelMapper modelMapper = new Services.ModelMapper();
+
+			List<Models.CrowdSourcedFieldDefinitionFeedback> feedbacks = await _context
+				.CrowdSourcedFieldDefinitionFeedbacks
+				.Include(csfdf => csfdf.Comic)
+				.Include(csfdf => csfdf.CrowdSourcedFieldDefinition)
+				.Include(csfdf => csfdf.CreatedByUser)
+				.Include(csfdf => csfdf.CompletedByUser)
+				.OrderBy(csfdf => csfdf.CreatedDate)
+				.ToListAsync();
+
+			return feedbacks.Select(csfdf => modelMapper.MapFeedback(csfdf, mapCreatedBy: true, mapCompletedBy: true));
+		}
+
+		[HttpGet]
+		[Route("{comicCode}/{fieldCode}/{id}")]
+		[Authorize(Roles = Roles.AdminMod)]
+		public async Task<IActionResult> GetFeedback(string comicCode, string fieldCode, int id)
+		{
+			Services.ModelMapper modelMapper = new Services.ModelMapper();
+
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return BadRequest("Comic not found");
+			}
+
+			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
+			if (fieldDef == null)
+			{
+				return BadRequest("Field not found");
+			}
+
+			Models.CrowdSourcedFieldDefinitionFeedback feedback = await _context
+				.CrowdSourcedFieldDefinitionFeedbacks
+				.Include(csfdf => csfdf.Comic)
+				.Include(csfdf => csfdf.CrowdSourcedFieldDefinition)
+				.Include(csfdf => csfdf.CreatedByUser)
+				.Include(csfdf => csfdf.CompletedByUser)
+				.Where(csfdf => csfdf.ComicId == comic.Id && csfdf.CrowdSourcedFieldDefinitionId == fieldDef.Id && csfdf.Id == id)
+				.FirstOrDefaultAsync();
+
+			return Json(modelMapper.MapFeedback(feedback, mapCreatedBy: true, mapCompletedBy: true));
+		}
 	}
 }

@@ -1,0 +1,78 @@
+@page "/feedbackqueue/{ComicCode}/{FieldCode}/{Id:int}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
+@inject Services.LACSApi Api
+
+<Container Fluid="false">
+	<Row>
+		<Column>
+			<h1>Feedback Review</h1>
+
+			<Table>
+				<TableRow>
+					<TableHeaderCell>Comic</TableHeaderCell>
+					<TableRowCell>
+						<NavLink href="@($"/comic/{@_feedbackVM.ComicCode}")">@_feedbackVM.ComicCode</NavLink>
+					</TableRowCell>
+				</TableRow>
+				<TableRow>
+					<TableHeaderCell>Field</TableHeaderCell>
+					<TableRowCell>
+						<NavLink href="@($"/field/{@_feedbackVM.FieldCode}")">@_feedbackVM.FieldCode</NavLink>
+					</TableRowCell>
+				</TableRow>
+				<TableRow>
+					<TableHeaderCell>Id</TableHeaderCell>
+					<TableRowCell>
+						@_feedbackVM.Id
+					</TableRowCell>
+				</TableRow>
+				<TableRow>
+					<TableHeaderCell>Created By</TableHeaderCell>
+					<TableRowCell>
+						@_feedbackVM.CreatedByUser.UserName
+					</TableRowCell>
+				</TableRow>
+				<TableRow>
+					<TableHeaderCell>Created Date</TableHeaderCell>
+					<TableRowCell>
+						@_feedbackVM.CreatedDate
+					</TableRowCell>
+				</TableRow>
+				<TableRow>
+					<TableHeaderCell>Comment</TableHeaderCell>
+					<TableRowCell>
+						@_feedbackVM.Comment
+					</TableRowCell>
+				</TableRow>
+			</Table>
+		</Column>
+	</Row>
+</Container>
+
+@code {
+	[Parameter]
+	public string ComicCode { get; set; } = "";
+	[Parameter]
+	public string FieldCode { get; set; } = "";
+	[Parameter]
+	public int Id { get; set; }
+
+	private FeedbackViewModel _feedbackVM = new FeedbackViewModel();
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			_feedbackVM = await Api.GetFeedback(ComicCode, FieldCode, Id);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+
+		await base.OnInitializedAsync();
+	}
+}
