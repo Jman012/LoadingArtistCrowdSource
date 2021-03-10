@@ -23,7 +23,15 @@
 				<FormTextarea @bind-Value="_feedbackVM.Comment"></FormTextarea>
 
 				<Button Type="ButtonType.Submit" Color="Color.Primary">
-					<HelperIcon Name="plus" /> Submit
+					@if (_isSubmitting)
+					{
+						<Spinner Small="true" Inline="true"></Spinner>
+					}
+					else
+					{
+						<HelperIcon Name="plus" />
+					}
+					&nbsp;Submit
 				</Button>
 				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleCancel">
 					Cancel
@@ -40,6 +48,7 @@
 	public string FieldCode { get; set; } = "";
 
 	private FeedbackViewModel _feedbackVM = new FeedbackViewModel();
+	private bool _isSubmitting;
 
 	protected override void OnInitialized()
 	{
@@ -52,7 +61,9 @@
 		string? result;
 		try
 		{
+			_isSubmitting = true;
 			result = await Api.PostFeedback(_feedbackVM);
+			_isSubmitting = false;
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{

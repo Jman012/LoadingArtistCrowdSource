@@ -107,7 +107,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[HttpGet]
 		[Route("{comicCode}/{fieldCode}/{id}")]
 		[Authorize(Roles = Roles.AdminMod)]
-		public async Task<IActionResult> GetFeedback(string comicCode, string fieldCode, int id)
+		public async Task<IActionResult> GetFeedback(
+			[FromRoute] string comicCode, 
+			[FromRoute] string fieldCode, 
+			[FromRoute] int id)
 		{
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 
@@ -133,6 +136,51 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.FirstOrDefaultAsync();
 
 			return Json(modelMapper.MapFeedback(feedback, mapCreatedBy: true, mapCompletedBy: true));
+		}
+
+		[HttpPost]
+		[Route("{comicCode}/{fieldCode}/{id}")]
+		[Authorize(Roles = Roles.AdminMod)]
+		public async Task<IActionResult> PostCompleteFeedback(
+			[FromRoute] string comicCode, 
+			[FromRoute] string fieldCode, 
+			[FromRoute] int id,
+			[FromBody] FeedbackViewModel vm)
+		{
+			var userId = _userManager.GetUserId(User);
+			if (string.IsNullOrEmpty(vm.CompletionComment))
+			{
+				return BadRequest("Completion Comment is required.");
+			}
+			if (vm.CompletionType == null)
+			{
+				return BadRequest("Completion Type is required");
+			}
+
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return BadRequest("Comic not found");
+			}
+
+			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
+			if (fieldDef == null)
+			{
+				return BadRequest("Field not found");
+			}
+
+			Models.CrowdSourcedFieldDefinitionFeedback feedback = await _context
+				.CrowdSourcedFieldDefinitionFeedbacks
+				.Where(csfdf => csfdf.ComicId == comic.Id && csfdf.CrowdSourcedFieldDefinitionId == fieldDef.Id && csfdf.Id == id)
+				.FirstOrDefaultAsync();
+			
+			feedback.CompletedBy = userId;
+			feedback.CompletionComment = vm.CompletionComment;
+			feedback.CompletionType = vm.CompletionType;
+			feedback.CompletionDate = DateTimeOffset.Now;
+			await _context.SaveChangesAsync();
+			
+			return Ok();
 		}
 	}
 }

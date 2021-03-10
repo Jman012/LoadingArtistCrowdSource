@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
 @inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
 
 <Container Fluid="false">
 	<Row>
@@ -47,6 +49,29 @@
 					</TableRowCell>
 				</TableRow>
 			</Table>
+
+			<EditForm Model="_feedbackVM" OnValidSubmit="HandleValidSubmit">
+				<DataAnnotationsValidator />
+				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+
+				<FormTextarea @bind-Value="_feedbackVM.CompletionComment"></FormTextarea>
+				<FormSelect @bind-Value="_feedbackVM.CompletionType">
+					<SelectOptionsFromEnum Field="_feedbackVM.CompletionType ?? default" IncludeEmpty="true"></SelectOptionsFromEnum>
+				</FormSelect>
+
+				<Button Type="ButtonType.Submit" Color="Color.Primary">
+					@if (_isSubmitting)
+					{
+						<Spinner Small="true" Inline="true"></Spinner>
+					}
+					else
+					{
+						<HelperIcon Name="plus" />
+					}
+					&nbsp;Submit
+				</Button>
+				<NavLink href="/feedbackqueue" class="btn btn-light">Cancel</NavLink>
+			</EditForm>
 		</Column>
 	</Row>
 </Container>
@@ -60,12 +85,15 @@
 	public int Id { get; set; }
 
 	private FeedbackViewModel _feedbackVM = new FeedbackViewModel();
+	private bool _isSubmitting;
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
+			_isSubmitting = true;
 			_feedbackVM = await Api.GetFeedback(ComicCode, FieldCode, Id);
+			_isSubmitting = false;
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
@@ -74,5 +102,29 @@
 		}
 
 		await base.OnInitializedAsync();
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		string? result;
+		try
+		{
+			result = await Api.PostCompleteFeedback(ComicCode, FieldCode, Id, _feedbackVM);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			ToastService.ShowError(result, "Error");
+		}
+		else
+		{
+			ToastService.ShowSuccess("The feedback has been completed", "Success");
+			NavigationManager.NavigateTo("/feedbackqueue");
+		}
 	}
 }
