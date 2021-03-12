@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
@@ -42,7 +43,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		public async Task<IActionResult> CompileFeed()
 		{
 			string sFeedUrl = "https://loadingartist.com/feed?post_type=comic&paged={0}";
-			int nNextPage = 0;
+			int nNextPage = 1;
 
 			Func<string> getNextUrl = () => string.Format(sFeedUrl, nNextPage++);
 
@@ -135,7 +136,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return BadRequest("No file found");
 			}
 
-			if (_context.Comics.Any())
+			if (await _context.Comics.AnyAsync())
 			{
 				return BadRequest("Comics already exist");
 			}
@@ -148,7 +149,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 
 			int id = 1;
-			using (var transaction = _context.Database.BeginTransaction())
+			using (var transaction = await _context.Database.BeginTransactionAsync())
 			{
 				try
 				{
@@ -171,6 +172,97 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 
 			return Ok($"Success - {id-1} comics imported");
+		}
+
+		[HttpPost]
+		[Route("import_comics")]
+		public async Task<IActionResult> ImportNewComics()
+		{
+			_logger.LogInformation($"User {User.Identity?.Name} initiated importing new comics.");
+			Queue<Models.Comic> importableComics = await GetImportableRssFeedItems();
+			int importableComicsCount = importableComics.Count;
+
+			var latestComic = await _context.Comics.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
+			int latestComicId = latestComic?.Id ?? 0;
+			_logger.LogInformation($"Beginning import. Latest comic id = {latestComicId}");
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					int currentComicId = latestComicId + 1;
+					foreach (var comic in importableComics)
+					{
+						_logger.LogInformation($"Importing comic '{comic.Code}' '{comic.Permalink}' with a new id of '{currentComicId}'");
+						comic.Id = currentComicId;
+						currentComicId += 1;
+						_context.Comics.Add(comic);
+					}
+
+					_logger.LogInformation($"Importing comics completed. Saving changes.");
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing comics");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+			
+			_logger.LogInformation($"Importing and saving comics completed.");
+			return Ok($"Imported {importableComicsCount} comic(s)");
+		}
+
+		private async Task<SyndicationFeed> GetRssFeedPage(int page)
+		{
+			string sFeedUrl = "https://loadingartist.com/feed?post_type=comic&paged={0}";
+
+			string url = string.Format(sFeedUrl, page);
+
+			_logger.LogInformation($"Pulling RSS page {page}: {url}");
+			SyndicationFeed syndicationFeed;
+			using (var stream = await _httpClient.GetStreamAsync(url))
+			using (var xmlReader = XmlReader.Create(stream))
+			{
+				syndicationFeed = SyndicationFeed.Load(xmlReader);
+			}
+			_logger.LogInformation($"Done loading feed page. Feed contains {syndicationFeed.Items.Count()} items.");
+
+			return syndicationFeed;
+		}
+
+		private async Task<Queue<Models.Comic>> GetImportableRssFeedItems()
+		{
+			var userId = _userManager.GetUserId(User);
+			List<Models.Comic> importableItemsNewestFirst = new List<Models.Comic>();
+
+			var latestComic = await _context.Comics.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
+			_logger.LogInformation($"Latest comic: {latestComic.Code} {latestComic.Permalink}");
+
+			int page = 1;
+			bool shouldBreakLoop = false;
+			while (!shouldBreakLoop)
+			{
+				var feedPage = await GetRssFeedPage(page);
+				page += 1;
+				foreach (var feedItem in feedPage.Items)
+				{
+					var comic = CreateComic(feedItem, id: 0, userId: userId);
+					if (latestComic.Permalink == comic.Permalink)
+					{
+						_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' matches latest comic in system. Stopping.");
+						shouldBreakLoop = true;
+						break;
+					}
+
+					_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' is new. Queueing for insertion.");
+					importableItemsNewestFirst.Add(comic);
+				}
+			}
+
+			return new Queue<Models.Comic>(importableItemsNewestFirst.Reverse<Models.Comic>());
 		}
 
 		private Models.Comic CreateComic(SyndicationItem feedItem, int id, string userId)

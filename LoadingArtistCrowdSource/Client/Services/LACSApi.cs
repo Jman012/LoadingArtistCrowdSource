@@ -65,7 +65,7 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<string?> PostTranscriptRollbackToHistory(string comicCode, int id)
 		{
-			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/transcript/{id}", null);
+			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/transcript/{id}", new StringContent(""));
 			if (response.IsSuccessStatusCode)
 			{
 				return null;
@@ -134,6 +134,11 @@ namespace LoadingArtistCrowdSource.Client.Services
 			var response = await _authClient.PostAsync("api/admin/import_feed", content);
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<string> ImportNewComics()
+		{
+			var response = await _authClient.PostAsync("api/admin/import_comics", new StringContent(""));
+			return await response.Content.ReadAsStringAsync();
+		}
 		#endregion AdminController
 
 		#region FeedbackController
@@ -162,12 +167,8 @@ namespace LoadingArtistCrowdSource.Client.Services
 		public async Task<string?> PostCompleteFeedback(string comicCode, string fieldCode, int id, FeedbackViewModel vm)
 		{
 			var response = await _authClient.PostAsJsonAsync($"/api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}/{id}", vm, _serializationOptions);
-			if (!response.IsSuccessStatusCode)
-			{
-				return await response.Content.ReadAsStringAsync();
-			}
-
-			return null;
+			response.EnsureSuccessStatusCode();
+			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion FeedbackController
 	}

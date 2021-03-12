@@ -11,6 +11,19 @@
 
 	<Row Class="mb-3">
 		<Column>
+			<h3>Import New Comics</h3>
+			<Button Color="Color.Primary" Clicked="HandleImportNewComics" Disabled="_isLoadingImportNewComics">
+				@if (_isLoadingImportNewComics)
+				{
+					<Spinner Inline="true" Small="true" />
+				}
+				&nbsp;Import
+			</Button>
+		</Column>
+	</Row>
+
+	<Row Class="mb-3">
+		<Column>
 			<h3>Compile Feed</h3>
 			<a class="btn btn-primary" href="api/admin/compile_feed" target="_top">Compile Feed</a>
 		</Column>
@@ -26,7 +39,9 @@
 </Container>
 
 @code {
-	private IBrowserFile? _importFeedFile { get; set; }
+	private IBrowserFile? _importFeedFile;
+	private bool _isLoadingImportNewComics;
+
 	private void HandleImportFeedFile(InputFileChangeEventArgs e)
 	{
 		_importFeedFile = e.File;
@@ -50,6 +65,27 @@
 				ex.Redirect();
 				return;
 			}
+		}
+	}
+
+	private async Task HandleImportNewComics()
+	{
+		try
+		{
+			_isLoadingImportNewComics = true;
+			var result = await Api.ImportNewComics();
+			_isLoadingImportNewComics = false;
+			ToastService.ShowSuccess(result);
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			ex.Redirect();
+			return;
+		}
+		catch (System.Net.Http.HttpRequestException ex)
+		{
+			ToastService.ShowError(ex.Message);
+			return;
 		}
 	}
 }
