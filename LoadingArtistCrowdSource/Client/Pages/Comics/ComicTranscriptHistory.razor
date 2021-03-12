@@ -12,15 +12,34 @@ else
 	<Container Fluid="false">
 		<Row>
 			<Column>
-				<h1>Transcript: </h1>
+				<div>
+					<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicCode)}")">
+						<HelperIcon Name="chevron-left" /> Back to Comic
+					</NavLink>
+				</div>
+				<h2>Transcript</h2>
 
-				@foreach (var transcriptHistory in _transcriptHistories)
+				@foreach (var transcriptHistory in _transcriptHistories.Reverse())
 				{
-					<pre class="border rounded border-primary">
-						@transcriptHistory.TranscriptContent
-					</pre>
-					<div class="border rounded">
-						@((MarkupString)transcriptHistory.DiffWithPrevious)
+					<div class="mb-3">
+						<h6>
+							@transcriptHistory.CreatedByUser.UserName
+							<small class="text-muted">@transcriptHistory.CreatedDate</small>	
+						</h6>
+						
+						@if (string.IsNullOrEmpty(transcriptHistory.DiffWithPrevious))
+						{
+							<pre class="border rounded bg-light p-3" style="min-height: 44px;">
+								@transcriptHistory.TranscriptContent
+							</pre>
+						}
+						else
+						{
+							<div class="border rounded">
+								@((MarkupString)transcriptHistory.DiffWithPrevious)
+							</div>
+						}
+						<hr />
 					</div>
 				}
 			</Column>
