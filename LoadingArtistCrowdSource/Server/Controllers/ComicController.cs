@@ -343,6 +343,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.ComicTranscriptHistories
 				.Include(cth => cth.CreatedByUser)
 				.Where(cth => cth.ComicId == comic.Id)
+				.OrderBy(cth => cth.Id)
 				.ToListAsync();
 
 			var transcriptHistoryItemVms = transcriptHistories
