@@ -78,6 +78,43 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			#endregion ComicHistoryLog
 
+			#region ComicTranscript
+			// Keys
+			builder.Entity<ComicTranscript>()
+				.HasKey(ct => ct.ComicId);
+			// Relationships
+			builder.Entity<ComicTranscript>()
+				.HasOne(ct => ct.Comic)
+				.WithOne(c => c.ComicTranscript)
+				.HasForeignKey<ComicTranscript>(ct => ct.ComicId)
+				.OnDelete(DeleteBehavior.NoAction);
+			builder.Entity<ComicTranscript>()
+				.HasOne(ct => ct.LastEditedByUser)
+				.WithMany(au => au.ComicTranscriptsOwned)
+				.HasForeignKey(ct => ct.LastEditedByUserId)
+				.OnDelete(DeleteBehavior.NoAction);
+			#endregion ComicTranscript
+
+			#region ComicTranscriptHistory
+			// Keys
+			builder.Entity<ComicTranscriptHistory>()
+				.HasKey(cth => new 
+				{
+					cth.ComicId,
+					cth.Id,
+				});
+			// Relationships
+			builder.Entity<ComicTranscriptHistory>()
+				.HasOne(cth => cth.Comic)
+				.WithMany(c => c.ComicTranscriptHistories)
+				.HasForeignKey(cth => cth.ComicId)
+				.OnDelete(DeleteBehavior.NoAction);
+			builder.Entity<ComicTranscriptHistory>()
+				.HasOne(cth => cth.CreatedByUser)
+				.WithMany(au => au.ComicTranscriptHistoriesCreated)
+				.OnDelete(DeleteBehavior.NoAction);
+			#endregion ComicTranscriptHistory
+
 			#region CrowdSourcedFieldDefinition
 			// Keys
 			builder.Entity<CrowdSourcedFieldDefinition>()
@@ -333,6 +370,8 @@ namespace LoadingArtistCrowdSource.Server.Data
 
 		public DbSet<Comic> Comics => Set<Comic>();
 		public DbSet<ComicHistoryLog> ComicHistoryLogs => Set<ComicHistoryLog>();
+		public DbSet<ComicTranscript> ComicTranscripts => Set<ComicTranscript>();
+		public DbSet<ComicTranscriptHistory> ComicTranscriptHistories => Set<ComicTranscriptHistory>();
 		public DbSet<CrowdSourcedFieldDefinition> CrowdSourcedFieldDefinitions => Set<CrowdSourcedFieldDefinition>();
 		public DbSet<CrowdSourcedFieldDefinitionFeedback> CrowdSourcedFieldDefinitionFeedbacks => Set<CrowdSourcedFieldDefinitionFeedback>();
 		public DbSet<CrowdSourcedFieldDefinitionHistoryLog> CrowdSourcedFieldDefinitionHistoryLogs => Set<CrowdSourcedFieldDefinitionHistoryLog>();

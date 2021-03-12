@@ -62,13 +62,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
 			if (comic == null)
 			{
-				return BadRequest("Comic not found");
+				return NotFound("Comic not found");
 			}
 
 			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDef == null)
 			{
-				return BadRequest("Field not found");
+				return NotFound("Field not found");
 			}
 
 			var feedback = new Models.CrowdSourcedFieldDefinitionFeedback()
@@ -117,13 +117,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
 			if (comic == null)
 			{
-				return BadRequest("Comic not found");
+				return NotFound("Comic not found");
 			}
 
 			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDef == null)
 			{
-				return BadRequest("Field not found");
+				return NotFound("Field not found");
 			}
 
 			Models.CrowdSourcedFieldDefinitionFeedback feedback = await _context
@@ -160,13 +160,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
 			if (comic == null)
 			{
-				return BadRequest("Comic not found");
+				return NotFound("Comic not found");
 			}
 
 			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDef == null)
 			{
-				return BadRequest("Field not found");
+				return NotFound("Field not found");
 			}
 
 			Models.CrowdSourcedFieldDefinitionFeedback feedback = await _context

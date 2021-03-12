@@ -49,6 +49,20 @@ namespace LoadingArtistCrowdSource.Client.Services
 			var response = await _authClient.PutAsJsonAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/edit", vm, _serializationOptions);
 			response.EnsureSuccessStatusCode();
 		}
+		public async Task<TranscriptHistoryItemViewModel[]> GetTranscriptHistory(string comicCode)
+		{
+			return await _publicClient.GetFromJsonAsync<TranscriptHistoryItemViewModel[]>($"api/comic/{Uri.EscapeDataString(comicCode)}/transcript", _serializationOptions) ?? new TranscriptHistoryItemViewModel[] { };
+		}
+		public async Task<string?> PostTranscriptHistory(string comicCode, TranscriptViewModel vm)
+		{
+			var response = await _authClient.PostAsJsonAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/transcript", vm, _serializationOptions);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return await response.Content.ReadAsStringAsync();
+		}
 		#endregion
 
 		#region FieldController

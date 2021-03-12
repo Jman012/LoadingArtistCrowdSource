@@ -1,4 +1,6 @@
-﻿html, body {
+﻿@import url('diff.css');
+
+html, body {
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 

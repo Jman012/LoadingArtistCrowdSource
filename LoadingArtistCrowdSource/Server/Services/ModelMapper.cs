@@ -13,7 +13,8 @@ namespace LoadingArtistCrowdSource.Server.Services
 		public ComicViewModel MapComic(Comic comic,
 			bool mapImportedByUser = false,
 			bool mapLastUpdatedUser = false,
-			bool mapComicHistoryLogs = false)
+			bool mapComicHistoryLogs = false,
+			bool mapTranscript = false)
 		{
 			ComicViewModel comicVM = new ComicViewModel()
 			{
@@ -45,6 +46,10 @@ namespace LoadingArtistCrowdSource.Server.Services
 					.ComicHistoryLogs
 					.Select(this.MapComicHistoryLog)
 					.ToList();
+			}
+			if (mapTranscript && comic.ComicTranscript != null)
+			{
+				comicVM.Transcript = MapTranscript(comic.ComicTranscript, mapLastEditedByUser: true);
 			}
 
 			return comicVM;
@@ -204,6 +209,42 @@ namespace LoadingArtistCrowdSource.Server.Services
 			if (mapCompletedBy && feedback.CompletedByUser != null)
 			{
 				vm.CompletedByUser = MapApplicationUser(feedback.CompletedByUser);
+			}
+
+			return vm;
+		}
+
+		public TranscriptViewModel MapTranscript(Models.ComicTranscript transcript,
+			bool mapLastEditedByUser = false)
+		{
+			var vm = new TranscriptViewModel()
+			{
+				LastEditedDate = transcript.LastEditedDate,
+				TranscriptContent = transcript.TranscriptContent,
+			};
+
+			if (mapLastEditedByUser)
+			{
+				vm.LastEditedByUser = MapApplicationUser(transcript.LastEditedByUser);
+			}
+
+			return vm;
+		}
+
+		public TranscriptHistoryItemViewModel MapTranscriptHistory(
+			Models.ComicTranscriptHistory transcriptHistory,
+			bool mapCreatedByUser = false)
+		{
+			var vm = new TranscriptHistoryItemViewModel()
+			{
+				CreatedDate = transcriptHistory.CreatedDate,
+				TranscriptContent = transcriptHistory.TranscriptContent,
+				DiffWithPrevious = transcriptHistory.DiffWithPrevious,
+			};
+
+			if (mapCreatedByUser)
+			{
+				vm.CreatedByUser = MapApplicationUser(transcriptHistory.CreatedByUser);
 			}
 
 			return vm;

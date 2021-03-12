@@ -83,6 +83,8 @@ namespace LoadingArtistCrowdSource.Server
 				// Required in order to have UserManager<T>.GetUserId() to work.
 				options.ClaimsIdentity.UserIdClaimType = System.Security.Claims.ClaimTypes.NameIdentifier;
 			});
+
+			services.AddScoped<Services.IRazorPartialToStringRenderer, Services.RazorPartialToStringRenderer>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,0 +1,138 @@
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Services.LACSApi Api
+@inject IJSRuntime JsRuntime
+@inject IToastService ToastService
+
+<Modal @ref="_modal" Class="custom-modal-dialog-scrollable">
+	<ModalBackdrop />
+	<ModalContent Size="ModalSize.Large">
+		<ModalHeader>
+			<ModalTitle>Transcript</ModalTitle>
+			<CloseButton Clicked="Close"></CloseButton>
+		</ModalHeader>
+		<ModalBody>
+			<EditForm @ref="_form" Model="_newTranscript" Context="editContext">
+				<DataAnnotationsValidator />
+
+				<Container Fluid="false">
+					<Row>
+						<Column Display="Display.None.Block.OnWidescreen" Class="border-right">
+							<img src="@_comicImgSrc" class="img-fluid" />
+						</Column>
+						<Column>
+							<AuthorizeView>
+								<NotAuthorized>
+									<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
+								</NotAuthorized>
+								<Authorized>
+									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+									<h5>Your Response</h5>
+									<FormTextarea @bind-Value="_newTranscript.TranscriptContent" rows="8"></FormTextarea>
+								</Authorized>
+							</AuthorizeView>
+						</Column>
+					</Row>
+				</Container>
+			</EditForm>
+		</ModalBody>
+		<ModalFooter>
+			<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(_isSubmitting || _userName == null)" Clicked="HandleSubmit" Class="text-nowrap">
+				@if (_isSubmitting)
+				{
+					<Spinner Small="true" Inline="true"></Spinner><text>&nbsp;</text>
+				}
+				@if (string.IsNullOrEmpty(_originalTranscript.TranscriptContent))
+				{
+					<text>Add</text>
+				}
+				else
+				{
+					<text>Edit</text>
+				}
+			</Button>
+			<Button Type="ButtonType.Button" Color="Color.Light" Clicked="Close">Cancel</Button>
+		</ModalFooter>
+	</ModalContent>
+</Modal>
+
+@code {
+
+	public struct State
+	{
+		public TranscriptViewModel Transcript { get; set; }
+		public string ComicCode { get; set; }
+		public string ComicImgSrc { get; set; }
+	}
+
+	[Parameter]
+	public EventCallback OnSubmit { get; set; }
+	
+	private Modal _modal = new Modal();
+	private EditForm _form = new EditForm();
+	private string? _userName;
+	private TranscriptViewModel _originalTranscript = new TranscriptViewModel();
+	private TranscriptViewModel _newTranscript = new TranscriptViewModel();
+	private string _comicCode = "";
+	private string _comicImgSrc = "";
+	private bool _isSubmitting = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+		if (user.Identity!.IsAuthenticated)
+		{
+			_userName = user.Identity!.Name;
+		}
+		await base.OnInitializedAsync();
+	}
+
+	public void Open(State state)
+	{
+		_originalTranscript = state.Transcript;
+		_newTranscript = new TranscriptViewModel()
+		{
+			TranscriptContent = state.Transcript.TranscriptContent,
+		};
+		_comicCode = state.ComicCode;
+		_comicImgSrc = state.ComicImgSrc;
+
+		_modal.Show();
+	}
+
+	public void Close()
+	{
+		_modal.Hide();
+	}
+
+	private async Task HandleSubmit()
+	{
+		if (!_form.EditContext!.Validate())
+		{
+			return;
+		}
+
+		_isSubmitting = true;
+		string? result;
+		try
+		{
+			result = await Api.PostTranscriptHistory(_comicCode, _newTranscript);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+		_isSubmitting = false;
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			ToastService.ShowError(result, "Error");
+			return;
+		}
+		
+		ToastService.ShowSuccess("Your transcript has been added", "Success");
+		await OnSubmit.InvokeAsync();
+		_modal.Hide();
+	}
+}

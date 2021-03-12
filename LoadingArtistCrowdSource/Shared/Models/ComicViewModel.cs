@@ -48,5 +48,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public ApplicationUserViewModel? LastUpdatedByUser { get; set; }
 		public List<ComicHistoryLogViewModel> ComicHistoryLogs { get; set; } = new List<ComicHistoryLogViewModel>();
 		public List<ComicFieldViewModel> ComicFields { get; set; } = new List<ComicFieldViewModel>();
+		public TranscriptViewModel Transcript { get; set; } = new TranscriptViewModel();
 	}
 }

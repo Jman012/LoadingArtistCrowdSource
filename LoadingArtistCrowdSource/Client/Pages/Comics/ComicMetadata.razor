@@ -1,0 +1,64 @@
+<Table Bordered="true" Narrow="true">
+	<TableBody>
+		<TableRow>
+			<TableHeaderCell>Title</TableHeaderCell>
+			<TableRowCell>@Comic.Title</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Identifier</TableHeaderCell>
+			<TableRowCell>@Comic.Code</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Number</TableHeaderCell>
+			<TableRowCell>@Comic.Id</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Permalink</TableHeaderCell>
+			<TableRowCell><NewTabLink Href="@Comic.Permalink">@Comic.Permalink</NewTabLink></TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Published</TableHeaderCell>
+			<TableRowCell>@Comic.ComicPublishedDate.ToString("yyyy-MM-dd mm:dd:ss K")</TableRowCell>
+		</TableRow>
+		@* <TableRow>
+			<TableHeaderCell>Image</TableHeaderCell>
+			<TableRowCell><NewTabLink Href="@Comic.ImageUrlSrc">@Comic.ImageUrlSrc</NewTabLink></TableRowCell>
+		</TableRow> *@
+		<TableRow>
+			<TableHeaderCell>Thumbnail</TableHeaderCell>
+			<TableRowCell>
+				<NewTabLink Href="@Comic.ImageThumbnailUrlSrc">
+					<img src="@Comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" class="img-fluid" style="max-height: 128px;" />
+				</NewTabLink>
+			</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Wide Thumbnail</TableHeaderCell>
+			<TableRowCell>
+				@if (Comic.ImageWideThumbnailUrlSrc != null)
+				{
+					<NewTabLink Href="@Comic.ImageWideThumbnailUrlSrc">
+						<img src="@Comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" class="img-fluid" style="max-height: 128px;" />
+					</NewTabLink>
+				}
+				else
+				{
+					<text>N/A</text>
+				}
+			</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Tooltip</TableHeaderCell>
+			<TableRowCell>@((MarkupString)(Comic.Tooltip ?? ""))</TableRowCell>
+		</TableRow>
+		<TableRow>
+			<TableHeaderCell>Description</TableHeaderCell>
+			<TableRowCell><p>@((MarkupString)(Comic.Description ?? ""))</p></TableRowCell>
+		</TableRow>
+	</TableBody>
+</Table>
+
+@code {
+	[Parameter]
+	public ComicViewModel Comic { get; set; }
+}

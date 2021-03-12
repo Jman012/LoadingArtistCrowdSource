@@ -98,6 +98,8 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public ApplicationUser ImportedByUser { get; set; } = null!;
 		public ApplicationUser? LastUpdatedByUser { get; set; }
 		public List<ComicHistoryLog> ComicHistoryLogs { get; set; } = null!;
+		public ComicTranscript? ComicTranscript { get; set; }
+		public List<ComicTranscriptHistory> ComicTranscriptHistories { get; set; } = null!;
 		public List<CrowdSourcedFieldDefinitionFeedback> FieldFeedbacks { get; set; } = null!;
 		public List<CrowdSourcedFieldUserEntry> CrowdSourcedFieldUserEntries { get; set; } = null!;
 		public List<CrowdSourcedFieldUserEntryValue> CrowdSourcedFieldUserEntryValues { get; set; } = null!;

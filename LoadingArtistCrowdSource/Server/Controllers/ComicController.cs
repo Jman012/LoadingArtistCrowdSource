@@ -22,12 +22,18 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly ILogger<ComicController> _logger;
+		private readonly Services.IRazorPartialToStringRenderer _renderer;
 
-		public ComicController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager, ILogger<ComicController> logger)
+		public ComicController(
+			ApplicationDbContext context, 
+			UserManager<Models.ApplicationUser> userManager, 
+			ILogger<ComicController> logger,
+			Services.IRazorPartialToStringRenderer renderer)
 		{
 			_context = context;
 			_userManager = userManager;
 			_logger = logger;
+			_renderer = renderer;
 		}
 
 		[HttpGet]
@@ -49,6 +55,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			Models.Comic? comic = await _context.Comics
 				.Include(c => c.ImportedByUser)
 				.Include(c => c.LastUpdatedByUser)
+				.Include(c => c.ComicTranscript)
+				.Include(c => c.ComicTranscript).ThenInclude(ct => ct!.LastEditedByUser)
 				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
 				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CrowdSourcedFieldUserEntryValues)
 				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CreatedByUser)
@@ -71,7 +79,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			var comicVM = modelMapper.MapComic(comic,
 				mapImportedByUser: true,
-				mapLastUpdatedUser: true);
+				mapLastUpdatedUser: true,
+				mapTranscript: true);
 
 			comicVM.ComicFields = fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
 			{
@@ -293,10 +302,14 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[HttpPut]
 		[Route("{comicCode}/edit")]
 		[Authorize(Roles = Roles.AdminMod)]
-		public async Task PutComicMetadata([FromRoute] string comicCode, [FromBody] Shared.Models.ComicViewModel vm)
+		public async Task<IActionResult> PutComicMetadata([FromRoute] string comicCode, [FromBody] Shared.Models.ComicViewModel vm)
 		{
 			var userId = _userManager.GetUserId(User);
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Id == vm.Id);
+			if (comic == null)
+			{
+				return NotFound("Comic code not found");
+			}
 
 			comic.Code = vm.Code;
 			comic.Permalink = vm.Permalink;
@@ -311,7 +324,116 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			comic.LastUpdatedDate = DateTimeOffset.Now;
 
 			await _context.SaveChangesAsync();
-			return;
+			return Ok();
+		}
+
+		[HttpGet]
+		[Route("{comicCode}/transcript")]
+		public async Task<IActionResult> GetTranscriptHistory([FromRoute] string comicCode)
+		{
+			var modelMapper = new Services.ModelMapper();
+
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound("Comic code not found");
+			}
+
+			var transcriptHistories = await _context
+				.ComicTranscriptHistories
+				.Include(cth => cth.CreatedByUser)
+				.Where(cth => cth.ComicId == comic.Id)
+				.ToListAsync();
+
+			var transcriptHistoryItemVms = transcriptHistories
+				.Select(cth => modelMapper.MapTranscriptHistory(cth, mapCreatedByUser: true));
+
+			return Json(transcriptHistoryItemVms);
+		}
+
+		[HttpPost]
+		[Route("{comicCode}/transcript")]
+		[Authorize]
+		public async Task<IActionResult> PostTranscriptHistory(
+			[FromRoute] string comicCode, 
+			[FromBody] Shared.Models.TranscriptViewModel transcript)
+		{
+			var userId = _userManager.GetUserId(User);
+
+			var comic = await _context
+				.Comics
+				.Include(c => c.ComicTranscript)
+				.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound("Comic code not found");
+			}
+
+			string transcriptContent = transcript.TranscriptContent.Trim();
+			if (string.IsNullOrEmpty(transcriptContent))
+			{
+				return BadRequest("Transcript content is required");
+			}
+			if (comic.ComicTranscript != null && transcriptContent.Equals(comic.ComicTranscript.TranscriptContent))
+			{
+				return Ok();
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					Models.ComicTranscriptHistory? latestHistory = _context
+						.ComicTranscriptHistories
+						.Where(cth => cth.ComicId == comic.Id)
+						.OrderByDescending(cth => cth.Id)
+						.FirstOrDefault();
+
+					// Create new transcript history
+					var comicTranscriptHistory = new Models.ComicTranscriptHistory()
+					{
+						ComicId = comic.Id,
+						CreatedByUserId = userId,
+						CreatedDate = DateTimeOffset.Now,
+						TranscriptContent = transcriptContent,
+					};
+					_context.ComicTranscriptHistories.Add(comicTranscriptHistory);
+
+					// Calculate diff
+					if (latestHistory != null)
+					{
+						var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, transcriptContent);
+						comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
+					}
+					await _context.SaveChangesAsync();
+
+					// Get and update current transcript
+					var comicTranscript = await _context.ComicTranscripts
+						.FirstOrDefaultAsync(ct => ct.ComicId == comic.Id);
+					if (comicTranscript == null)
+					{
+						comicTranscript = new Models.ComicTranscript()
+						{
+							ComicId = comic.Id,
+						};
+						_context.ComicTranscripts.Add(comicTranscript);
+					}
+					comicTranscript.LastEditedByUserId = userId;
+					comicTranscript.LastEditedDate = DateTimeOffset.Now;
+					comicTranscript.TranscriptContent = transcriptContent;
+					await _context.SaveChangesAsync();
+
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "There was an error posting the transcript history item");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			return Ok();
 		}
 	}
 }

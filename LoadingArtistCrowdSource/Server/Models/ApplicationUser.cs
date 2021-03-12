@@ -15,6 +15,9 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public List<Comic> ComicsLastUpdated { get; set; } = null!;
 
 		public List<ComicHistoryLog> ComicHistoryLogsCreated { get; set; } = null!;
+		
+		public List<ComicTranscript> ComicTranscriptsOwned { get; set; } = null!;
+		public List<ComicTranscriptHistory> ComicTranscriptHistoriesCreated { get; set; } = null!;
 
 		public List<CrowdSourcedFieldDefinition> CrowdSourcedFieldDefinitionsCreated { get; set; } = null!;
 		public List<CrowdSourcedFieldDefinition> CrowdSourcedFieldDefinitionsLastUpdated { get; set; } = null!;

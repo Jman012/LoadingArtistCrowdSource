@@ -29,90 +29,52 @@
 
 		<Row>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
-				<h3>Metadata</h3>
-				<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
-					<Authorized>
-						<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
-					</Authorized>
-				</AuthorizeView>
-				<Table Bordered="true" Narrow="true">
-					<TableBody>
-						<TableRow>
-							<TableHeaderCell>Title</TableHeaderCell>
-							<TableRowCell>@_comic.Title</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Identifier</TableHeaderCell>
-							<TableRowCell>@_comic.Code</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Number</TableHeaderCell>
-							<TableRowCell>@_comic.Id</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Permalink</TableHeaderCell>
-							<TableRowCell><NewTabLink Href="@_comic.Permalink">@_comic.Permalink</NewTabLink></TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Published</TableHeaderCell>
-							<TableRowCell>@_comic.ComicPublishedDate.ToString("yyyy-MM-dd mm:dd:ss K")</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Image</TableHeaderCell>
-							<TableRowCell><NewTabLink Href="@_comic.ImageUrlSrc">@_comic.ImageUrlSrc</NewTabLink></TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Thumbnail</TableHeaderCell>
-							<TableRowCell>
-								<NewTabLink Href="@_comic.ImageThumbnailUrlSrc">
-									<img src="@_comic.ImageThumbnailUrlSrc" width="128" height="128" title="Thumbnail" alt="Thumbnail" class="img-fluid" style="max-height: 128px;" />
-								</NewTabLink>
-							</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Wide Thumbnail</TableHeaderCell>
-							<TableRowCell>
-								@if (_comic.ImageWideThumbnailUrlSrc != null)
-								{
-									<NewTabLink Href="@_comic.ImageWideThumbnailUrlSrc">
-										<img src="@_comic.ImageWideThumbnailUrlSrc" height="128" title="Wide Thumbnail" alt="Wide Thumbnail" class="img-fluid" style="max-height: 128px;" />
-									</NewTabLink>
-								}
-								else
-								{
-									<text>N/A</text>
-								}
-							</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Tooltip</TableHeaderCell>
-							<TableRowCell>@((MarkupString)(_comic.Tooltip ?? ""))</TableRowCell>
-						</TableRow>
-						<TableRow>
-							<TableHeaderCell>Description</TableHeaderCell>
-							<TableRowCell><p>@((MarkupString)(_comic.Description ?? ""))</p></TableRowCell>
-						</TableRow>
-					</TableBody>
-				</Table>
-
-				<h3>Comic Image</h3>
-				<p>
-					<center>
-						<a href="@_comic.ImageUrlSrc" target="_blank">
-							<img src="@_comic.ImageUrlSrc" width="550" title="Comic image" alt="Comic image" class="comic-image img-thumbnail" />
-						</a>
-					</center>
-				</p>
+				<Row Class="mb-3">
+					<Column>
+						<h3>Metadata</h3>
+						<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
+							<Authorized>
+								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
+							</Authorized>
+						</AuthorizeView>
+						<ComicMetadata Comic="_comic"></ComicMetadata>
+					</Column>
+				</Row>
+				<Row Class="mb-3">
+					<Column>
+						<h3>Comic Image</h3>
+						<div>
+							<center>
+								<a href="@_comic.Permalink" target="_blank">
+									<img src="@_comic.ImageUrlSrc" width="550" title="Comic image" alt="Comic image" class="comic-image img-thumbnail" />
+								</a>
+							</center>
+						</div>
+					</Column>
+				</Row>
 			</Column>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
-				<h3>Crowd Sourced Data</h3>
-				<div class="entry-list">
-					<FieldEntries ComicCode="@_comic.Code" 
-								  ComicImgSrc="@_comic.ImageUrlSrc" 
-								  ComicProgress="@_comicPage.Progress" 
-								  Fields="_comic.ComicFields" 
-								  OnComicNeedsRefresh="HandleComicNedsRefresh"></FieldEntries>
-				</div>
+				<Row Class="mb-3">
+					<Column>
+						<h3>Crowd Sourced Data</h3>
+						<div class="entry-list">
+							<FieldEntries ComicCode="@_comic.Code" 
+										  ComicImgSrc="@_comic.ImageUrlSrc" 
+										  ComicProgress="@_comicPage.Progress" 
+										  Fields="_comic.ComicFields" 
+										  OnComicNeedsRefresh="HandleComicNedsRefresh" />
+						</div>
+					</Column>
+				</Row>
+				<Row Class="mb-3">
+					<Column>
+						<h3>Transcript</h3>
+						<ComicTranscriptView Transcript="_comic.Transcript"
+											 ComicCode="@_comic.Code"
+											 ComicImgSrc="@_comic.ImageUrlSrc"
+											 OnComicNeedsRefresh="HandleComicNedsRefresh" />
+					</Column>
+				</Row>
 			</Column>
 		</Row>
 	</div>

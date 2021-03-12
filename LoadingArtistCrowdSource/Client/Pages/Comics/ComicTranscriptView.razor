@@ -1,0 +1,49 @@
+<div class="d-flex flex-row justify-content-between">
+	<a role="button" href @onclick="HandleEdit" @onclick:preventDefault="true">Edit</a>
+	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicCode)}/transcript")">History</NavLink>
+</div>
+@if (string.IsNullOrEmpty(Transcript.TranscriptContent))
+{
+	<div class="border rounded bg-light d-flex align-items-center justify-content-center" style="min-height: 44px;">
+		<div>
+			No transcript recorded yet
+		</div>
+	</div>
+}
+else
+{
+	<pre class="border rounded bg-light p-3" style="min-height: 44px;">
+		@Transcript.TranscriptContent
+	</pre>
+}
+
+<TranscriptFormModal @ref="_transcriptModal" OnSubmit="HandleTranscriptSubmitted"></TranscriptFormModal>
+
+
+@code {
+	[Parameter]
+	public string ComicCode { get; set; } = "";
+	[Parameter]
+	public string ComicImgSrc { get; set; } = "";
+	[Parameter]
+	public TranscriptViewModel Transcript { get; set; } = new TranscriptViewModel();
+	[Parameter]
+	public EventCallback OnComicNeedsRefresh { get; set; } = new EventCallback();
+
+	private TranscriptFormModal _transcriptModal = new TranscriptFormModal();
+
+	private void HandleEdit()
+	{
+		_transcriptModal.Open(new TranscriptFormModal.State()
+		{
+			ComicCode = ComicCode,
+			ComicImgSrc = ComicImgSrc,
+			Transcript = Transcript,
+		});
+	}
+
+	private async Task HandleTranscriptSubmitted()
+	{
+		await OnComicNeedsRefresh.InvokeAsync();
+	}
+}

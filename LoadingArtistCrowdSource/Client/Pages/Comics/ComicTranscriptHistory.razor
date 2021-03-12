@@ -1,0 +1,53 @@
+@page "/comic/{ComicCode}/transcript"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
+
+@if (_isLoading)
+{
+	<Spinner></Spinner>
+}
+else
+{
+	<Container Fluid="false">
+		<Row>
+			<Column>
+				<h1>Transcript: </h1>
+
+				@foreach (var transcriptHistory in _transcriptHistories)
+				{
+					<pre class="border rounded border-primary">
+						@transcriptHistory.TranscriptContent
+					</pre>
+					<div class="border rounded">
+						@((MarkupString)transcriptHistory.DiffWithPrevious)
+					</div>
+				}
+			</Column>
+		</Row>
+	</Container>
+}
+
+
+@code {
+	[Parameter]
+	public string ComicCode { get; set; } = "";
+
+	private TranscriptHistoryItemViewModel[] _transcriptHistories = new TranscriptHistoryItemViewModel[] { };
+	private bool _isLoading;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			_transcriptHistories = await Api.GetTranscriptHistory(ComicCode);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+
+		await base.OnInitializedAsync();
+	}
+}
