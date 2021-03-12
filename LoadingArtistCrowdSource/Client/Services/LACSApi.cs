@@ -63,6 +63,16 @@ namespace LoadingArtistCrowdSource.Client.Services
 
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<string?> PostTranscriptRollbackToHistory(string comicCode, int id)
+		{
+			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/transcript/{id}", null);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return await response.Content.ReadAsStringAsync();
+		}
 		#endregion
 
 		#region FieldController

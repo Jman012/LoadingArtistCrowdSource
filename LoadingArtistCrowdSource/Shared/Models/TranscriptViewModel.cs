@@ -16,7 +16,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 
 		[Required]
 		[DisplayName("Transcript Contents")]
-		[Description("The transcript should contain all legible text present in the comic, with no additional text.")]
+		[Description("The transcript should contain all legible text present in the comic, with no additional text except for the \"LoadingArtist.com\" watermark.")]
 		public string TranscriptContent { get; set; } = "";
 	}
 }

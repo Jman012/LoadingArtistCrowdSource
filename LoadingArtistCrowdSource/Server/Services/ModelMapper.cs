@@ -237,6 +237,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 		{
 			var vm = new TranscriptHistoryItemViewModel()
 			{
+				Id = transcriptHistory.Id,
 				CreatedDate = transcriptHistory.CreatedDate,
 				TranscriptContent = transcriptHistory.TranscriptContent,
 				DiffWithPrevious = transcriptHistory.DiffWithPrevious,

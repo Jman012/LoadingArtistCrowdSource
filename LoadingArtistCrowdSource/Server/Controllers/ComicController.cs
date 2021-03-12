@@ -435,5 +435,98 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			return Ok();
 		}
+
+		[HttpPost]
+		[Route("{comicCode}/transcript/{id}")]
+		[Authorize]
+		public async Task<IActionResult> PostTranscriptHistoryRollback(
+			[FromRoute] string comicCode, 
+			[FromRoute] int id)
+		{
+			var userId = _userManager.GetUserId(User);
+
+			var comic = await _context
+				.Comics
+				.Include(c => c.ComicTranscript)
+				.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound("Comic code not found");
+			}
+
+			var sourceTranscriptHistory = await _context
+				.ComicTranscriptHistories
+				.FirstOrDefaultAsync(cth => cth.ComicId == comic.Id && cth.Id == id);
+			if (sourceTranscriptHistory == null)
+			{
+				return NotFound("Comic transition history not found" + id);
+			}
+
+			Models.ComicTranscriptHistory? latestHistory = _context
+				.ComicTranscriptHistories
+				.Where(cth => cth.ComicId == comic.Id)
+				.OrderByDescending(cth => cth.Id)
+				.FirstOrDefault();
+
+			if (latestHistory == null)
+			{
+				return BadRequest("Unexpected error");
+			}
+
+			if (latestHistory.TranscriptContent == sourceTranscriptHistory.TranscriptContent)
+			{
+				return BadRequest("Can not roll back to a transcript that is identical");
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					// Create new transcript history
+					var comicTranscriptHistory = new Models.ComicTranscriptHistory()
+					{
+						ComicId = comic.Id,
+						CreatedByUserId = userId,
+						CreatedDate = DateTimeOffset.Now,
+						TranscriptContent = sourceTranscriptHistory.TranscriptContent,
+					};
+					_context.ComicTranscriptHistories.Add(comicTranscriptHistory);
+
+					// Calculate diff
+					if (latestHistory != null)
+					{
+						var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, sourceTranscriptHistory.TranscriptContent);
+						comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
+					}
+					await _context.SaveChangesAsync();
+
+					// Get and update current transcript
+					var comicTranscript = await _context.ComicTranscripts
+						.FirstOrDefaultAsync(ct => ct.ComicId == comic.Id);
+					if (comicTranscript == null)
+					{
+						comicTranscript = new Models.ComicTranscript()
+						{
+							ComicId = comic.Id,
+						};
+						_context.ComicTranscripts.Add(comicTranscript);
+					}
+					comicTranscript.LastEditedByUserId = userId;
+					comicTranscript.LastEditedDate = DateTimeOffset.Now;
+					comicTranscript.TranscriptContent = sourceTranscriptHistory.TranscriptContent;
+					await _context.SaveChangesAsync();
+
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "There was an error posting the transcript history item");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			return Ok();
+		}
 	}
 }
