@@ -7,7 +7,7 @@
 @inject IToastService ToastService
 
 <Container Fluid="false">
-	<h3>Admin</h3>
+	<h1>Admin</h1>
 
 	<Row Class="mb-3">
 		<Column>
@@ -15,24 +15,10 @@
 			<Button Color="Color.Primary" Clicked="HandleImportNewComics" Disabled="_isLoadingImportNewComics">
 				@if (_isLoadingImportNewComics)
 				{
-					<Spinner Inline="true" Small="true" />
+					<Spinner Inline="true" Small="true" /><text>&nbsp;</text>
 				}
-				&nbsp;Import
+				Import
 			</Button>
-		</Column>
-	</Row>
-
-	<Row Class="mb-3">
-		<Column>
-			<h3>Compile Feed</h3>
-			<a class="btn btn-primary" href="api/admin/compile_feed" target="_top">Compile Feed</a>
-		</Column>
-	</Row>
-	<Row Class="mb-3">
-		<Column>
-			<h3>Import Feed</h3>
-			<InputFile OnChange="HandleImportFeedFile"></InputFile>
-			<Button Color="Color.Primary" Clicked="HandleImportFeed">Import Feed</Button>
 		</Column>
 	</Row>
 
@@ -45,27 +31,6 @@
 	private void HandleImportFeedFile(InputFileChangeEventArgs e)
 	{
 		_importFeedFile = e.File;
-	}
-	private async Task HandleImportFeed()
-	{
-		if (_importFeedFile == null)
-		{
-			ToastService.ShowWarning("No file selected");
-			return;
-		}
-
-		using (var readStream = _importFeedFile.OpenReadStream(maxAllowedSize: 512000 * 20))
-		{
-			try
-			{
-				await Api.ImportFeed(readStream);
-			}
-			catch (AccessTokenNotAvailableException ex)
-			{
-				ex.Redirect();
-				return;
-			}
-		}
 	}
 
 	private async Task HandleImportNewComics()

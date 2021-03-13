@@ -76,6 +76,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au.ComicHistoryLogsCreated)
 				.HasForeignKey(chl => chl.CreatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<ComicHistoryLog>()
+				.Property(chl => chl.Id)
+				.UseIdentityColumn();
 			#endregion ComicHistoryLog
 
 			#region ComicTranscript
@@ -113,6 +117,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.HasOne(cth => cth.CreatedByUser)
 				.WithMany(au => au.ComicTranscriptHistoriesCreated)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<ComicTranscriptHistory>()
+				.Property(ctl => ctl.Id)
+				.UseIdentityColumn();
 			#endregion ComicTranscriptHistory
 
 			#region CrowdSourcedFieldDefinition
@@ -195,6 +203,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au.CrowdSourcedFieldDefinitionHistoryLogsCreated)
 				.HasForeignKey(csfdfhl => csfdfhl.CreatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<CrowdSourcedFieldDefinitionHistoryLog>()
+				.Property(ctl => ctl.Id)
+				.UseIdentityColumn();
 			#endregion CrowdSourcedFieldDefinitionHistoryLog
 
 			#region CrowdSourcedFieldDefinitionOption
@@ -345,7 +357,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				SecurityStamp = "",
 				TwoFactorEnabled = false,
 			};
-			adminUser.PasswordHash = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>().HashPassword(adminUser, "password");
+			adminUser.PasswordHash = "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A=="; // new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>().HashPassword(adminUser, "password");
 			builder.Entity<ApplicationUser>().HasData(
 				adminUser
 			);

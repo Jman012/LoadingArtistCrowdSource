@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoadingArtistCrowdSource.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210306013802_FieldOptionDisplayOrder")]
-    partial class FieldOptionDisplayOrder
+    [Migration("20210313055531_InitialSchema")]
+    partial class InitialSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -199,7 +199,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "JMAN012GUY@GMAIL.COM",
                             NormalizedUserName = "JMAN012GUY@GMAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEHdPXFD3bkyPztpuI1DsJekFPV6eCjU9eAtXidhjxMdGEMWkOl0kA1a314ufeD/cjQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A==",
                             PhoneNumber = "",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
@@ -276,7 +276,9 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
@@ -305,6 +307,61 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("ComicHistoryLog");
+                });
+
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.ComicTranscript", b =>
+                {
+                    b.Property<int>("ComicId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LastEditedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset>("LastEditedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("TranscriptContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ComicId");
+
+                    b.HasIndex("LastEditedByUserId");
+
+                    b.ToTable("ComicTranscript");
+                });
+
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.ComicTranscriptHistory", b =>
+                {
+                    b.Property<int>("ComicId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DiffWithPrevious")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TranscriptContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ComicId", "Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.ToTable("ComicTranscriptHistory");
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinition", b =>
@@ -369,6 +426,9 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionFeedback", b =>
                 {
+                    b.Property<int>("ComicId")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("CrowdSourcedFieldDefinitionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -398,11 +458,13 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("CrowdSourcedFieldDefinitionId", "Id");
+                    b.HasKey("ComicId", "CrowdSourcedFieldDefinitionId", "Id");
 
                     b.HasIndex("CompletedBy");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CrowdSourcedFieldDefinitionId");
 
                     b.ToTable("CrowdSourcedFieldDefinitionFeedback");
                 });
@@ -413,7 +475,9 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
@@ -737,6 +801,44 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Navigation("CrowdSourcedFieldDefinition");
                 });
 
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.ComicTranscript", b =>
+                {
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.Comic", "Comic")
+                        .WithOne("ComicTranscript")
+                        .HasForeignKey("LoadingArtistCrowdSource.Server.Models.ComicTranscript", "ComicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.ApplicationUser", "LastEditedByUser")
+                        .WithMany("ComicTranscriptsOwned")
+                        .HasForeignKey("LastEditedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Comic");
+
+                    b.Navigation("LastEditedByUser");
+                });
+
+            modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.ComicTranscriptHistory", b =>
+                {
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.Comic", "Comic")
+                        .WithMany("ComicTranscriptHistories")
+                        .HasForeignKey("ComicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.ApplicationUser", "CreatedByUser")
+                        .WithMany("ComicTranscriptHistoriesCreated")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Comic");
+
+                    b.Navigation("CreatedByUser");
+                });
+
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinition", b =>
                 {
                     b.HasOne("LoadingArtistCrowdSource.Server.Models.ApplicationUser", "CreatedByUser")
@@ -757,6 +859,12 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinitionFeedback", b =>
                 {
+                    b.HasOne("LoadingArtistCrowdSource.Server.Models.Comic", "Comic")
+                        .WithMany("FieldFeedbacks")
+                        .HasForeignKey("ComicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("LoadingArtistCrowdSource.Server.Models.ApplicationUser", "CompletedByUser")
                         .WithMany("CrowdSourcedFieldDefinitionFeedbacksCompleted")
                         .HasForeignKey("CompletedBy")
@@ -773,6 +881,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasForeignKey("CrowdSourcedFieldDefinitionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Comic");
 
                     b.Navigation("CompletedByUser");
 
@@ -985,6 +1095,10 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.Navigation("ComicsLastUpdated");
 
+                    b.Navigation("ComicTranscriptHistoriesCreated");
+
+                    b.Navigation("ComicTranscriptsOwned");
+
                     b.Navigation("CrowdSourcedFieldDefinitionFeedbacksCompleted");
 
                     b.Navigation("CrowdSourcedFieldDefinitionFeedbacksCreated");
@@ -1006,6 +1120,10 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 {
                     b.Navigation("ComicHistoryLogs");
 
+                    b.Navigation("ComicTranscript");
+
+                    b.Navigation("ComicTranscriptHistories");
+
                     b.Navigation("CrowdSourcedFieldUserEntries");
 
                     b.Navigation("CrowdSourcedFieldUserEntryValues");
@@ -1013,6 +1131,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Navigation("CrowdSourcedFieldVerifiedEntries");
 
                     b.Navigation("CrowdSourcedFieldVerifiedEntryValues");
+
+                    b.Navigation("FieldFeedbacks");
                 });
 
             modelBuilder.Entity("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinition", b =>

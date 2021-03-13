@@ -75,11 +75,63 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ComicTranscript",
+                columns: table => new
+                {
+                    ComicId = table.Column<int>(type: "int", nullable: false),
+                    LastEditedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LastEditedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TranscriptContent = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComicTranscript", x => x.ComicId);
+                    table.ForeignKey(
+                        name: "FK_ComicTranscript_AspNetUsers_LastEditedByUserId",
+                        column: x => x.LastEditedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ComicTranscript_Comic_ComicId",
+                        column: x => x.ComicId,
+                        principalTable: "Comic",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ComicTranscriptHistory",
+                columns: table => new
+                {
+                    ComicId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TranscriptContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DiffWithPrevious = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComicTranscriptHistory", x => new { x.ComicId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_ComicTranscriptHistory_AspNetUsers_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ComicTranscriptHistory_Comic_ComicId",
+                        column: x => x.ComicId,
+                        principalTable: "Comic",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ComicHistoryLog",
                 columns: table => new
                 {
                     ComicId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     LogDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -111,6 +163,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 name: "CrowdSourcedFieldDefinitionFeedback",
                 columns: table => new
                 {
+                    ComicId = table.Column<int>(type: "int", nullable: false),
                     CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -123,7 +176,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CrowdSourcedFieldDefinitionFeedback", x => new { x.CrowdSourcedFieldDefinitionId, x.Id });
+                    table.PrimaryKey("PK_CrowdSourcedFieldDefinitionFeedback", x => new { x.ComicId, x.CrowdSourcedFieldDefinitionId, x.Id });
                     table.ForeignKey(
                         name: "FK_CrowdSourcedFieldDefinitionFeedback_AspNetUsers_CompletedBy",
                         column: x => x.CompletedBy,
@@ -133,6 +186,11 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         name: "FK_CrowdSourcedFieldDefinitionFeedback_AspNetUsers_CreatedBy",
                         column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CrowdSourcedFieldDefinitionFeedback_Comic_ComicId",
+                        column: x => x.ComicId,
+                        principalTable: "Comic",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_CrowdSourcedFieldDefinitionFeedback_CrowdSourcedFieldDefinition_CrowdSourcedFieldDefinitionId",
@@ -146,7 +204,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 columns: table => new
                 {
                     CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     LogDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LogMessage = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -174,7 +233,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    URL = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    URL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -313,7 +373,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "432ea055-ea01-443d-a6f7-e97d2c18d275", 0, "3acb17f1-65fe-4eac-bc2b-26403b23b999", "jman012guy@gmail.com", true, true, null, "JMAN012GUY@GMAIL.COM", "JMAN012GUY@GMAIL.COM", "AQAAAAEAACcQAAAAEGcMHFGENP1e3gIgzicFPkEkznYA2I/i4ygvv6gkD5J5ZbtP5mZhNULGL5kn+OKtQA==", "", false, "", false, "jman012guy@gmail.com" });
+                values: new object[] { "432ea055-ea01-443d-a6f7-e97d2c18d275", 0, "3acb17f1-65fe-4eac-bc2b-26403b23b999", "jman012guy@gmail.com", true, true, null, "JMAN012GUY@GMAIL.COM", "JMAN012GUY@GMAIL.COM", "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A==", "", false, "", false, "jman012guy@gmail.com" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comic_Code",
@@ -342,6 +402,16 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 column: "CrowdSourcedFieldDefinitionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ComicTranscript_LastEditedByUserId",
+                table: "ComicTranscript",
+                column: "LastEditedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComicTranscriptHistory_CreatedByUserId",
+                table: "ComicTranscriptHistory",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CrowdSourcedFieldDefinition_Code",
                 table: "CrowdSourcedFieldDefinition",
                 column: "Code",
@@ -366,6 +436,11 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 name: "IX_CrowdSourcedFieldDefinitionFeedback_CreatedBy",
                 table: "CrowdSourcedFieldDefinitionFeedback",
                 column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CrowdSourcedFieldDefinitionFeedback_CrowdSourcedFieldDefinitionId",
+                table: "CrowdSourcedFieldDefinitionFeedback",
+                column: "CrowdSourcedFieldDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CrowdSourcedFieldDefinitionHistoryLog_CreatedBy",
@@ -412,6 +487,12 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ComicHistoryLog");
+
+            migrationBuilder.DropTable(
+                name: "ComicTranscript");
+
+            migrationBuilder.DropTable(
+                name: "ComicTranscriptHistory");
 
             migrationBuilder.DropTable(
                 name: "CrowdSourcedFieldDefinitionFeedback");

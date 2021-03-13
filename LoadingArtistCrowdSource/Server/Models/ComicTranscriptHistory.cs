@@ -21,7 +21,6 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// <summary>
 		/// The id of the history entry for the comic's transcript.
 		/// </summary>
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int Id { get; set; }
 
 		/// <summary>

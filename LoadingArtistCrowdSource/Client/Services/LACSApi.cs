@@ -125,15 +125,6 @@ namespace LoadingArtistCrowdSource.Client.Services
 		#endregion RandomController
 
 		#region AdminController
-		public async Task<string> ImportFeed(Stream ms)
-		{
-			var content = new MultipartFormDataContent
-			{
-				{ new StreamContent(ms), "\"upload\"", "feed.xml" }
-			};
-			var response = await _authClient.PostAsync("api/admin/import_feed", content);
-			return await response.Content.ReadAsStringAsync();
-		}
 		public async Task<string> ImportNewComics()
 		{
 			var response = await _authClient.PostAsync("api/admin/import_comics", new StringContent(""));
