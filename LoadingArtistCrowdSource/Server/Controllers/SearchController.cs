@@ -8,10 +8,10 @@ using LoadingArtistCrowdSource.Shared.Enums;
 using LoadingArtistCrowdSource.Shared.Models;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {

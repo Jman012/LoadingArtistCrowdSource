@@ -171,5 +171,12 @@ namespace LoadingArtistCrowdSource.Client.Services
 			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion FeedbackController
+
+		#region StatisticsController
+		public async Task<StatisticsViewModel> GetStatistics()
+		{
+			return await _publicClient.GetFromJsonAsync<StatisticsViewModel>("/api/statistics", _serializationOptions) ?? new StatisticsViewModel();
+		}
+		#endregion StatisticsController
 	}
 }

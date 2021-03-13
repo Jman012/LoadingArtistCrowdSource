@@ -51,6 +51,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[Route("{code}")]
 		public async Task<IActionResult> GetComic(string code)
 		{
+			// Retrieve comic from storage
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			Models.Comic? comic = await _context.Comics
 				.Include(c => c.ImportedByUser)
@@ -67,6 +68,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
+			// Get list of field definitions with options
 			List<Models.CrowdSourcedFieldDefinition> fields = await _context
 				.CrowdSourcedFieldDefinitions
 				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
@@ -77,11 +79,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var dctVerifiedEntries = comic.CrowdSourcedFieldVerifiedEntries.ToDictionary(csfve => csfve.CrowdSourcedFieldDefinitionId);
 			var lkpUserEntries = comic.CrowdSourcedFieldUserEntries.ToLookup(csfue => csfue.CrowdSourcedFieldDefinitionId);
 
+			// Map comic to view model
 			var comicVM = modelMapper.MapComic(comic,
 				mapImportedByUser: true,
 				mapLastUpdatedUser: true,
 				mapTranscript: true);
 
+			// Map field definitions and options to view model
 			comicVM.ComicFields = fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
 			{
 				Code = csfd.Code,
@@ -104,13 +108,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					: null,
 			}).ToList();
 
+			// Calculate comic completion percentage.
 			// Each field = 0, 1, or 2 points.
 			// Verified = 2 points, Collecting = 1 points, No Data = 0 points
+			// Which is implemented by: (CountUserEntries + CountVerifiedEntries) / (TotalCountFields * 2)
+			// Ignore fields where type is Section.
 			var nonSectionFields = comicVM.ComicFields.Where(cf => cf.Type != CrowdSourcedFieldType.Section);
 			var totalPoints = nonSectionFields.Count() * 2;
 			var accruedPoints = nonSectionFields.Sum(cf => cf.VerifiedEntry != null ? 2 : (cf.UserEntries.Any() ? 1 : 0));
 			var progress = totalPoints == 0 ? 0.0 : (totalPoints == accruedPoints ? 1.0 : ((double)accruedPoints / (double)totalPoints));
 
+			// Wrap in comic page view model for navigation
 			var firstComicCode = (await _context.Comics.OrderBy(c => c.Id).FirstAsync()).Code;
 			var previousComicCode = (await _context.Comics.Where(c => c.Id == comic.Id - 1).FirstOrDefaultAsync())?.Code;
 			var nextComicCode = (await _context.Comics.Where(c => c.Id == comic.Id + 1).FirstOrDefaultAsync())?.Code;

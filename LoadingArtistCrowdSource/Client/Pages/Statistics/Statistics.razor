@@ -1,0 +1,53 @@
+@page "/statistics"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject Services.LACSApi Api
+
+@if (_isLoading)
+{
+	<Spinner></Spinner>
+}
+else
+{
+	<Container>
+		<Row>
+			<Column>
+				<h1>Statistics</h1>
+
+				<h3>Overall Comic Integrity</h3>
+				<Progress>
+					<ProgressBar Value="_stats.OverallIntegrity"></ProgressBar>
+				</Progress>
+
+				<h3>Integrity by Year</h3>
+				@foreach (var year in _stats.IntegrityByYear.Keys)
+				{
+					<h4>@year</h4>
+					<Progress>
+						<ProgressBar Value="_stats.IntegrityByYear[year]"></ProgressBar>
+					</Progress>
+				}
+			</Column>
+		</Row>
+	</Container>
+}
+
+@code {
+	private bool _isLoading;
+	private StatisticsViewModel _stats = new StatisticsViewModel();
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			_isLoading = true;
+			_stats = await Api.GetStatistics();
+			_isLoading = false;
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			ex.Redirect();
+			return;
+		}
+		await base.OnInitializedAsync();
+	}
+}
