@@ -85,7 +85,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			// Relationships
 			builder.Entity<ComicTranscript>()
 				.HasOne(ct => ct.Comic)
-				.WithOne(c => c.ComicTranscript)
+				.WithOne(c => c.ComicTranscript!)
 				.HasForeignKey<ComicTranscript>(ct => ct.ComicId)
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<ComicTranscript>()
@@ -167,7 +167,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<CrowdSourcedFieldDefinitionFeedback>()
 				.HasOne(csfdf => csfdf.CompletedByUser)
-				.WithMany(au => au.CrowdSourcedFieldDefinitionFeedbacksCompleted)
+				.WithMany(au => au!.CrowdSourcedFieldDefinitionFeedbacksCompleted)
 				.HasForeignKey(csfdf => csfdf.CompletedBy)
 				.OnDelete(DeleteBehavior.NoAction);
 			// Properties

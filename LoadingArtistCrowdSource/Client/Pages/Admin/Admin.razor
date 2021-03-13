@@ -74,7 +74,6 @@
 		{
 			_isLoadingImportNewComics = true;
 			var result = await Api.ImportNewComics();
-			_isLoadingImportNewComics = false;
 			ToastService.ShowSuccess(result);
 		}
 		catch (AccessTokenNotAvailableException ex)
@@ -86,6 +85,10 @@
 		{
 			ToastService.ShowError(ex.Message);
 			return;
+		}
+		finally
+		{
+			_isLoadingImportNewComics = false;
 		}
 	}
 }

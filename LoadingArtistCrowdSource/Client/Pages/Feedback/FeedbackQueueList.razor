@@ -56,7 +56,7 @@ else
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completion Date" Field="@(c => c.CompletionDate)" Sortable="true" Filterable="true">
 			<Template>
-				@context.CompletionDate.Value.ToString("yyyy-MM-dd")
+				@context.CompletionDate?.ToString("yyyy-MM-dd")
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completed By" Field="@(c => c.CompletedByUser!.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>

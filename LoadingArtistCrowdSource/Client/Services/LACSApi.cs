@@ -137,6 +137,7 @@ namespace LoadingArtistCrowdSource.Client.Services
 		public async Task<string> ImportNewComics()
 		{
 			var response = await _authClient.PostAsync("api/admin/import_comics", new StringContent(""));
+			response.EnsureSuccessStatusCode();
 			return await response.Content.ReadAsStringAsync();
 		}
 		#endregion AdminController
@@ -167,8 +168,12 @@ namespace LoadingArtistCrowdSource.Client.Services
 		public async Task<string?> PostCompleteFeedback(string comicCode, string fieldCode, int id, FeedbackViewModel vm)
 		{
 			var response = await _authClient.PostAsJsonAsync($"/api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}/{id}", vm, _serializationOptions);
-			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadAsStringAsync();
+			if (!response.IsSuccessStatusCode)
+			{
+				return await response.Content.ReadAsStringAsync();
+			}
+
+			return null;
 		}
 		#endregion FeedbackController
 

@@ -15,7 +15,9 @@ else
 
 				<h3>Overall Comic Integrity</h3>
 				<Progress>
-					<ProgressBar Value="_stats.OverallIntegrity"></ProgressBar>
+					<ProgressBar Value="_overallIntegrity">
+						@(_overallIntegrity)%
+					</ProgressBar>
 				</Progress>
 
 				<h3>Integrity by Year</h3>
@@ -23,7 +25,9 @@ else
 				{
 					<h4>@year</h4>
 					<Progress>
-						<ProgressBar Value="_stats.IntegrityByYear[year]"></ProgressBar>
+						<ProgressBar Value="(int)Math.Floor(_stats.IntegrityByYear[year] * 100.0)">
+							@((int)Math.Floor(_stats.IntegrityByYear[year] * 100.0))%
+						</ProgressBar>
 					</Progress>
 				}
 			</Column>
@@ -34,6 +38,8 @@ else
 @code {
 	private bool _isLoading;
 	private StatisticsViewModel _stats = new StatisticsViewModel();
+
+	private int _overallIntegrity => (int)Math.Floor(_stats.OverallIntegrity * 100.0);
 
 	protected override async Task OnInitializedAsync()
 	{

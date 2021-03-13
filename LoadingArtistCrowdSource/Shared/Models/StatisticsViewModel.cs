@@ -10,7 +10,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 {
 	public class StatisticsViewModel
 	{
-		public int OverallIntegrity { get; set; }
-		public Dictionary<int, int> IntegrityByYear { get; set; } = new Dictionary<int, int>();
+		public double OverallIntegrity { get; set; }
+		public Dictionary<int, double> IntegrityByYear { get; set; } = new Dictionary<int, double>();
 	}
 }

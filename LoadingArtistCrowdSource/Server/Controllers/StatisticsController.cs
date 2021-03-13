@@ -74,13 +74,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				int accruedPoints = userEntryCountsByYear[year] + verifiedEntryCountsByYear[year];
 				double integrity = (double)accruedPoints / ((double)totalFieldPoints * (double)comicCountsByYear[year]);
-				vm.IntegrityByYear.Add(year, (int)Math.Floor(integrity));
+				vm.IntegrityByYear.Add(year, integrity);
 
 				totalAccruedPoints += accruedPoints;
 			}
 
 			int totalComicCount = comicCountsByYear.Values.Sum();
-			vm.OverallIntegrity = (int)Math.Floor((double)totalAccruedPoints / ((double)totalFieldPoints * (double)totalComicCount));
+			vm.OverallIntegrity = (double)totalAccruedPoints / ((double)totalFieldPoints * (double)totalComicCount);
 
 			return vm;
 		}

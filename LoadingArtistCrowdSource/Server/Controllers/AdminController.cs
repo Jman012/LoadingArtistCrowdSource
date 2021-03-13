@@ -223,7 +223,23 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			_logger.LogInformation($"Pulling RSS page {page}: {url}");
 			SyndicationFeed syndicationFeed;
-			using (var stream = await _httpClient.GetStreamAsync(url))
+
+			Stream responseStream;
+			try
+			{
+				responseStream = await _httpClient.GetStreamAsync(url);
+			}
+			catch (HttpRequestException ex)
+			{
+				if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+				{
+					_logger.LogInformation($"On page {page}, received 404. Ending.");
+					return new SyndicationFeed();
+				}
+				throw;
+			}
+
+			using (var stream = responseStream)
 			using (var xmlReader = XmlReader.Create(stream))
 			{
 				syndicationFeed = SyndicationFeed.Load(xmlReader);
@@ -239,7 +255,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			List<Models.Comic> importableItemsNewestFirst = new List<Models.Comic>();
 
 			var latestComic = await _context.Comics.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
-			_logger.LogInformation($"Latest comic: {latestComic.Code} {latestComic.Permalink}");
+			_logger.LogInformation($"Latest comic: {latestComic?.Code} {latestComic?.Permalink}");
 
 			int page = 1;
 			bool shouldBreakLoop = false;
@@ -247,10 +263,14 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				var feedPage = await GetRssFeedPage(page);
 				page += 1;
+				if (!feedPage.Items.Any())
+				{
+					break;
+				}
 				foreach (var feedItem in feedPage.Items)
 				{
 					var comic = CreateComic(feedItem, id: 0, userId: userId);
-					if (latestComic.Permalink == comic.Permalink)
+					if (latestComic?.Permalink == comic.Permalink)
 					{
 						_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' matches latest comic in system. Stopping.");
 						shouldBreakLoop = true;
