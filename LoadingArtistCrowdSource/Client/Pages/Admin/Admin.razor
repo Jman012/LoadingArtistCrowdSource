@@ -44,12 +44,10 @@
 		catch (AccessTokenNotAvailableException ex)
 		{
 			ex.Redirect();
-			return;
 		}
 		catch (System.Net.Http.HttpRequestException ex)
 		{
 			ToastService.ShowError(ex.Message);
-			return;
 		}
 		finally
 		{

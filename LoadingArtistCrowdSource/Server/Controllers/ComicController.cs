@@ -23,17 +23,20 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly ILogger<ComicController> _logger;
 		private readonly Services.IRazorPartialToStringRenderer _renderer;
+		private readonly Services.HistoryLogger _historyLogger;
 
 		public ComicController(
 			ApplicationDbContext context, 
 			UserManager<Models.ApplicationUser> userManager, 
 			ILogger<ComicController> logger,
-			Services.IRazorPartialToStringRenderer renderer)
+			Services.IRazorPartialToStringRenderer renderer,
+			Services.HistoryLogger historyLogger)
 		{
 			_context = context;
 			_userManager = userManager;
 			_logger = logger;
 			_renderer = renderer;
+			_historyLogger = historyLogger;
 		}
 
 		[HttpGet]
@@ -180,12 +183,15 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								CreatedDate = DateTimeOffset.Now,
 							};
 							_context.CrowdSourcedFieldUserEntries.Add(userEntry);
+							_context.ComicHistoryLogs.Add(_historyLogger.CreateAddUserEntryLog(comic, userEntry, newValues: values.ToArray()));
 							await _context.SaveChangesAsync();
 						}
 						else
 						{
 							result = UserEntrySubmissionResult.ExistingEntryEdited;
 							userEntry.LastUpdatedDate = DateTimeOffset.Now;
+							_context.ComicHistoryLogs.Add(_historyLogger.CreateEditUserEntryLog(comic, userEntry, newValues: values.ToArray()));
+							await _context.SaveChangesAsync();
 						}
 
 						// First, remove all values
