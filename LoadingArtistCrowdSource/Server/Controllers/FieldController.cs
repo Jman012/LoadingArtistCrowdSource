@@ -176,5 +176,28 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			await _context.SaveChangesAsync();
 			return Ok();
 		}
+
+		[HttpGet]
+		[Route("{fieldCode}/history")]
+		public async Task<ActionResult> GetComicHistory([FromRoute] string fieldCode)
+		{
+			var modelMapper = new Services.ModelMapper();
+			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
+			if (fieldDef == null)
+			{
+				return NotFound();
+			}
+
+			var fieldHistoryLogs = await _context
+				.CrowdSourcedFieldDefinitionHistoryLogs
+				.Include(csfdhl => csfdhl.CrowdSourcedFieldDefinition)
+				.Include(csfdhl => csfdhl.CreatedByUser)
+				.Where(csfdhl => csfdhl.CrowdSourcedFieldDefinitionId == fieldDef.Id)
+				.OrderByDescending(csfdhl => csfdhl.Id)
+				.ToListAsync();
+
+			var vm = modelMapper.MapFieldHistoryLog(fieldDef, fieldHistoryLogs);
+			return Json(vm);
+		}
 	}
 }

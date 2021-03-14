@@ -177,7 +177,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 		{
 			Func<string?, string?, string, CrowdSourcedFieldDefinitionHistoryLog?> createWith = (oldValue, newValue, field) =>
 			{
-				if (oldValue != newValue) return null;
+				if (oldValue == newValue) return null;
 				var log = CreateBlankFieldDefinitionLog(oldFieldDef, byUserId);
 				log.LogMessage = $"Field definition property '{field}' was edited";
 				log.OldValue = oldValue;
@@ -235,11 +235,11 @@ namespace LoadingArtistCrowdSource.Server.Services
 			{
 				Func<string?, string?, string, CrowdSourcedFieldDefinitionHistoryLog?> createWith = (oldValue, newValue, field) => 
 				{
-					if (oldValue != newValue) return null;
+					if (oldValue == newValue) return null;
 					var log = CreateBlankFieldDefinitionLog(oldFieldDef, byUserId);
-					log.LogMessage = $"Field definition option '{code}' was added";
-					log.OldValue = null;
-					log.NewValue = null;
+					log.LogMessage = $"Field definition option '{code}' was edited for field {field}";
+					log.OldValue = oldValue;
+					log.NewValue = newValue;
 					return log;
 				};
 

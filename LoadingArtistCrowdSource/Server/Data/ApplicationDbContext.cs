@@ -116,6 +116,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<ComicTranscriptHistory>()
 				.HasOne(cth => cth.CreatedByUser)
 				.WithMany(au => au.ComicTranscriptHistoriesCreated)
+				.HasForeignKey(cth => cth.CreatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
 			// Properties
 			builder.Entity<ComicTranscriptHistory>()

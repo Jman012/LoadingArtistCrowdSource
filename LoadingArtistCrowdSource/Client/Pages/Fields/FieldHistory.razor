@@ -1,0 +1,56 @@
+﻿@page "/field/{FieldCode}/history"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles = LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod)]
+@inject Services.LACSApi Api
+
+@if (_isLoading)
+{
+	<Spinner></Spinner>
+}
+else
+{
+	<div>
+		<NavLink href="@($"/field/{Uri.EscapeDataString(FieldCode)}")">
+			<HelperIcon Name="chevron-left" /> Back to Field
+		</NavLink>
+	</div>
+
+	<h3>Field History: @_fieldHistoryLog.FieldTitle</h3>
+
+	<BlazorTable.Table TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Items="_fieldHistoryLog.LogItems" PageSize="15">
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="Id" Field="@(chl => chl.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="User" Field="@(chl => chl.CreatedByUser.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="Log Date" Field="@(c => c.LogDate)" Sortable="true" Filterable="true"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="Message" Field="@(c => c.LogMessage)"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="Old Value" Field="@(c => c.OldValue)"></BlazorTable.Column>
+		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionHistoryLogItemViewModel" Title="New Value" Field="@(c => c.NewValue)"></BlazorTable.Column>
+		<BlazorTable.Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true"></BlazorTable.Pager>
+	</BlazorTable.Table>
+}
+
+
+@code {
+	[Parameter]
+	public string FieldCode { get; set; } = "";
+
+	private CrowdSourcedFieldDefinitionHistoryLogViewModel _fieldHistoryLog = new CrowdSourcedFieldDefinitionHistoryLogViewModel();
+	private bool _isLoading;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			_isLoading = true;
+			_fieldHistoryLog = await Api.GetFieldHistory(FieldCode);
+			_isLoading = false;
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			ex.Redirect();
+			return;
+		}
+
+		await base.OnInitializedAsync();
+	}
+}

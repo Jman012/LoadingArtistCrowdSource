@@ -261,5 +261,28 @@ namespace LoadingArtistCrowdSource.Server.Services
 			};
 			return vm;
 		}
+
+		public CrowdSourcedFieldDefinitionHistoryLogViewModel MapFieldHistoryLog(
+			CrowdSourcedFieldDefinition fieldDef,
+			IEnumerable<CrowdSourcedFieldDefinitionHistoryLog> fieldLogs)
+		{
+			IEnumerable<CrowdSourcedFieldDefinitionHistoryLogItemViewModel> logItemVms = fieldLogs
+				.Select(csfdhl => new CrowdSourcedFieldDefinitionHistoryLogItemViewModel()
+				{
+					Id = csfdhl.Id,
+					CreatedByUser = MapApplicationUser(csfdhl.CreatedByUser),
+					LogDate = csfdhl.LogDate,
+					LogMessage = csfdhl.LogMessage,
+					OldValue = csfdhl.OldValue,
+					NewValue = csfdhl.NewValue,
+				});
+
+			var vm = new CrowdSourcedFieldDefinitionHistoryLogViewModel()
+			{
+				FieldTitle = fieldDef.Name,
+				LogItems = logItemVms.ToArray(),
+			};
+			return vm;
+		}
 	}
 }

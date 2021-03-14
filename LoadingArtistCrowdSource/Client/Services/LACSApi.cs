@@ -108,6 +108,10 @@ namespace LoadingArtistCrowdSource.Client.Services
 
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<CrowdSourcedFieldDefinitionHistoryLogViewModel> GetFieldHistory(string fieldCode)
+		{
+			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionHistoryLogViewModel>($"api/field/{Uri.EscapeDataString(fieldCode)}/history", _serializationOptions) ?? new CrowdSourcedFieldDefinitionHistoryLogViewModel();
+		}
 		#endregion
 
 		#region SearchController

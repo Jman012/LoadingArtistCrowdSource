@@ -38,7 +38,7 @@
 									<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
 								</div>
 								<div>
-									<NavLink href="@($"/comic/{Code}/history")">Comic History</NavLink>
+									<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/history")">Comic History</NavLink>
 								</div>
 							</Authorized>
 						</AuthorizeView>
