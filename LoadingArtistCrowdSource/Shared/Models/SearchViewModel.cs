@@ -12,11 +12,13 @@ namespace LoadingArtistCrowdSource.Shared.Models
 {
 	public class SearchViewModel
 	{
-		[DisplayName("Identifier")]
+		[DisplayName("Number")]
 		public int? Id { get; set; }
 		public string? Code { get; set; }
 		public string? Title { get; set; }
+		public string? Tooltip { get; set; }
 		public string? Description { get; set; }
+		public string? Transcript { get; set; }
 		public SearchEntryViewModel[] SearchEntries { get; set; } = new SearchEntryViewModel[] { };
 	}
 

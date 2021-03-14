@@ -72,9 +72,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				query = query.Where(c => c.Title.Contains(vm.Title));
 			}
+			if (!string.IsNullOrEmpty(vm.Tooltip))
+			{
+				query = query.Where(c => c.Tooltip != null && c.Tooltip.Contains(vm.Tooltip));
+			}
 			if (!string.IsNullOrEmpty(vm.Description))
 			{
 				query = query.Where(c => c.Description != null && c.Description.Contains(vm.Description));
+			}
+			if (!string.IsNullOrEmpty(vm.Transcript))
+			{
+				query = query.Where(c => c.ComicTranscript != null && c.ComicTranscript.TranscriptContent.Contains(vm.Transcript));
 			}
 			foreach (var searchEntry in vm.SearchEntries)
 			{

@@ -27,7 +27,15 @@ else
 							<FormTextfield @bind-Value="_searchVM.Title"></FormTextfield>
 						</Column>
 						<Column>
+							<FormTextfield @bind-Value="_searchVM.Tooltip"></FormTextfield>
+						</Column>
+					</Row>
+					<Row>
+						<Column>
 							<FormTextfield @bind-Value="_searchVM.Description"></FormTextfield>
+						</Column>
+						<Column>
+							<FormTextfield @bind-Value="_searchVM.Transcript"></FormTextfield>
 						</Column>
 					</Row>
 					<Row>
@@ -113,7 +121,9 @@ else
 			Id = _searchVM.Id,
 			Code = _searchVM.Code,
 			Title = _searchVM.Title,
+			Tooltip = _searchVM.Tooltip,
 			Description = _searchVM.Description,
+			Transcript = _searchVM.Transcript,
 			SearchEntries = _searchVM.SearchEntries.Where(se => se.FieldValues.Any(fv => fv.Filtered)).ToArray(),
 		};
 
