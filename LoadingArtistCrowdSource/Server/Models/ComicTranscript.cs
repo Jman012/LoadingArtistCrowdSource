@@ -22,7 +22,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// <summary>
 		/// The id of the user who last edited this comic's transcript.
 		/// </summary>
-		public string LastEditedByUserId { get; set; } = "";
+		public string LastEditedBy { get; set; } = "";
 
 		/// <summary>
 		/// The date and time when the last user edited this comic's transcript.

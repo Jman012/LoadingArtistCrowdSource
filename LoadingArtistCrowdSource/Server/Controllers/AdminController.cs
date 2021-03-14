@@ -29,13 +29,20 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly HttpClient _httpClient;
 		private readonly ILogger<AdminController> _logger;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
+		private readonly Services.HistoryLogger _historyLogger;
 
-		public AdminController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, ILogger<AdminController> logger, UserManager<Models.ApplicationUser> userManager)
+		public AdminController(
+			ApplicationDbContext context, 
+			IHttpClientFactory httpClientFactory, 
+			ILogger<AdminController> logger, 
+			UserManager<Models.ApplicationUser> userManager,
+			Services.HistoryLogger historyLogger)
 		{
 			_context = context;
 			_httpClient = httpClientFactory.CreateClient();
 			_logger = logger;
 			_userManager = userManager;
+			_historyLogger = historyLogger;
 		}
 
 		[HttpPost]
@@ -61,6 +68,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						comic.Id = currentComicId;
 						currentComicId += 1;
 						_context.Comics.Add(comic);
+						_context.ComicHistoryLogs.Add(_historyLogger.CreateComicImportedLog(comic));
 					}
 
 					_logger.LogInformation($"Importing comics completed. Saving changes.");

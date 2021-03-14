@@ -95,7 +95,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 			builder.Entity<ComicTranscript>()
 				.HasOne(ct => ct.LastEditedByUser)
 				.WithMany(au => au.ComicTranscriptsOwned)
-				.HasForeignKey(ct => ct.LastEditedByUserId)
+				.HasForeignKey(ct => ct.LastEditedBy)
 				.OnDelete(DeleteBehavior.NoAction);
 			#endregion ComicTranscript
 

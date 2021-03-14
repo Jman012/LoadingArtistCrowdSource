@@ -39,6 +39,11 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public DateTimeOffset LogDate { get; set; }
 
 		/// <summary>
+		/// A description of the history log.
+		/// </summary>
+		public string LogMessage { get; set; } = "";
+
+		/// <summary>
 		/// If this history log is about a value change, the previous value.
 		/// </summary>
 		public string? OldValue { get; set; }
@@ -47,11 +52,6 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// If this history log is about a value change, the new value.
 		/// </summary>
 		public string? NewValue { get; set; }
-
-		/// <summary>
-		/// A description of the history log.
-		/// </summary>
-		public string LogMessage { get; set; } = "";
 
 		public Comic Comic { get; set; } = null!;
 		public CrowdSourcedFieldDefinition CrowdSourcedFieldDefinition { get; set; } = null!;

@@ -256,7 +256,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 													 csfve.CrowdSourcedFieldDefinitionId == fieldDefinition.Id);
 						if (shouldVerify)
 						{
-
 							// Create a new VerifiedEntry record, if one doesn't already exist.
 							if (verifiedEntry == null)
 							{
@@ -271,6 +270,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 									VerificationDate = DateTimeOffset.Now,
 								};
 								_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
+								_context.ComicHistoryLogs.Add(_historyLogger.CreateAddVerifiedEntryLog(comic, verifiedEntry));
 
 								// Remove old verified entry values and add new ones.
 								var verifiedEntryValues = firstUserEntry.CrowdSourcedFieldUserEntryValues
@@ -295,6 +295,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							{
 								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
 								_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(verifiedEntry.CrowdSourcedFieldVerifiedEntryValues);
+								_context.ComicHistoryLogs.Add(_historyLogger.CreateRemoveVerifiedEntryLog(comic, verifiedEntry));
 
 								await _context.SaveChangesAsync();
 							}
@@ -325,19 +326,35 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound("Comic code not found");
 			}
 
-			comic.Code = vm.Code;
-			comic.Permalink = vm.Permalink;
-			comic.Title = vm.Title;
-			comic.Tooltip = vm.Tooltip;
-			comic.Description = vm.Description;
-			comic.ImageUrlSrc = vm.ImageUrlSrc;
-			comic.ImageThumbnailUrlSrc = vm.ImageThumbnailUrlSrc;
-			comic.ImageWideThumbnailUrlSrc = vm.ImageWideThumbnailUrlSrc;
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					_context.ComicHistoryLogs.AddRange(_historyLogger.CreateMetadataEditedLogs(comic, vm, userId));
 
-			comic.LastUpdatedBy = userId;
-			comic.LastUpdatedDate = DateTimeOffset.Now;
+					comic.Code = vm.Code;
+					comic.Permalink = vm.Permalink;
+					comic.Title = vm.Title;
+					comic.Tooltip = vm.Tooltip;
+					comic.Description = vm.Description;
+					comic.ImageUrlSrc = vm.ImageUrlSrc;
+					comic.ImageThumbnailUrlSrc = vm.ImageThumbnailUrlSrc;
+					comic.ImageWideThumbnailUrlSrc = vm.ImageWideThumbnailUrlSrc;
 
-			await _context.SaveChangesAsync();
+					comic.LastUpdatedBy = userId;
+					comic.LastUpdatedDate = DateTimeOffset.Now;
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+			
 			return Ok();
 		}
 
@@ -408,7 +425,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					var comicTranscriptHistory = new Models.ComicTranscriptHistory()
 					{
 						ComicId = comic.Id,
-						CreatedByUserId = userId,
+						CreatedBy = userId,
 						CreatedDate = DateTimeOffset.Now,
 						TranscriptContent = transcriptContent,
 					};
@@ -420,6 +437,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, transcriptContent);
 						comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
 					}
+					_context.ComicHistoryLogs.Add(_historyLogger.CreateNewTranscriptLog(comic, latestHistory, comicTranscriptHistory));
 					await _context.SaveChangesAsync();
 
 					// Get and update current transcript
@@ -433,7 +451,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						};
 						_context.ComicTranscripts.Add(comicTranscript);
 					}
-					comicTranscript.LastEditedByUserId = userId;
+					comicTranscript.LastEditedBy = userId;
 					comicTranscript.LastEditedDate = DateTimeOffset.Now;
 					comicTranscript.TranscriptContent = transcriptContent;
 					await _context.SaveChangesAsync();
@@ -474,7 +492,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.FirstOrDefaultAsync(cth => cth.ComicId == comic.Id && cth.Id == id);
 			if (sourceTranscriptHistory == null)
 			{
-				return NotFound("Comic transition history not found" + id);
+				return NotFound("Comic transition history not found: " + id);
 			}
 
 			Models.ComicTranscriptHistory? latestHistory = _context
@@ -501,18 +519,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					var comicTranscriptHistory = new Models.ComicTranscriptHistory()
 					{
 						ComicId = comic.Id,
-						CreatedByUserId = userId,
+						CreatedBy = userId,
 						CreatedDate = DateTimeOffset.Now,
 						TranscriptContent = sourceTranscriptHistory.TranscriptContent,
 					};
 					_context.ComicTranscriptHistories.Add(comicTranscriptHistory);
 
 					// Calculate diff
-					if (latestHistory != null)
-					{
-						var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, sourceTranscriptHistory.TranscriptContent);
-						comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
-					}
+					var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, sourceTranscriptHistory.TranscriptContent);
+					comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
+
+					_context.ComicHistoryLogs.Add(_historyLogger.CreateTranscriptRollbackLog(comic, latestHistory, comicTranscriptHistory));
 					await _context.SaveChangesAsync();
 
 					// Get and update current transcript
@@ -526,7 +543,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						};
 						_context.ComicTranscripts.Add(comicTranscript);
 					}
-					comicTranscript.LastEditedByUserId = userId;
+					comicTranscript.LastEditedBy = userId;
 					comicTranscript.LastEditedDate = DateTimeOffset.Now;
 					comicTranscript.TranscriptContent = sourceTranscriptHistory.TranscriptContent;
 					await _context.SaveChangesAsync();

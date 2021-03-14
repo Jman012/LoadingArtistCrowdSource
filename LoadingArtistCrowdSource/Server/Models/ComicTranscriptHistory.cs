@@ -26,7 +26,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// <summary>
 		/// The id of the user who created this transcript version.
 		/// </summary>
-		public string CreatedByUserId { get; set; } = "";
+		public string CreatedBy { get; set; } = "";
 
 		/// <summary>
 		/// The date and time the user submitted this transcript version.

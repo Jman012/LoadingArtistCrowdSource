@@ -25,11 +25,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly ILogger<FieldController> _logger;
-		public FieldController(ApplicationDbContext context, UserManager<Models.ApplicationUser> userManager, ILogger<FieldController> logger)
+		private readonly Services.HistoryLogger _historyLogger;
+		public FieldController(
+			ApplicationDbContext context, 
+			UserManager<Models.ApplicationUser> userManager, 
+			ILogger<FieldController> logger,
+			Services.HistoryLogger historyLogger)
 		{
 			_context = context;
 			_userManager = userManager;
 			_logger = logger;
+			_historyLogger = historyLogger;
 		}
 
 		[HttpGet]
@@ -82,6 +88,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return BadRequest("This Code is already taken by another field in the system.");
 			}
 
+			if (vm.Options.Count != vm.Options.Select(o => o.Code).Distinct().Count())
+			{
+				return BadRequest("There are duplicate codes for the field options");
+			}
+
 			using (var transaction = await _context.Database.BeginTransactionAsync())
 			{
 				try
@@ -96,6 +107,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							CreatedBy = userId,
 						};
 						_context.CrowdSourcedFieldDefinitions.Add(fieldDef);
+						_context.CrowdSourcedFieldDefinitionHistoryLogs.Add(_historyLogger.CreateAddFieldDefinitionLog(fieldDef));
+					}
+					else
+					{
+						_context.CrowdSourcedFieldDefinitionHistoryLogs.AddRange(_historyLogger.CreateEditFieldDefinitionLogs(fieldDef, vm, userId));
 					}
 
 					// Set definition properties

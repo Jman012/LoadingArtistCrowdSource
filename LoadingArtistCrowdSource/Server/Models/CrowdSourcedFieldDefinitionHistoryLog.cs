@@ -35,6 +35,16 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// </summary>
 		public string LogMessage { get; set; } = "";
 
+		/// <summary>
+		/// If this history log is about a value change, the previous value.
+		/// </summary>
+		public string? OldValue { get; set; }
+
+		/// <summary>
+		/// If this history log is about a value change, the new value.
+		/// </summary>
+		public string? NewValue { get; set; }
+
 		public CrowdSourcedFieldDefinition CrowdSourcedFieldDefinition { get; set; } = null!;
 		public ApplicationUser CreatedByUser { get; set; } = null!;
 	}
