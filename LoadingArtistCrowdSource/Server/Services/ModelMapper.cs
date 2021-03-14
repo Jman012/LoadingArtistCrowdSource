@@ -13,7 +13,6 @@ namespace LoadingArtistCrowdSource.Server.Services
 		public ComicViewModel MapComic(Comic comic,
 			bool mapImportedByUser = false,
 			bool mapLastUpdatedUser = false,
-			bool mapComicHistoryLogs = false,
 			bool mapTranscript = false)
 		{
 			ComicViewModel comicVM = new ComicViewModel()
@@ -39,13 +38,6 @@ namespace LoadingArtistCrowdSource.Server.Services
 			if (mapLastUpdatedUser && comic.LastUpdatedByUser != null)
 			{
 				comicVM.LastUpdatedByUser = MapApplicationUser(comic.LastUpdatedByUser);
-			}
-			if (mapComicHistoryLogs)
-			{
-				comicVM.ComicHistoryLogs = comic
-					.ComicHistoryLogs
-					.Select(this.MapComicHistoryLog)
-					.ToList();
 			}
 			if (mapTranscript && comic.ComicTranscript != null)
 			{
@@ -75,11 +67,6 @@ namespace LoadingArtistCrowdSource.Server.Services
 			{
 				UserName = user.UserName,
 			};
-		}
-
-		public ComicHistoryLogViewModel MapComicHistoryLog(ComicHistoryLog log)
-		{
-			return new ComicHistoryLogViewModel();
 		}
 
 		public CrowdSourcedFieldUserEntryViewModel MapCrowdSourcedFieldUserEntry(CrowdSourcedFieldUserEntry entry, bool mapCreatedBy = false)
@@ -232,7 +219,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 		}
 
 		public TranscriptHistoryItemViewModel MapTranscriptHistory(
-			Models.ComicTranscriptHistory transcriptHistory,
+			ComicTranscriptHistory transcriptHistory,
 			bool mapCreatedByUser = false)
 		{
 			var vm = new TranscriptHistoryItemViewModel()
@@ -248,6 +235,30 @@ namespace LoadingArtistCrowdSource.Server.Services
 				vm.CreatedByUser = MapApplicationUser(transcriptHistory.CreatedByUser);
 			}
 
+			return vm;
+		}
+
+		public ComicHistoryLogViewModel MapComicHistoryLog(
+			Comic comic,
+			IEnumerable<ComicHistoryLog> comicLogs)
+		{
+			IEnumerable<ComicHistoryLogItemViewModel> logItemVms = comicLogs
+				.Select(cl => new ComicHistoryLogItemViewModel()
+				{
+					Id = cl.Id,
+					FieldName = cl.CrowdSourcedFieldDefinition?.Name,
+					CreatedByUser = MapApplicationUser(cl.CreatedByUser),
+					LogDate = cl.LogDate,
+					LogMessage = cl.LogMessage,
+					OldValue = cl.OldValue,
+					NewValue = cl.NewValue,
+				});
+
+			var vm = new ComicHistoryLogViewModel()
+			{
+				ComicTitle = comic.Title,
+				LogItems = logItemVms.ToArray(),
+			};
 			return vm;
 		}
 	}

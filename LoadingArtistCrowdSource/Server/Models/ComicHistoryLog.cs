@@ -54,7 +54,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		public string? NewValue { get; set; }
 
 		public Comic Comic { get; set; } = null!;
-		public CrowdSourcedFieldDefinition CrowdSourcedFieldDefinition { get; set; } = null!;
+		public CrowdSourcedFieldDefinition? CrowdSourcedFieldDefinition { get; set; }
 		public ApplicationUser CreatedByUser { get; set; } = null!;
 	}
 }

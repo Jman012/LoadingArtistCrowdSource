@@ -66,6 +66,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Where(csfd => csfd.Type != CrowdSourcedFieldType.Section)
 				.CountAsync();
 			int totalFieldPoints = totalCountFieldsNotSection * 2;
+			if (totalFieldPoints == 0)
+			{
+				return new StatisticsViewModel();
+			}
 
 			var vm = new StatisticsViewModel();
 

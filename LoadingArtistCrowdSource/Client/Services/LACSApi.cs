@@ -73,6 +73,10 @@ namespace LoadingArtistCrowdSource.Client.Services
 
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<ComicHistoryLogViewModel> GetComicHistory(string comicCode)
+		{
+			return await _authClient.GetFromJsonAsync<ComicHistoryLogViewModel>($"api/comic/{Uri.EscapeDataString(comicCode)}/history", _serializationOptions) ?? new ComicHistoryLogViewModel();
+		}
 		#endregion
 
 		#region FieldController

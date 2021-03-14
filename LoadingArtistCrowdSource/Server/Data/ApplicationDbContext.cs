@@ -68,7 +68,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<ComicHistoryLog>()
 				.HasOne(chl => chl.CrowdSourcedFieldDefinition)
-				.WithMany(csfd => csfd.ComicHistoryLogs)
+				.WithMany(csfd => csfd!.ComicHistoryLogs)
 				.HasForeignKey(chl => chl.CrowdSourcedFieldDefinitionId)
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<ComicHistoryLog>()

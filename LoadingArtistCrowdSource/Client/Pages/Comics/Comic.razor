@@ -34,7 +34,12 @@
 						<h3>Metadata</h3>
 						<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
 							<Authorized>
-								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
+								<div>
+									<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
+								</div>
+								<div>
+									<NavLink href="@($"/comic/{Code}/history")">Comic History</NavLink>
+								</div>
 							</Authorized>
 						</AuthorizeView>
 						<ComicMetadata Comic="_comic"></ComicMetadata>

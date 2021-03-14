@@ -160,6 +160,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 			// Get the user's entry, if it exists.
 			var userEntry = await _context.CrowdSourcedFieldUserEntries
+				.Include(csfue => csfue.CrowdSourcedFieldUserEntryValues)
 				.FirstOrDefaultAsync(csfue => csfue.ComicId == comic.Id &&
 											  csfue.CrowdSourcedFieldDefinitionId == fieldDefinition.Id &&
 											  csfue.CreatedBy == userId);
@@ -181,6 +182,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
 								CreatedBy = userId,
 								CreatedDate = DateTimeOffset.Now,
+								CrowdSourcedFieldUserEntryValues = new List<Models.CrowdSourcedFieldUserEntryValue>(),
 							};
 							_context.CrowdSourcedFieldUserEntries.Add(userEntry);
 							_context.ComicHistoryLogs.Add(_historyLogger.CreateAddUserEntryLog(comic, userEntry, newValues: values.ToArray()));
@@ -559,6 +561,31 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 
 			return Ok();
+		}
+
+		[HttpGet]
+		[Route("{comicCode}/history")]
+		[Authorize(Roles = Roles.AdminMod)]
+		public async Task<ActionResult> GetComicHistory([FromRoute] string comicCode)
+		{
+			var modelMapper = new Services.ModelMapper();
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound();
+			}
+
+			var comicHistoryLogs = await _context
+				.ComicHistoryLogs
+				.Include(chl => chl.Comic)
+				.Include(chl => chl.CreatedByUser)
+				.Include(chl => chl.CrowdSourcedFieldDefinition)
+				.Where(chl => chl.ComicId == comic.Id)
+				.OrderByDescending(chl => chl.Id)
+				.ToListAsync();
+
+			var vm = modelMapper.MapComicHistoryLog(comic, comicHistoryLogs);
+			return Json(vm);
 		}
 	}
 }
