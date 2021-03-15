@@ -128,7 +128,11 @@ namespace LoadingArtistCrowdSource.Server.Data
 			// Properties
 			builder.Entity<ComicTranscriptHistory>()
 				.Property(ctl => ctl.Id)
-				.UseIdentityColumn();
+				.HasValueGenerator((a, b) => 
+					new Services.AutoIncrementIdValueGenerator<ComicTranscriptHistory, int>(
+						cth => cth.ComicId,
+						cth => cth.Id
+					));
 			#endregion ComicTranscriptHistory
 
 			#region CrowdSourcedFieldDefinition
