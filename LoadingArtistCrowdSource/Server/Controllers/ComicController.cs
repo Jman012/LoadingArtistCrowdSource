@@ -604,10 +604,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
+			// Get current tags
 			var comicTags = await _context.ComicTags
 				.Where(ct => ct.ComicId == comic.Id)
 				.ToListAsync();
 
+			// Calculate new and deleted tags
 			var dctCurrentValues = comicTags.ToDictionary(ct => ct.Value);
 			var hshNewValues = new HashSet<string>(vm.TagValues);
 			var addedValues = hshNewValues.Except(dctCurrentValues.Keys);
@@ -617,8 +619,28 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				try
 				{
-
+					// Remove deleted tags
+					foreach (var deletedValue in deletedValues)
+					{
+						var comicTag = dctCurrentValues[deletedValue];
+						_context.ComicTags.Remove(comicTag);
+					}
 					await _context.SaveChangesAsync();
+
+					// Add new tags
+					foreach (var newValue in addedValues)
+					{
+						var comicTag = new Models.ComicTag()
+						{
+							ComicId = comic.Id,
+							Value = newValue,
+							CreatedBy = userId,
+							CreatedDate = DateTimeOffset.Now,
+						};
+						_context.ComicTags.Add(comicTag);
+					}
+					await _context.SaveChangesAsync();
+
 					await transaction.CommitAsync();
 				}
 				catch (Exception ex)
@@ -628,6 +650,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			return Ok();
 		}
 	}
 }
