@@ -107,11 +107,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							CreatedBy = userId,
 						};
 						_context.CrowdSourcedFieldDefinitions.Add(fieldDef);
-						_context.CrowdSourcedFieldDefinitionHistoryLogs.Add(_historyLogger.CreateAddFieldDefinitionLog(fieldDef));
+						await _context.CrowdSourcedFieldDefinitionHistoryLogs.AddAsync(_historyLogger.CreateAddFieldDefinitionLog(fieldDef));
 					}
 					else
 					{
-						_context.CrowdSourcedFieldDefinitionHistoryLogs.AddRange(_historyLogger.CreateEditFieldDefinitionLogs(fieldDef, vm, userId));
+						await _context.CrowdSourcedFieldDefinitionHistoryLogs.AddRangeAsync(_historyLogger.CreateEditFieldDefinitionLogs(fieldDef, vm, userId));
 					}
 
 					// Set definition properties

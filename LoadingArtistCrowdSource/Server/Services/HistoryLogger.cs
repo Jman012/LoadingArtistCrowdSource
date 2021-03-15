@@ -273,6 +273,14 @@ namespace LoadingArtistCrowdSource.Server.Services
 		#endregion CrowdSourcedFieldDefinitionHistoryLog
 
 		#region Private Methods
+		private async Task<int> GetNextComicHistoryLogId(Comic comic)
+		{
+			var latestComicHistoryLog = await _context
+				.ComicHistoryLogs
+				.OrderByDescending(chl => chl.ComicId == comic.Id)
+				.FirstOrDefaultAsync();
+			return (latestComicHistoryLog?.Id ?? 0) + 1;
+		}
 		private string RenderValues(CrowdSourcedFieldUserEntry userEntry)
 		{
 			return RenderValues(userEntry.CrowdSourcedFieldUserEntryValues.Select(v => v.Value));

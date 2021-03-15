@@ -274,9 +274,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
@@ -472,9 +470,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");

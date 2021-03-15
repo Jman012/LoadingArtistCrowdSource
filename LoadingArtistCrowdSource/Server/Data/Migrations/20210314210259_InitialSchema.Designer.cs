@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoadingArtistCrowdSource.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210314003036_HistoryTranscriptColumns")]
-    partial class HistoryTranscriptColumns
+    [Migration("20210314210259_InitialSchema")]
+    partial class InitialSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -276,15 +276,12 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid?>("CrowdSourcedFieldDefinitionId")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("LogDate")
@@ -344,10 +341,6 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTimeOffset>("CreatedDate")
@@ -363,7 +356,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.HasKey("ComicId", "Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CreatedBy");
 
                     b.ToTable("ComicTranscriptHistory");
                 });
@@ -479,9 +472,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
@@ -801,8 +792,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.HasOne("LoadingArtistCrowdSource.Server.Models.CrowdSourcedFieldDefinition", "CrowdSourcedFieldDefinition")
                         .WithMany("ComicHistoryLogs")
                         .HasForeignKey("CrowdSourcedFieldDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Comic");
 
@@ -840,7 +830,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
 
                     b.HasOne("LoadingArtistCrowdSource.Server.Models.ApplicationUser", "CreatedByUser")
                         .WithMany("ComicTranscriptHistoriesCreated")
-                        .HasForeignKey("CreatedByUserId")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 

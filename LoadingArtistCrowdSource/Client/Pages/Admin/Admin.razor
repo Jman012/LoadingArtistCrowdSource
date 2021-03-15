@@ -40,18 +40,18 @@
 			_isLoadingImportNewComics = true;
 			var result = await Api.ImportNewComics();
 			ToastService.ShowSuccess(result);
+			_isLoadingImportNewComics = false;
 		}
 		catch (AccessTokenNotAvailableException ex)
 		{
+			_isLoadingImportNewComics = false;
 			ex.Redirect();
 		}
 		catch (System.Net.Http.HttpRequestException ex)
 		{
+			_isLoadingImportNewComics = false;
 			ToastService.ShowError(ex.Message);
 		}
-		finally
-		{
-			_isLoadingImportNewComics = false;
-		}
+		_isLoadingImportNewComics = false;
 	}
 }

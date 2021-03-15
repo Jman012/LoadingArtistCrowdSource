@@ -68,7 +68,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						comic.Id = currentComicId;
 						currentComicId += 1;
 						_context.Comics.Add(comic);
-						_context.ComicHistoryLogs.Add(_historyLogger.CreateComicImportedLog(comic));
+						await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateComicImportedLog(comic));
 					}
 
 					_logger.LogInformation($"Importing comics completed. Saving changes.");

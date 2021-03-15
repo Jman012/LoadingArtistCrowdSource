@@ -46,6 +46,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.WithMany(au => au.ComicsLastUpdated)
 				.HasForeignKey(c => c.LastUpdatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
+			// Properties
+			builder.Entity<Comic>()
+				.Property(c => c.Id)
+				.ValueGeneratedNever();
 			// Indices
 			builder.Entity<Comic>()
 				.HasIndex(c => c.Code)
@@ -79,7 +83,10 @@ namespace LoadingArtistCrowdSource.Server.Data
 			// Properties
 			builder.Entity<ComicHistoryLog>()
 				.Property(chl => chl.Id)
-				.UseIdentityColumn();
+				.HasValueGenerator((a, b) => 
+					new Services.AutoIncrementIdValueGenerator<ComicHistoryLog, int>(
+						chl => chl.ComicId,
+						chl => chl.Id));
 			#endregion ComicHistoryLog
 
 			#region ComicTranscript
@@ -195,19 +202,22 @@ namespace LoadingArtistCrowdSource.Server.Data
 				});
 			// Relationships
 			builder.Entity<CrowdSourcedFieldDefinitionHistoryLog>()
-				.HasOne(csfdfhl => csfdfhl.CrowdSourcedFieldDefinition)
+				.HasOne(csfdhl => csfdhl.CrowdSourcedFieldDefinition)
 				.WithMany(csfd => csfd.CrowdSourcedFieldDefinitionHistoryLogs)
-				.HasForeignKey(csfdfhl => csfdfhl.CrowdSourcedFieldDefinitionId)
+				.HasForeignKey(csfdhl => csfdhl.CrowdSourcedFieldDefinitionId)
 				.OnDelete(DeleteBehavior.NoAction);
 			builder.Entity<CrowdSourcedFieldDefinitionHistoryLog>()
-				.HasOne(csfdfhl => csfdfhl.CreatedByUser)
+				.HasOne(csfdhl => csfdhl.CreatedByUser)
 				.WithMany(au => au.CrowdSourcedFieldDefinitionHistoryLogsCreated)
-				.HasForeignKey(csfdfhl => csfdfhl.CreatedBy)
+				.HasForeignKey(csfdhl => csfdhl.CreatedBy)
 				.OnDelete(DeleteBehavior.NoAction);
 			// Properties
 			builder.Entity<CrowdSourcedFieldDefinitionHistoryLog>()
-				.Property(ctl => ctl.Id)
-				.UseIdentityColumn();
+				.Property(csfdhl => csfdhl.Id)
+				.HasValueGenerator((a, b) => 
+					new Services.AutoIncrementIdValueGenerator<CrowdSourcedFieldDefinitionHistoryLog, Guid>(
+						csfdhl => csfdhl.CrowdSourcedFieldDefinitionId, 
+						csfdhl => csfdhl.Id));
 			#endregion CrowdSourcedFieldDefinitionHistoryLog
 
 			#region CrowdSourcedFieldDefinitionOption

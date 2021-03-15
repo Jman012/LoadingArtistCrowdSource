@@ -115,9 +115,12 @@
 			</Button>
 			<Button Color="Color.Light" Clicked="HandleCancel">Cancel</Button>
 
-			<div class="my-3">
-				<NavLink href="@($"/field/{Uri.EscapeDataString(Code)}/history")">Field History</NavLink>
-			</div>
+			@if (!_isNew)
+			{
+				<div class="my-3">
+					<NavLink href="@($"/field/{Uri.EscapeDataString(Code)}/history")">Field History</NavLink>
+				</div>
+			}
 
 		</EditForm>
 	}

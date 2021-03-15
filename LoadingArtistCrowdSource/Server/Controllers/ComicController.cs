@@ -185,14 +185,14 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								CrowdSourcedFieldUserEntryValues = new List<Models.CrowdSourcedFieldUserEntryValue>(),
 							};
 							_context.CrowdSourcedFieldUserEntries.Add(userEntry);
-							_context.ComicHistoryLogs.Add(_historyLogger.CreateAddUserEntryLog(comic, userEntry, newValues: values.ToArray()));
+							await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateAddUserEntryLog(comic, userEntry, newValues: values.ToArray()));
 							await _context.SaveChangesAsync();
 						}
 						else
 						{
 							result = UserEntrySubmissionResult.ExistingEntryEdited;
 							userEntry.LastUpdatedDate = DateTimeOffset.Now;
-							_context.ComicHistoryLogs.Add(_historyLogger.CreateEditUserEntryLog(comic, userEntry, newValues: values.ToArray()));
+							await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateEditUserEntryLog(comic, userEntry, newValues: values.ToArray()));
 							await _context.SaveChangesAsync();
 						}
 
@@ -272,7 +272,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 									VerificationDate = DateTimeOffset.Now,
 								};
 								_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
-								_context.ComicHistoryLogs.Add(_historyLogger.CreateAddVerifiedEntryLog(comic, verifiedEntry));
+								await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateAddVerifiedEntryLog(comic, verifiedEntry));
 
 								// Remove old verified entry values and add new ones.
 								var verifiedEntryValues = firstUserEntry.CrowdSourcedFieldUserEntryValues
@@ -297,7 +297,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							{
 								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
 								_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(verifiedEntry.CrowdSourcedFieldVerifiedEntryValues);
-								_context.ComicHistoryLogs.Add(_historyLogger.CreateRemoveVerifiedEntryLog(comic, verifiedEntry));
+								await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateRemoveVerifiedEntryLog(comic, verifiedEntry));
 
 								await _context.SaveChangesAsync();
 							}
@@ -332,7 +332,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				try
 				{
-					_context.ComicHistoryLogs.AddRange(_historyLogger.CreateMetadataEditedLogs(comic, vm, userId));
+					await _context.ComicHistoryLogs.AddRangeAsync(_historyLogger.CreateMetadataEditedLogs(comic, vm, userId));
 
 					comic.Code = vm.Code;
 					comic.Permalink = vm.Permalink;
@@ -439,7 +439,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, transcriptContent);
 						comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
 					}
-					_context.ComicHistoryLogs.Add(_historyLogger.CreateNewTranscriptLog(comic, latestHistory, comicTranscriptHistory));
+					await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateNewTranscriptLog(comic, latestHistory, comicTranscriptHistory));
 					await _context.SaveChangesAsync();
 
 					// Get and update current transcript
@@ -531,7 +531,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					var diffModel = DiffPlex.DiffBuilder.SideBySideDiffBuilder.Instance.BuildDiffModel(latestHistory.TranscriptContent, sourceTranscriptHistory.TranscriptContent);
 					comicTranscriptHistory.DiffWithPrevious = await _renderer.RenderPartialToStringAsync("~/Pages/Diff/Diff.cshtml", diffModel);
 
-					_context.ComicHistoryLogs.Add(_historyLogger.CreateTranscriptRollbackLog(comic, latestHistory, comicTranscriptHistory));
+					await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateTranscriptRollbackLog(comic, latestHistory, comicTranscriptHistory));
 					await _context.SaveChangesAsync();
 
 					// Get and update current transcript

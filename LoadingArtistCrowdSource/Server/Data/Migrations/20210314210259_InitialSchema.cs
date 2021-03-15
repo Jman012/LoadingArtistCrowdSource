@@ -79,7 +79,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 columns: table => new
                 {
                     ComicId = table.Column<int>(type: "int", nullable: false),
-                    LastEditedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LastEditedBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     LastEditedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     TranscriptContent = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -87,8 +87,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_ComicTranscript", x => x.ComicId);
                     table.ForeignKey(
-                        name: "FK_ComicTranscript_AspNetUsers_LastEditedByUserId",
-                        column: x => x.LastEditedByUserId,
+                        name: "FK_ComicTranscript_AspNetUsers_LastEditedBy",
+                        column: x => x.LastEditedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -105,7 +105,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     ComicId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     TranscriptContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiffWithPrevious = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -114,8 +114,8 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_ComicTranscriptHistory", x => new { x.ComicId, x.Id });
                     table.ForeignKey(
-                        name: "FK_ComicTranscriptHistory_AspNetUsers_CreatedByUserId",
-                        column: x => x.CreatedByUserId,
+                        name: "FK_ComicTranscriptHistory_AspNetUsers_CreatedBy",
+                        column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -130,14 +130,13 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 columns: table => new
                 {
                     ComicId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     LogDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LogMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OldValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LogMessage = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -204,11 +203,12 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 columns: table => new
                 {
                     CrowdSourcedFieldDefinitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     LogDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LogMessage = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    LogMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OldValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -402,14 +402,14 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 column: "CrowdSourcedFieldDefinitionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ComicTranscript_LastEditedByUserId",
+                name: "IX_ComicTranscript_LastEditedBy",
                 table: "ComicTranscript",
-                column: "LastEditedByUserId");
+                column: "LastEditedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ComicTranscriptHistory_CreatedByUserId",
+                name: "IX_ComicTranscriptHistory_CreatedBy",
                 table: "ComicTranscriptHistory",
-                column: "CreatedByUserId");
+                column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CrowdSourcedFieldDefinition_Code",
