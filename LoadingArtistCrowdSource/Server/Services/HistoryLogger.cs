@@ -154,6 +154,40 @@ namespace LoadingArtistCrowdSource.Server.Services
 				NewValue = newTranscriptHistory.TranscriptContent,
 			};
 		}
+		
+		public ComicHistoryLog CreatePutComicTagsLog(Comic comic, string byUserId, IEnumerable<string> addedTagValues, IEnumerable<string> removedTagValues)
+		{
+			string added = string.Join(", ", addedTagValues.OrderBy(s => s));
+			string removed = string.Join(", ", removedTagValues.OrderBy(s => s));
+			string logMessage;
+			if (addedTagValues.Any() && !removedTagValues.Any())
+			{
+				logMessage = $"User added tags to comic: {added}";
+			}
+			else if (!addedTagValues.Any() && removedTagValues.Any())
+			{
+				logMessage = $"User removed tags from comic: {removed}";
+			}
+			else if (addedTagValues.Any() && removedTagValues.Any())
+			{
+				logMessage = $"User removed tags \"{removed}\" and add tags \"{added}\"";
+			}
+			else
+			{
+				throw new Exception("No changes to record");
+			}
+
+			return new ComicHistoryLog()
+			{
+				ComicId = comic.Id,
+				CrowdSourcedFieldDefinitionId = null,
+				CreatedBy = byUserId,
+				LogDate = DateTimeOffset.Now,
+				LogMessage = logMessage,
+				OldValue = null,
+				NewValue = null,
+			}
+		}
 		#endregion ComicHistoryLog
 
 		#region CrowdSourcedFieldDefinitionHistoryLog

@@ -615,6 +615,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var addedValues = hshNewValues.Except(dctCurrentValues.Keys);
 			var deletedValues = dctCurrentValues.Keys.Except(hshNewValues);
 
+			if (!addedValues.Any() && !deletedValues.Any())
+			{
+				return Ok();
+			}
+
 			using (var transaction = await _context.Database.BeginTransactionAsync())
 			{
 				try
@@ -640,6 +645,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						_context.ComicTags.Add(comicTag);
 					}
 					await _context.SaveChangesAsync();
+
+					// History
+					await _context.AddAsync(_historyLogger.CreatePutComicTagsLog(comic, userId, addedValues, deletedValues));
 
 					await transaction.CommitAsync();
 				}
