@@ -13,7 +13,8 @@ namespace LoadingArtistCrowdSource.Server.Services
 		public ComicViewModel MapComic(Comic comic,
 			bool mapImportedByUser = false,
 			bool mapLastUpdatedUser = false,
-			bool mapTranscript = false)
+			bool mapTranscript = false,
+			bool mapTags = false)
 		{
 			ComicViewModel comicVM = new ComicViewModel()
 			{
@@ -42,6 +43,10 @@ namespace LoadingArtistCrowdSource.Server.Services
 			if (mapTranscript && comic.ComicTranscript != null)
 			{
 				comicVM.Transcript = MapTranscript(comic.ComicTranscript, mapLastEditedByUser: true);
+			}
+			if (mapTags && comic.ComicTags != null)
+			{
+				comicVM.Tags = MapComicTags(comic.ComicTags, mapApplicationUser: true);
 			}
 
 			return comicVM;
@@ -282,6 +287,29 @@ namespace LoadingArtistCrowdSource.Server.Services
 				FieldTitle = fieldDef.Name,
 				LogItems = logItemVms.ToArray(),
 			};
+			return vm;
+		}
+
+		public ComicTagsViewModel MapComicTags(
+			List<ComicTag> comicTags,
+			bool mapApplicationUser = false)
+		{
+			var vm = new ComicTagsViewModel()
+			{
+				TagValues = comicTags
+					.Select(ct => ct.Value)
+					.OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+					.ToList(),
+			};
+
+			if (mapApplicationUser)
+			{
+				vm.Contributors = comicTags
+					.Select(ct => MapApplicationUser(ct.CreatedByUser))
+					.OrderBy(au => au.UserName, StringComparer.OrdinalIgnoreCase)
+					.ToList();
+			}
+
 			return vm;
 		}
 	}

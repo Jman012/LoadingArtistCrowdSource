@@ -89,6 +89,27 @@ namespace LoadingArtistCrowdSource.Server.Data
 						chl => chl.Id));
 			#endregion ComicHistoryLog
 
+			#region ComicTag
+			// Keys
+			builder.Entity<ComicTag>()
+				.HasKey(ct => new 
+				{
+					ct.ComicId,
+					ct.Value,
+				});
+			// Relationships
+			builder.Entity<ComicTag>()
+				.HasOne(ct => ct.Comic)
+				.WithMany(c => c.ComicTags)
+				.HasForeignKey(ct => ct.ComicId)
+				.OnDelete(DeleteBehavior.NoAction);
+			builder.Entity<ComicTag>()
+				.HasOne(ct => ct.CreatedByUser)
+				.WithMany(au => au.ComicsTagged)
+				.HasForeignKey(ct => ct.CreatedBy)
+				.OnDelete(DeleteBehavior.NoAction);
+			#endregion ComicTag
+
 			#region ComicTranscript
 			// Keys
 			builder.Entity<ComicTranscript>()
@@ -397,6 +418,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 
 		public DbSet<Comic> Comics => Set<Comic>();
 		public DbSet<ComicHistoryLog> ComicHistoryLogs => Set<ComicHistoryLog>();
+		public DbSet<ComicTag> ComicTags => Set<ComicTag>();
 		public DbSet<ComicTranscript> ComicTranscripts => Set<ComicTranscript>();
 		public DbSet<ComicTranscriptHistory> ComicTranscriptHistories => Set<ComicTranscriptHistory>();
 		public DbSet<CrowdSourcedFieldDefinition> CrowdSourcedFieldDefinitions => Set<CrowdSourcedFieldDefinition>();

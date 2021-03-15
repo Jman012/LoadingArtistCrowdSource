@@ -59,7 +59,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			Models.Comic? comic = await _context.Comics
 				.Include(c => c.ImportedByUser)
 				.Include(c => c.LastUpdatedByUser)
-				.Include(c => c.ComicTranscript)
+				.Include(c => c.ComicTags).ThenInclude(ct => ct.CreatedByUser)
 				.Include(c => c.ComicTranscript).ThenInclude(ct => ct!.LastEditedByUser)
 				.Include(c => c.CrowdSourcedFieldVerifiedEntries).ThenInclude(ve => ve.CrowdSourcedFieldVerifiedEntryValues)
 				.Include(c => c.CrowdSourcedFieldUserEntries).ThenInclude(ue => ue.CrowdSourcedFieldUserEntryValues)
@@ -86,7 +86,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var comicVM = modelMapper.MapComic(comic,
 				mapImportedByUser: true,
 				mapLastUpdatedUser: true,
-				mapTranscript: true);
+				mapTranscript: true,
+				mapTags: true);
 
 			// Map field definitions and options to view model
 			comicVM.ComicFields = fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
@@ -566,7 +567,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[HttpGet]
 		[Route("{comicCode}/history")]
 		[Authorize(Roles = Roles.AdminMod)]
-		public async Task<ActionResult> GetComicHistory([FromRoute] string comicCode)
+		public async Task<IActionResult> GetComicHistory([FromRoute] string comicCode)
 		{
 			var modelMapper = new Services.ModelMapper();
 			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
@@ -586,6 +587,47 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			var vm = modelMapper.MapComicHistoryLog(comic, comicHistoryLogs);
 			return Json(vm);
+		}
+
+		[HttpPut]
+		[Route("{comicCode}/tags")]
+		[Authorize]
+		public async Task<IActionResult> PutComicTags(
+			[FromRoute] string comicCode,
+			[FromBody] Shared.Models.ComicTagsViewModel vm)
+		{
+			var userId = _userManager.GetUserId(User);
+			
+			var comic = await _context.Comics.FirstOrDefaultAsync(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound();
+			}
+
+			var comicTags = await _context.ComicTags
+				.Where(ct => ct.ComicId == comic.Id)
+				.ToListAsync();
+
+			var dctCurrentValues = comicTags.ToDictionary(ct => ct.Value);
+			var hshNewValues = new HashSet<string>(vm.TagValues);
+			var addedValues = hshNewValues.Except(dctCurrentValues.Keys);
+			var deletedValues = dctCurrentValues.Keys.Except(hshNewValues);
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "There was an error putting the comic tags");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
 		}
 	}
 }
