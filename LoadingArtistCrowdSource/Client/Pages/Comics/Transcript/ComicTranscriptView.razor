@@ -1,3 +1,5 @@
+@namespace LoadingArtistCrowdSource.Client.Pages.Comics
+
 <div class="d-flex flex-row justify-content-between">
 	<a role="button" href @onclick="HandleEdit" @onclick:preventDefault="true">Edit</a>
 	<NavLink href="@($"/comic/{Uri.EscapeDataString(ComicCode)}/transcript")">History</NavLink>

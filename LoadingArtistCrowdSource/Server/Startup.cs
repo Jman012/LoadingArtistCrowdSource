@@ -86,6 +86,7 @@ namespace LoadingArtistCrowdSource.Server
 
 			services.AddScoped<Services.IRazorPartialToStringRenderer, Services.RazorPartialToStringRenderer>();
 			services.AddScoped<Services.HistoryLogger>();
+			services.AddScoped<Services.TagRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

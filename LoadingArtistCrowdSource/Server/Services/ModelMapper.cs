@@ -297,8 +297,8 @@ namespace LoadingArtistCrowdSource.Server.Services
 			var vm = new ComicTagsViewModel()
 			{
 				TagValues = comicTags
-					.Select(ct => ct.Value)
-					.OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+					.Select(ct => new ComicTagViewModel() { TagValue = ct.Value })
+					.OrderBy(v => v.TagValue, StringComparer.OrdinalIgnoreCase)
 					.ToList(),
 			};
 

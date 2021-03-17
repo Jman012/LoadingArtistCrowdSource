@@ -77,7 +77,17 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.GetFromJsonAsync<ComicHistoryLogViewModel>($"api/comic/{Uri.EscapeDataString(comicCode)}/history", _serializationOptions) ?? new ComicHistoryLogViewModel();
 		}
-		#endregion
+		public async Task<string?> PutComicTags(string comicCode, ComicTagsViewModel vm)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/tags", vm, _serializationOptions);
+			if (response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			return await response.Content.ReadAsStringAsync();
+		}
+		#endregion ComicController
 
 		#region FieldController
 		public async Task<CrowdSourcedFieldDefinitionViewModel[]> GetFields()
@@ -112,7 +122,7 @@ namespace LoadingArtistCrowdSource.Client.Services
 		{
 			return await _authClient.GetFromJsonAsync<CrowdSourcedFieldDefinitionHistoryLogViewModel>($"api/field/{Uri.EscapeDataString(fieldCode)}/history", _serializationOptions) ?? new CrowdSourcedFieldDefinitionHistoryLogViewModel();
 		}
-		#endregion
+		#endregion FieldController
 
 		#region SearchController
 		public async Task<ComicFieldViewModel[]> GetSearchFields()
@@ -166,7 +176,7 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task<string?> PostCompleteFeedback(string comicCode, string fieldCode, int id, FeedbackViewModel vm)
 		{
-			var response = await _authClient.PostAsJsonAsync($"/api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}/{id}", vm, _serializationOptions);
+			var response = await _authClient.PostAsJsonAsync($"api/feedback/{Uri.EscapeDataString(vm.ComicCode)}/{Uri.EscapeDataString(vm.FieldCode)}/{id}", vm, _serializationOptions);
 			if (!response.IsSuccessStatusCode)
 			{
 				return await response.Content.ReadAsStringAsync();
@@ -179,8 +189,15 @@ namespace LoadingArtistCrowdSource.Client.Services
 		#region StatisticsController
 		public async Task<StatisticsViewModel> GetStatistics()
 		{
-			return await _publicClient.GetFromJsonAsync<StatisticsViewModel>("/api/statistics", _serializationOptions) ?? new StatisticsViewModel();
+			return await _publicClient.GetFromJsonAsync<StatisticsViewModel>("api/statistics", _serializationOptions) ?? new StatisticsViewModel();
 		}
 		#endregion StatisticsController
+
+		#region TagController
+		public async Task<ComicTagsViewModel> GetSystemTags()
+		{
+			return await _publicClient.GetFromJsonAsync<ComicTagsViewModel>("api/tag", _serializationOptions) ?? new ComicTagsViewModel();
+		}
+		#endregion TagController
 	}
 }

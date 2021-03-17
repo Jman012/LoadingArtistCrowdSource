@@ -1,0 +1,266 @@
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@namespace LoadingArtistCrowdSource.Client.Pages.Comics
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Services.LACSApi Api
+@inject IJSRuntime JsRuntime
+@inject IToastService ToastService
+
+<Modal @ref="_modal" Class="custom-modal-dialog-scrollable">
+	<ModalBackdrop />
+	<ModalContent Size="ModalSize.Large">
+		<ModalHeader>
+			<ModalTitle>Tags</ModalTitle>
+			<CloseButton Clicked="Close"></CloseButton>
+		</ModalHeader>
+		<ModalBody>
+			<EditForm @ref="_form" Model="_newTag" Context="editContext" OnValidSubmit="HandleFormValidSubmit">
+				<DataAnnotationsValidator />
+
+				<Container Fluid="false">
+					<Row>
+						<Column Display="Display.None.Block.OnWidescreen" Class="border-right">
+							<img src="@_comicImgSrc" class="img-fluid" />
+						</Column>
+						<Column>
+							<AuthorizeView>
+								<NotAuthorized>
+									<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
+								</NotAuthorized>
+								<Authorized>
+									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+									
+									@if (_isLoadingSystemTags)
+									{
+										<Spinner></Spinner>
+									}
+									else
+									{
+										<h5>Your Response</h5>
+
+										<p>
+											Tags are used to represent objects or actions visible in the comic. 
+											These are typically useful for when the set of Crowd Sourced Data fields 
+											does not accurately capture the information.
+										</p>
+										
+										<label for="TagValue">Tag Text</label>
+										<div class="input-group mb-3">
+											<InputText id="TagValue" name="TagValue" @bind-Value="@_newTag.TagValue" class="form-control" placeholder="Chair"></InputText>
+											<div class="input-group-append">
+												<button class="btn btn-primary" type="submit">Add</button>
+											</div>
+										</div>
+
+										<h5>New Tags</h5>
+										<div class="mb-2">
+											<TagsView Tags="_addedTags" EmptyText="No tags added yet" OnDeleteTag="HandleRemoveAddedTag" />
+										</div>
+
+										<hr />
+
+										<h5>Removed Tags</h5>
+										<div class="mb-2">
+											<TagsView Tags="_deletedTags" EmptyText="No tags removed" OnDeleteTag="HandleRemoveRemovedTag" OnDeleteUseDownArrow="true" />
+										</div>
+
+										<h5>Existing Tags</h5>
+										<div class="mb-2">
+											<TagsView Tags="_currentTags" EmptyText="No existing tags" OnDeleteTag="HandleRemoveCurrentTag" />
+										</div>
+									}
+								</Authorized>
+							</AuthorizeView>
+						</Column>
+					</Row>
+				</Container>
+			</EditForm>
+		</ModalBody>
+		<ModalFooter>
+			<Button Type="ButtonType.Button" Color="Color.Primary" Disabled="@(_isSubmitting || _userName == null)" Clicked="HandleModalSubmit" Class="text-nowrap">
+				@if (_isSubmitting)
+				{
+					<Spinner Small="true" Inline="true"></Spinner><text>&nbsp;</text>
+				}
+				Save
+			</Button>
+			<Button Type="ButtonType.Button" Color="Color.Light" Clicked="Close">Cancel</Button>
+		</ModalFooter>
+	</ModalContent>
+</Modal>
+
+@code {
+
+	public struct State
+	{
+		public ComicTagsViewModel Tags { get; set; }
+		public string ComicCode { get; set; }
+		public string ComicImgSrc { get; set; }
+	}
+
+	[Parameter]
+	public EventCallback OnSubmit { get; set; }
+	
+	private bool _isLoadingSystemTags;
+	private Dictionary<string, ComicTagViewModel> _systemTags = new Dictionary<string, ComicTagViewModel>();
+
+	private Modal _modal = new Modal();
+	private EditForm _form = new EditForm();
+	private string? _userName;
+
+	private ComicTagsViewModel _originalTags = new ComicTagsViewModel();
+	private ComicTagsViewModel _currentTags = new ComicTagsViewModel();
+	private ComicTagsViewModel _addedTags = new ComicTagsViewModel();
+	private ComicTagsViewModel _deletedTags = new ComicTagsViewModel();
+	private ComicTagViewModel _newTag = new ComicTagViewModel();
+
+	private string _comicCode = "";
+	private string _comicImgSrc = "";
+	private bool _isSubmitting = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+		if (user.Identity!.IsAuthenticated)
+		{
+			_userName = user.Identity!.Name;
+		}
+
+		await base.OnInitializedAsync();
+	}
+
+	private int GetSystemTagCount(string tagValue)
+	{
+		ComicTagViewModel tag;
+		if (_systemTags.TryGetValue(tagValue, out tag!))
+		{
+			return tag.TagSystemCount;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	public async Task Open(State state)
+	{
+		_currentTags = state.Tags;
+		_currentTags = new ComicTagsViewModel()
+		{
+			TagValues = _currentTags.TagValues.ToList(),
+		};
+		_addedTags = new ComicTagsViewModel();
+		_deletedTags = new ComicTagsViewModel();
+
+		_comicCode = state.ComicCode;
+		_comicImgSrc = state.ComicImgSrc;
+
+		_modal.Show();
+
+		try
+		{
+			_isLoadingSystemTags = true;
+			_systemTags = (await Api.GetSystemTags()).TagValues.ToDictionary(tv => tv.TagValue);
+			_isLoadingSystemTags = false;
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			_isSubmitting = false;
+			return;
+		}
+	}
+
+	public void Close()
+	{
+		_modal.Hide();
+	}
+
+	private void HandleFormValidSubmit()
+	{
+		string newTagValue = ComicTagViewModel.Transform(_newTag.TagValue);
+		_newTag.TagValue = "";
+
+		if (_addedTags.TagValues.Any(tv => tv.TagValue == newTagValue))
+		{
+			return;
+		}
+
+		if (_currentTags.TagValues.Any(tv => tv.TagValue == newTagValue))
+		{
+			// Do nothing
+		}
+		else if (_deletedTags.TagValues.Any(tv => tv.TagValue == newTagValue))
+		{
+			// Remove from Deleted, add back to Current
+			_deletedTags.TagValues.RemoveAll(tv => tv.TagValue == newTagValue);
+			_currentTags.TagValues.Add(new ComicTagViewModel()
+			{
+				TagValue = newTagValue,
+				TagSystemCount = GetSystemTagCount(newTagValue),
+			});
+			_currentTags.TagValues = _currentTags.TagValues.OrderBy(tv => tv.TagValue).ToList();
+		}
+		else
+		{
+			// Add to Added
+			_addedTags.TagValues.Add(new ComicTagViewModel()
+			{
+				TagValue = newTagValue,
+				TagSystemCount = GetSystemTagCount(newTagValue),
+			});
+			_addedTags.TagValues = _addedTags.TagValues.OrderBy(tv => tv.TagValue).ToList();
+		}
+		
+	}
+
+	private void HandleRemoveAddedTag(ComicTagViewModel tagVm)
+	{
+		_addedTags.TagValues.RemoveAll(tv => tv.TagValue == tagVm.TagValue);
+	}
+
+	private void HandleRemoveRemovedTag(ComicTagViewModel tagVm)
+	{
+		_deletedTags.TagValues.RemoveAll(tv => tv.TagValue == tagVm.TagValue);
+		_currentTags.TagValues.Add(tagVm);
+		_currentTags.TagValues = _currentTags.TagValues.OrderBy(tv => tv.TagValue).ToList();
+	}
+
+	private void HandleRemoveCurrentTag(ComicTagViewModel tagVm)
+	{
+		_currentTags.TagValues.RemoveAll(tv => tv.TagValue == tagVm.TagValue);
+		_deletedTags.TagValues.Add(tagVm);
+		_deletedTags.TagValues = _deletedTags.TagValues.OrderBy(tv => tv.TagValue).ToList();
+	}
+
+	private async Task HandleModalSubmit()
+	{
+		var combinedTagsVm = new ComicTagsViewModel()
+		{
+			TagValues = _currentTags.TagValues.Concat(_addedTags.TagValues).ToList(),
+		};
+
+		_isSubmitting = true;
+		string? result;
+		try
+		{
+			result = await Api.PutComicTags(_comicCode, combinedTagsVm);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			_isSubmitting = false;
+			return;
+		}
+		_isSubmitting = false;
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			ToastService.ShowError(result, "Error");
+			return;
+		}
+		
+		ToastService.ShowSuccess("The tags have been updated", "Success");
+		await OnSubmit.InvokeAsync();
+		_modal.Hide();
+	}
+}

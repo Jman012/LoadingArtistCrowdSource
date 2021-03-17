@@ -1,0 +1,38 @@
+@namespace LoadingArtistCrowdSource.Client.Pages.Comics
+
+<div class="d-flex flex-row justify-content-between">
+	<a role="button" href @onclick="HandleEdit" @onclick:preventDefault="true">Edit</a>
+	@* <NavLink href="@($"/comic/{Uri.EscapeDataString(ComicCode)}/transcript")">History</NavLink> *@
+</div>
+<TagsView Tags="Tags" EmptyText="No tags submitted yet"></TagsView>
+
+<TagFormModal @ref="_tagModal" OnSubmit="HandleTranscriptSubmitted"></TagFormModal>
+
+
+@code {
+	[Parameter]
+	public string ComicCode { get; set; } = "";
+	[Parameter]
+	public string ComicImgSrc { get; set; } = "";
+	[Parameter]
+	public ComicTagsViewModel Tags { get; set; } = new ComicTagsViewModel();
+	[Parameter]
+	public EventCallback OnComicNeedsRefresh { get; set; } = new EventCallback();
+
+	private TagFormModal _tagModal = new TagFormModal();
+
+	private async Task HandleEdit()
+	{
+		await _tagModal.Open(new TagFormModal.State()
+		{
+			ComicCode = ComicCode,
+			ComicImgSrc = ComicImgSrc,
+			Tags = Tags,
+		});
+	}
+
+	private async Task HandleTranscriptSubmitted()
+	{
+		await OnComicNeedsRefresh.InvokeAsync();
+	}
+}

@@ -80,6 +80,15 @@
 											 OnComicNeedsRefresh="HandleComicNedsRefresh" />
 					</Column>
 				</Row>
+				<Row Class="mb-3">
+					<Column>
+						<h3>Tags</h3>
+						<ComicTagsView Tags="_comic.Tags"
+									   ComicCode="@_comic.Code"
+									   ComicImgSrc="@_comic.ImageUrlSrc"
+									   OnComicNeedsRefresh="HandleComicNedsRefresh" />
+					</Column>
+				</Row>
 			</Column>
 		</Row>
 	</div>

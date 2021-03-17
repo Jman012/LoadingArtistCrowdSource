@@ -24,19 +24,22 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly ILogger<ComicController> _logger;
 		private readonly Services.IRazorPartialToStringRenderer _renderer;
 		private readonly Services.HistoryLogger _historyLogger;
+		private readonly Services.TagRepository _tagRepo;
 
 		public ComicController(
 			ApplicationDbContext context, 
 			UserManager<Models.ApplicationUser> userManager, 
 			ILogger<ComicController> logger,
 			Services.IRazorPartialToStringRenderer renderer,
-			Services.HistoryLogger historyLogger)
+			Services.HistoryLogger historyLogger,
+			Services.TagRepository tagRepo)
 		{
 			_context = context;
 			_userManager = userManager;
 			_logger = logger;
 			_renderer = renderer;
 			_historyLogger = historyLogger;
+			_tagRepo = tagRepo;
 		}
 
 		[HttpGet]
@@ -88,6 +91,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				mapLastUpdatedUser: true,
 				mapTranscript: true,
 				mapTags: true);
+
+			List<Shared.Models.ComicTagViewModel> uniqueTags = await _tagRepo.GetSystemTags();
+			_tagRepo.SetSystemTagCounts(comicVM, uniqueTags);
 
 			// Map field definitions and options to view model
 			comicVM.ComicFields = fields.Select(csfd => new Shared.Models.ComicFieldViewModel()
@@ -604,6 +610,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return NotFound();
 			}
 
+			// Enforce casing requirements
+			foreach (var tagVm in vm.TagValues)
+			{
+				tagVm.TagValue = Shared.Models.ComicTagViewModel.Transform(tagVm.TagValue);
+			}
+
 			// Get current tags
 			var comicTags = await _context.ComicTags
 				.Where(ct => ct.ComicId == comic.Id)
@@ -611,7 +623,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			// Calculate new and deleted tags
 			var dctCurrentValues = comicTags.ToDictionary(ct => ct.Value);
-			var hshNewValues = new HashSet<string>(vm.TagValues);
+			var hshNewValues = new HashSet<string>(vm.TagValues.Select(tv => tv.TagValue));
 			var addedValues = hshNewValues.Except(dctCurrentValues.Keys);
 			var deletedValues = dctCurrentValues.Keys.Except(hshNewValues);
 
@@ -647,7 +659,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					await _context.SaveChangesAsync();
 
 					// History
-					await _context.AddAsync(_historyLogger.CreatePutComicTagsLog(comic, userId, addedValues, deletedValues));
+					await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreatePutComicTagsLog(comic, userId, addedValues, deletedValues));
+					await _context.SaveChangesAsync();
 
 					await transaction.CommitAsync();
 				}

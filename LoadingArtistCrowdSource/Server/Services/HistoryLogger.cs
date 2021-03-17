@@ -170,7 +170,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 			}
 			else if (addedTagValues.Any() && removedTagValues.Any())
 			{
-				logMessage = $"User removed tags \"{removed}\" and add tags \"{added}\"";
+				logMessage = $"User removed tags \"{removed}\" and added tags \"{added}\"";
 			}
 			else
 			{
@@ -186,7 +186,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 				LogMessage = logMessage,
 				OldValue = null,
 				NewValue = null,
-			}
+			};
 		}
 		#endregion ComicHistoryLog
 

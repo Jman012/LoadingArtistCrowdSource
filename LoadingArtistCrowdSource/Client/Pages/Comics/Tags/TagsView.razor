@@ -1,0 +1,30 @@
+@namespace LoadingArtistCrowdSource.Client.Pages.Comics
+
+@if (!Tags.TagValues.Any())
+{
+	<div class="border rounded bg-light d-flex align-items-center justify-content-center" style="min-height: 44px;">
+		<div>
+			@EmptyText
+		</div>
+	</div>
+}
+else
+{
+	<div class="d-flex flex-wrap border rounded p-1">
+		@foreach (var tagVm in Tags.TagValues)
+		{
+			<ComicTag Tag="tagVm" OnDeleteTag="OnDeleteTag" OnDeleteUseDownArrow="OnDeleteUseDownArrow" />
+		}
+	</div>
+}
+
+@code {
+	[Parameter]
+	public ComicTagsViewModel Tags { get; set; } = new ComicTagsViewModel();
+	[Parameter]
+	public string EmptyText { get; set; } = "No tags submitted yet";
+	[Parameter]
+	public EventCallback<ComicTagViewModel> OnDeleteTag { get; set; }
+	[Parameter]
+	public bool OnDeleteUseDownArrow { get; set; }
+}

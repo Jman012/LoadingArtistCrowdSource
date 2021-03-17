@@ -1,0 +1,8 @@
+.comic-tag .badge {
+	vertical-align: text-bottom;
+}
+
+.comic-tag button {
+	vertical-align: middle;
+	font-size: 1em;
+}

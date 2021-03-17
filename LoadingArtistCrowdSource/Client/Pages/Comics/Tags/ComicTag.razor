@@ -1,0 +1,32 @@
+@namespace LoadingArtistCrowdSource.Client.Pages.Comics
+
+<div class="comic-tag m-1">
+	<small class="border rounded bg-light p-1">
+		@Tag.TagValue <span class="badge badge-info">@Tag.TagSystemCount</span>
+		@if (OnDeleteTag.HasDelegate)
+		{
+			<button type="button" class="btn p-0 ml-1" @onclick="HandleClick" title="Click to remove">
+				<SemanticIcon Name="@_iconName" Title="Click to remove" />
+			</button>
+		}
+	</small>
+</div>
+
+@code {
+	[Parameter]
+	public ComicTagViewModel Tag { get; set; } = new ComicTagViewModel();
+	[Parameter]
+	public EventCallback<ComicTagViewModel> OnDeleteTag { get; set; }
+	[Parameter]
+	public bool OnDeleteUseDownArrow { get; set; }
+
+	private string _iconName => OnDeleteUseDownArrow ? "arrow-down" : "x";
+
+	private async Task HandleClick()
+	{
+		if (OnDeleteTag.HasDelegate)
+		{
+			await OnDeleteTag.InvokeAsync(Tag);
+		}
+	}
+}
