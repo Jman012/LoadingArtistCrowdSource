@@ -75,6 +75,30 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ComicTag",
+                columns: table => new
+                {
+                    ComicId = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComicTag", x => new { x.ComicId, x.Value });
+                    table.ForeignKey(
+                        name: "FK_ComicTag_AspNetUsers_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ComicTag_Comic_ComicId",
+                        column: x => x.ComicId,
+                        principalTable: "Comic",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ComicTranscript",
                 columns: table => new
                 {
@@ -372,7 +396,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "432ea055-ea01-443d-a6f7-e97d2c18d275", 0, "3acb17f1-65fe-4eac-bc2b-26403b23b999", "jman012guy@gmail.com", true, true, null, "JMAN012GUY@GMAIL.COM", "JMAN012GUY@GMAIL.COM", "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A==", "", false, "", false, "jman012guy@gmail.com" });
+                values: new object[] { "432ea055-ea01-443d-a6f7-e97d2c18d275", 0, "3acb17f1-65fe-4eac-bc2b-26403b23b999", "jman012guy@gmail.com", true, true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), "JMAN012GUY@GMAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A==", "", false, "", false, "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comic_Code",
@@ -399,6 +423,11 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 name: "IX_ComicHistoryLog_CrowdSourcedFieldDefinitionId",
                 table: "ComicHistoryLog",
                 column: "CrowdSourcedFieldDefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComicTag_CreatedBy",
+                table: "ComicTag",
+                column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComicTranscript_LastEditedBy",
@@ -486,6 +515,9 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ComicHistoryLog");
+
+            migrationBuilder.DropTable(
+                name: "ComicTag");
 
             migrationBuilder.DropTable(
                 name: "ComicTranscript");

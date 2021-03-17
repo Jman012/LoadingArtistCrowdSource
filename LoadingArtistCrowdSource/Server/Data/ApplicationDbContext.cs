@@ -378,15 +378,15 @@ namespace LoadingArtistCrowdSource.Server.Data
 			var adminUser = new ApplicationUser()
 			{
 				Id = user1Id,
-				UserName = "jman012guy@gmail.com",
-				NormalizedUserName = "JMAN012GUY@GMAIL.COM",
+				UserName = "admin",
+				NormalizedUserName = "ADMIN",
 				Email = "jman012guy@gmail.com",
 				NormalizedEmail = "JMAN012GUY@GMAIL.COM",
 				EmailConfirmed = true,
 				ConcurrencyStamp = "3acb17f1-65fe-4eac-bc2b-26403b23b999",
 				AccessFailedCount = 0,
 				LockoutEnabled = true,
-				LockoutEnd = null,
+				LockoutEnd = DateTimeOffset.MinValue,
 				PasswordHash = "",
 				PhoneNumber = "",
 				PhoneNumberConfirmed = false,

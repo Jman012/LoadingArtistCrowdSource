@@ -79,7 +79,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			// Get field information
 			int totalCountFieldsNotSection = await _context.CrowdSourcedFieldDefinitions
-				.Where(csfd => csfd.Type != CrowdSourcedFieldType.Section)
+				.Where(csfd => csfd.Type != CrowdSourcedFieldType.Section && csfd.IsActive && !csfd.IsDeleted)
 				.CountAsync();
 			int totalFieldPoints = totalCountFieldsNotSection * 2;
 

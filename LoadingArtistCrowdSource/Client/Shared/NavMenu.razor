@@ -32,6 +32,11 @@
 				<HelperIcon Name="image" Size="1.5em" class="mr-3" /> Comics
 			</NavLink>
 		</li>
+		<li class="nav-item px-3">
+			<NavLink class="nav-link" href="about" Match="NavLinkMatch.Prefix">
+				<HelperIcon Name="users" Size="1.5em" class="mr-3" /> About
+			</NavLink>
+		</li>
 		<AuthorizeView>
 			<Authorized>
 				<li class="nav-item px-3">
@@ -41,11 +46,6 @@
 				</li>
 			</Authorized>
 		</AuthorizeView>
-		<li class="nav-item px-3">
-			<NavLink class="nav-link" href="about" Match="NavLinkMatch.Prefix">
-				<HelperIcon Name="users" Size="1.5em" class="mr-3" /> About
-			</NavLink>
-		</li>
 		<AuthorizeView Roles="@Roles.Administrator">
 			<Authorized>
 				<li class="nav-item px-3">

@@ -195,14 +195,15 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                             Email = "jman012guy@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = true,
+                            LockoutEnd = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             NormalizedEmail = "JMAN012GUY@GMAIL.COM",
-                            NormalizedUserName = "JMAN012GUY@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
                             PasswordHash = "AQAAAAEAACcQAAAAEK1gJpnKWF92WxUNfQ0m0rbjpk9K5isdrfTJQzBieoSS5AJP4LQ6wxDHGwor1uT86A==",
                             PhoneNumber = "",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
-                            UserName = "jman012guy@gmail.com"
+                            UserName = "admin"
                         });
                 });
 

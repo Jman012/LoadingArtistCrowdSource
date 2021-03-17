@@ -31,7 +31,7 @@ namespace LoadingArtistCrowdSource.Server.Services
 					Name = Roles.Administrator,
 				}).Wait();
 
-				var admin = userManager.FindByNameAsync("jman012guy@gmail.com").Result;
+				var admin = userManager.FindByNameAsync("admin").Result;
 				userManager.AddToRoleAsync(admin, Roles.Administrator).Wait();
 			}
 

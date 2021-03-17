@@ -80,6 +80,13 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account
 			ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 			if (ModelState.IsValid)
 			{
+				// Restricted usernames
+				if (Input.DisplayName.Contains("admin", StringComparison.OrdinalIgnoreCase))
+				{
+					ModelState.AddModelError(string.Empty, "Invalid username");
+					return Page();
+				}
+
 				var user = new ApplicationUser { UserName = Input.DisplayName, Email = Input.Email };
 				if (await _userManager.FindByEmailAsync(Input.Email) != null)
 				{
