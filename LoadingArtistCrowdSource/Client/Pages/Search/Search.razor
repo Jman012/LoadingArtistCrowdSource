@@ -1,6 +1,7 @@
 ﻿@page "/search"
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject Services.LACSApi Api
+@inject NavigationManager NavigationManager
 
 @if (_fields == null)
 {
@@ -47,7 +48,7 @@ else
 						</Column>
 					</Row>
 
-					<div class="d-flex flex-wrap">
+					<div class="d-flex flex-wrap border rounded mb-3">
 						@for (int i = 0; i < _fields.Length; i++)
 						{
 							var index = i;
@@ -98,10 +99,7 @@ else
 		try
 		{
 			_fields = await Api.GetSearchFields();
-			_searchVM.SearchEntries = _fields.Select(f => new SearchEntryViewModel()
-			{
-				FieldCode = f.Code,
-			}).ToArray();
+			Load();
 		}
 		catch (AccessTokenNotAvailableException exception)
 		{
@@ -109,12 +107,65 @@ else
 			return;
 		}
 
+		NavigationManager.LocationChanged += (s, e) => Load();
+
 		await base.OnInitializedAsync();
+	}
+
+	private void Load()
+	{
+		_searchVM = new SearchViewModel();
+		_searchVM.SearchEntries = _fields!.Select(f => 
+		{
+			var searchEntry = new SearchEntryViewModel()
+			{
+				FieldCode = f.Code,
+				Operator = default,
+			};
+
+			switch (f.Type)
+			{
+				case CrowdSourcedFieldType.IntegerNumber:
+				case CrowdSourcedFieldType.FreeformTextfield:
+				case CrowdSourcedFieldType.FreeformTextarea:
+					searchEntry.FieldValues = new SearchEntryOptionViewModel[]
+					{
+						new SearchEntryOptionViewModel()
+						{
+							Code = "",
+							Filtered = true,
+						},
+					};
+					break;
+				default:
+					searchEntry.FieldValues = f.Options.Select(o => new SearchEntryOptionViewModel() 
+					{ 
+						Code = o.Code, 
+						Filtered = false 
+					}).ToArray();
+					break;
+			}
+
+			return searchEntry;
+		}).ToArray();
+
+		_searchVM.DecodeFromQueryString(new Uri(NavigationManager.Uri).Query);
+		StateHasChanged();
 	}
 
 	private async Task HandleValidSubmit()
 	{
 		_comics = null;
+
+		string searchQuery = _searchVM.EncodeToQueryString();
+		if (string.IsNullOrEmpty(searchQuery))
+		{
+			NavigationManager.NavigateTo("/search");
+		}
+		else
+		{
+			NavigationManager.NavigateTo("/search?" + searchQuery);
+		}
 
 		var newSearchVM = new SearchViewModel()
 		{

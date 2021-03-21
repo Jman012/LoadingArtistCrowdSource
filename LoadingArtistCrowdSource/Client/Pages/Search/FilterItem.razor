@@ -1,5 +1,5 @@
 ﻿<div class="dropdown">
-	<button type="button" id="@($"{Field.Code}-btn-label")" class="@($"btn {(FilterData.FieldValues.Any(fv => fv.Filtered) ? "btn-secondary" : "btn-light")} btn-sm dropdown-toggle")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	<button type="button" id="@($"{Field.Code}-btn-label")" class="@($"btn {(FilterData.FieldValues.Any(fv => !string.IsNullOrEmpty(fv.Code) && fv.Filtered) ? "btn-secondary" : "btn-light")} btn-sm dropdown-toggle")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		@dropdownText
 	</button>
 	<ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="@($"{Field.Code}-btn-label")">
@@ -63,8 +63,6 @@
 	[Parameter]
 	public EventCallback<SearchEntryViewModel>? FilterDataChanged { get; set; }
 
-	private List<CrowdSourcedFieldDefinitionOptionViewModel> _fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
-
 	private string? _searchText;
 	private (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] _searchedOptions = new (SearchEntryOptionViewModel, CrowdSourcedFieldDefinitionOptionViewModel)[] { };
 
@@ -72,45 +70,45 @@
 	{
 		get
 		{
-			if (FilterData.FieldValues.Zip(_fieldOptions).Any(o => o.First.Filtered))
+			switch (Field.Type)
 			{
-				string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(_fieldOptions).Where(o => o.First.Filtered).Select(o => o.Second.Text));
-				return $"{Field.Name}: {values}";
+				case CrowdSourcedFieldType.IntegerNumber:
+				case CrowdSourcedFieldType.FreeformTextfield:
+				case CrowdSourcedFieldType.FreeformTextarea:
+					var fieldValue = FilterData.FieldValues.FirstOrDefault() ?? new SearchEntryOptionViewModel();
+					if (!string.IsNullOrEmpty(fieldValue.Code) && fieldValue.Filtered)
+					{
+						return Field.Name + ": " + fieldValue.Code;
+					}
+					else
+					{
+						return "Any " + Field.Name;
+					}
+				default:
+					if (FilterData.FieldValues.Zip(Field.Options).Any(o => o.First.Filtered))
+					{
+						string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(Field.Options).Where(o => o.First.Filtered).Select(o => o.Second.Text));
+						return $"{Field.Name}: {values}";
+					}
+					else
+					{
+						return "Any " + Field.Name;
+					}
 			}
-			else
-			{
-				return "Any " + Field.Name;
-			}
+			
 		}
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		FilterData.FieldCode = Field.Code;
-
-		switch (Field.Type)
-		{
-			case CrowdSourcedFieldType.IntegerNumber:
-			case CrowdSourcedFieldType.FreeformTextfield:
-			case CrowdSourcedFieldType.FreeformTextarea:
-				_fieldOptions = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
-				FilterData.FieldValues = new SearchEntryOptionViewModel[]
-				{
-					new SearchEntryOptionViewModel()
-					{
-						Code = "",
-						Filtered = true,
-					},
-				};
-				break;
-			default:
-				_fieldOptions = Field.Options;
-				FilterData.FieldValues = _fieldOptions.Select(o => new SearchEntryOptionViewModel() { Code = o.Code, Filtered = false }).ToArray();
-				break;
-		}
-		await DidChange();
 		performSearch();
-		base.OnInitialized();
+		await base.OnInitializedAsync();
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		performSearch();
+		await base.OnParametersSetAsync();
 	}
 
 	private void HandleSearchInput(ChangeEventArgs e)
@@ -130,13 +128,13 @@
 		if (string.IsNullOrEmpty(_searchText))
 		{
 			_searchedOptions = FilterData.FieldValues
-				.Zip(_fieldOptions)
+				.Zip(Field.Options)
 				.ToArray();
 		}
 		else
 		{
 			_searchedOptions = FilterData.FieldValues
-				.Zip(_fieldOptions)
+				.Zip(Field.Options)
 				.Where(o => o.Second.Text.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
 				.ToArray();
 		}
