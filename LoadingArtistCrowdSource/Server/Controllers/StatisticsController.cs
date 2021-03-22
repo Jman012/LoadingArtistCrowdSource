@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
@@ -22,16 +23,28 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly ILogger<StatisticsController> _logger;
+		private readonly Services.JsonDistributedCache<ComicController> _distCache;
 
-		public StatisticsController(ApplicationDbContext context, ILogger<StatisticsController> logger)
+		public StatisticsController(
+			ApplicationDbContext context, 
+			ILogger<StatisticsController> logger,
+			Services.JsonDistributedCache<ComicController> distCache)
 		{
 			_context = context;
 			_logger = logger;
+			_distCache = distCache;
 		}
 
 		[HttpGet]
 		public async Task<StatisticsViewModel> Index()
 		{
+			// Attempt to fulfill request from cache
+			var result = await _distCache.GetAsync<StatisticsViewModel>(Services.CacheKeys.LACS.Stats.Index);
+			if (result != null)
+			{
+				return result;
+			}
+
 			// Each field = 0, 1, or 2 points.
 			// Verified = 2 points, Collecting = 1 points, No Data = 0 points
 			// Transcript = 0 or 1 points.
@@ -108,6 +121,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			int totalComicCount = comicCountsByYear.Values.Sum();
 			vm.OverallIntegrity = (double)totalAccruedPoints / ((double)totalPerComicPoints * (double)totalComicCount);
+
+			// Cache result for later
+			await _distCache.SetAsync(Services.CacheKeys.LACS.Stats.Index, vm, new DistributedCacheEntryOptions()
+			{
+				AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+			});
 
 			return vm;
 		}

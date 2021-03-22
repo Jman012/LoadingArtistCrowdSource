@@ -101,6 +101,12 @@ namespace LoadingArtistCrowdSource.Server.Services
 			_logger.LogDebug($"Set key '{key}' for {typeof(T).FullName} with {bytes.Length} bytes, expiring {CacheEntryOptionsDescription(options)}");
 		}
 
+		public async Task RemoveAsync(string key)
+		{
+			_logger.LogDebug($"Removing key {key}");
+			await _distCache.RemoveAsync(key);
+		}
+
 		private string CacheEntryOptionsDescription(DistributedCacheEntryOptions options)
 		{
 			if (options.AbsoluteExpiration.HasValue)

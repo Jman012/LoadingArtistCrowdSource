@@ -49,7 +49,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[HttpGet]
 		public async Task<IEnumerable<Shared.Models.ComicListItemViewModel>> Index()
 		{
-			return await _distCache.GetAsync("LACS.ComicIndex", async () => {
+			return await _distCache.GetAsync(Services.CacheKeys.LACS.ComicIndex, async () => {
 				Services.ModelMapper modelMapper = new Services.ModelMapper();
 				var comics = await _context.Comics
 					.OrderBy(c => c.Id)
@@ -68,6 +68,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		[Route("{code}")]
 		public async Task<IActionResult> GetComic(string code)
 		{
+			// Attempt to fulfill request from cache
+			var result = await _distCache.GetAsync<Shared.Models.ComicPageViewModel>(Services.CacheKeys.LACS.GetComic(code));
+			if (result != null)
+			{
+				return Json(result);
+			}
+
 			// Retrieve comic from storage
 			Services.ModelMapper modelMapper = new Services.ModelMapper();
 			Models.Comic? comic = await _context.Comics
@@ -154,6 +161,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Progress = progress,
 			};
 
+			// Cache this for later
+			await _distCache.SetAsync(Services.CacheKeys.LACS.GetComic(code), comicPageVM, new DistributedCacheEntryOptions()
+			{
+				SlidingExpiration = TimeSpan.FromHours(1),
+			});
 			return Json(comicPageVM);
 		}
 
@@ -323,7 +335,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					}
 
 					await transaction.CommitAsync();
-					return Json(result);
 				}
 				catch (Exception ex)
 				{
@@ -332,6 +343,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+
+			return Json(result);
 		}
 
 		[HttpPut]
@@ -374,6 +390,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.ComicIndex);
 			
 			return Ok();
 		}
@@ -486,6 +506,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				}
 			}
 
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+
 			return Ok();
 		}
 
@@ -577,6 +600,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
 
 			return Ok();
 		}
@@ -682,6 +708,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			// Clear comic from cache
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.Tags.Index);
 
 			return Ok();
 		}

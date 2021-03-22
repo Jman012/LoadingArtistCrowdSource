@@ -26,16 +26,19 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly ILogger<FieldController> _logger;
 		private readonly Services.HistoryLogger _historyLogger;
+		private readonly Services.JsonDistributedCache<ComicController> _distCache;
 		public FieldController(
 			ApplicationDbContext context, 
 			UserManager<Models.ApplicationUser> userManager, 
 			ILogger<FieldController> logger,
-			Services.HistoryLogger historyLogger)
+			Services.HistoryLogger historyLogger,
+			Services.JsonDistributedCache<ComicController> distCache)
 		{
 			_context = context;
 			_userManager = userManager;
 			_logger = logger;
 			_historyLogger = historyLogger;
+			_distCache = distCache;
 		}
 
 		[HttpGet]
@@ -149,6 +152,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				}
 			}
 
+			// Clear all comics from cache
+			foreach (string comicCode in _context.Comics.Select(c => c.Code))
+			{
+				await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+			}
+
 			return Ok();
 		}
 
@@ -174,12 +183,18 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				return csfd;
 			}).ToList();
 			await _context.SaveChangesAsync();
+
+			// Clear all comics from cache
+			foreach (string comicCode in _context.Comics.Select(c => c.Code))
+			{
+				await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+			}
 			return Ok();
 		}
 
 		[HttpGet]
 		[Route("{fieldCode}/history")]
-		public async Task<ActionResult> GetComicHistory([FromRoute] string fieldCode)
+		public async Task<ActionResult> GetFieldHistory([FromRoute] string fieldCode)
 		{
 			var modelMapper = new Services.ModelMapper();
 			var fieldDef = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
