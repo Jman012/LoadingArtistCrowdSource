@@ -149,6 +149,11 @@ namespace LoadingArtistCrowdSource.Client.Services
 			response.EnsureSuccessStatusCode();
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<string> SetUserRoles(AdminSetUserRolesViewModel vm)
+		{
+			var response = await _authClient.PutAsJsonAsync($"api/admin/user/{Uri.EscapeDataString(vm.Username)}/roles", vm.UserRoles, _serializationOptions);
+			return await response.Content.ReadAsStringAsync();
+		}
 		#endregion AdminController
 
 		#region FeedbackController

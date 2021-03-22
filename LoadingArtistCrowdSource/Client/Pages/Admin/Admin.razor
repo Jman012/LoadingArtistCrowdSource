@@ -22,11 +22,44 @@
 		</Column>
 	</Row>
 
+	<Row Class="mb-3">
+		<Column>
+			<h3>Set user roles</h3>
+			<EditForm Model="_setUserRolesVm" OnValidSubmit="HandleValidSetUserRolesSubmit">
+				<DataAnnotationsValidator />
+				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+
+				<FormTextfield @bind-Value="@_setUserRolesVm.Username" />
+				@foreach (var userRoleItem in _setUserRolesVm.UserRoles)
+				{
+					<div class="form-group form-check">
+						<InputCheckbox id="@userRoleItem.Role" 
+									   name="@userRoleItem.Role"
+									   class="form-check-input"
+									   @bind-Value="userRoleItem.Include" />
+
+						<label for="@userRoleItem.Role">@userRoleItem.Role</label>
+					</div>
+				}
+				<Button Type="ButtonType.Submit" Color="Color.Primary">Submit</Button>
+			</EditForm>
+		</Column>
+	</Row>
+
 </Container>
 
 @code {
 	private IBrowserFile? _importFeedFile;
 	private bool _isLoadingImportNewComics;
+
+	private AdminSetUserRolesViewModel _setUserRolesVm = new AdminSetUserRolesViewModel();
+
+	protected override void OnInitialized()
+	{
+		_setUserRolesVm.UserRoles.Add(new AdminSetUserRoleItemViewModel() { Role = LoadingArtistCrowdSource.Shared.Enums.Roles.Administrator, Include = false });
+		_setUserRolesVm.UserRoles.Add(new AdminSetUserRoleItemViewModel() { Role = LoadingArtistCrowdSource.Shared.Enums.Roles.Moderator, Include = false });
+		base.OnInitialized();
+	}
 
 	private void HandleImportFeedFile(InputFileChangeEventArgs e)
 	{
@@ -53,5 +86,18 @@
 			ToastService.ShowError(ex.Message);
 		}
 		_isLoadingImportNewComics = false;
+	}
+
+	private async Task HandleValidSetUserRolesSubmit()
+	{
+		try
+		{
+			ToastService.ShowInfo(await Api.SetUserRoles(_setUserRolesVm));
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			_isLoadingImportNewComics = false;
+			ex.Redirect();
+		}
 	}
 }

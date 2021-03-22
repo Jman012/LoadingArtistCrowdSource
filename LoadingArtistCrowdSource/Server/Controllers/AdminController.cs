@@ -87,6 +87,44 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok($"Imported {importableComicsCount} comic(s)");
 		}
 
+		[HttpPut]
+		[Route("user/{username}/roles")]
+		public async Task<IActionResult> PutUserRole([FromRoute] string username, [FromBody] IEnumerable<Shared.Models.AdminSetUserRoleItemViewModel> userRoleItems)
+		{
+			var user = await _userManager.FindByNameAsync(username);
+			if (user == null)
+			{
+				_logger.LogWarning($"User {username} not found");
+				return NotFound("User name not found");
+			}
+
+			IEnumerable<string> userRoles = userRoleItems.Where(uri => uri.Include).Select(uri => uri.Role);
+
+			List<string> rolesRemoved = new List<string>();
+			List<string> rolesAdded = new List<string>();
+			List<string> rolesUnchanged = new List<string>();
+
+			IList<string> currentRoles = await _userManager.GetRolesAsync(user);
+			foreach (string role in currentRoles)
+			{
+				if (!userRoles.Contains(role))
+				{
+					rolesRemoved.Add(role);
+					await _userManager.RemoveFromRoleAsync(user, role);
+				}
+				else
+				{
+					rolesUnchanged.Add(role);
+				}
+			}
+			rolesAdded.AddRange(userRoles.Except(currentRoles));
+			await _userManager.AddToRolesAsync(user, userRoles);
+
+			_logger.LogWarning($"Removed: {string.Join(", ", rolesRemoved)}; Added: {string.Join(", ", rolesAdded)}; Unchanged: {string.Join(", ", rolesUnchanged)}");
+			return Ok($"Removed: {string.Join(", ", rolesRemoved)}; Added: {string.Join(", ", rolesAdded)}; Unchanged: {string.Join(", ", rolesUnchanged)}");
+		}
+
+		#region Private Methods
 		private async Task<SyndicationFeed> GetRssFeedPage(int page)
 		{
 			string sFeedUrl = "https://loadingartist.com/feed?post_type=comic&paged={0}";
@@ -214,5 +252,6 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			return comic;
 		}
+		#endregion Private Methods
 	}
 }
