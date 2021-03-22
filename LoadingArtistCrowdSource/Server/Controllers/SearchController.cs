@@ -88,7 +88,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			}
 			foreach (var searchEntry in vm.SearchEntries)
 			{
-				string[] values = searchEntry.FieldValues.Where(v => v.Filtered).Select(v => v.Code).ToArray();
+				string[] values = searchEntry.FieldValues.Where(v => !string.IsNullOrEmpty(v.Code) && v.Filtered).Select(v => v.Code).ToArray();
 				if (!values.Any())
 				{
 					continue;

@@ -12,7 +12,7 @@
 				<li class="dropdown-item-text">
 					<div class="input-group">
 						<InputText class="form-control" @bind-Value="FilterData.FieldValues[0].Code"></InputText>
-						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="ClearSearchInput" title="Click to clear search filter">
+						<button type="button" class="btn btn-sm bg-transparent" style="margin-left: -28px; z-index: 100;" @onclick="() => FilterData.FieldValues[0].Code = string.Empty" title="Click to clear search filter">
 							<SemanticIcon Name="x" Title="Click to clear search filter" />
 						</button>
 					</div>
