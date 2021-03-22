@@ -99,7 +99,7 @@ else
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Field="@(c => c.Code)">
 			<Template>
-				<NavLink class="nav-link" href="@($"comic/{Uri.EscapeDataString(context.Code)}")">
+				<NavLink class="nav-link text-nowrap" href="@($"comic/{Uri.EscapeDataString(context.Code)}")">
 					<HelperIcon Name="plus" /> View
 				</NavLink>
 			</Template>

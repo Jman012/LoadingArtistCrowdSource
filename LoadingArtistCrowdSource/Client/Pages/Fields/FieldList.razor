@@ -76,7 +76,7 @@ else
 					<td>@field.LastUpdatedByUser.UserName</td>
 					<td>@field.LastUpdatedDate</td>
 					<td>
-						<NavLink class="nav-link" href="@($"field/{Uri.EscapeDataString(field.Code)}")">
+						<NavLink class="nav-link text-nowrap" href="@($"field/{Uri.EscapeDataString(field.Code)}")">
 							<HelperIcon Name="edit" /> Edit
 						</NavLink>
 					</td>
@@ -95,7 +95,7 @@ else
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="Last Updated" Field="@(fd => fd.LastUpdatedDate)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="CrowdSourcedFieldDefinitionViewModel" Title="" Field="@(fd => fd.Code)" Sortable="false" Filterable="false">
 			<Template>
-				<NavLink class="nav-link" href="@($"field/{Uri.EscapeDataString(context.Code)}")">
+				<NavLink class="nav-link text-nowrap" href="@($"field/{Uri.EscapeDataString(context.Code)}")">
 					<HelperIcon Name="edit" /> Edit
 				</NavLink>
 			</Template>

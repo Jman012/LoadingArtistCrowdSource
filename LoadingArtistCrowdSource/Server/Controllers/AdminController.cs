@@ -124,6 +124,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok($"Removed: {string.Join(", ", rolesRemoved)}; Added: {string.Join(", ", rolesAdded)}; Unchanged: {string.Join(", ", rolesUnchanged)}");
 		}
 
+		[HttpPost]
+		[Route("import_fields")]
+		public async Task<IActionResult> ImportFieldDefinitions([FromBody] string json)
+		{
+			return Ok();
+		}
+
 		#region Private Methods
 		private async Task<SyndicationFeed> GetRssFeedPage(int page)
 		{
