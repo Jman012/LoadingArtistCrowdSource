@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
@@ -25,6 +26,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly Services.IRazorPartialToStringRenderer _renderer;
 		private readonly Services.HistoryLogger _historyLogger;
 		private readonly Services.TagRepository _tagRepo;
+		private readonly Services.JsonDistributedCache<ComicController> _distCache;
 
 		public ComicController(
 			ApplicationDbContext context, 
@@ -32,7 +34,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			ILogger<ComicController> logger,
 			Services.IRazorPartialToStringRenderer renderer,
 			Services.HistoryLogger historyLogger,
-			Services.TagRepository tagRepo)
+			Services.TagRepository tagRepo,
+			Services.JsonDistributedCache<ComicController> distCache)
 		{
 			_context = context;
 			_userManager = userManager;
@@ -40,17 +43,25 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			_renderer = renderer;
 			_historyLogger = historyLogger;
 			_tagRepo = tagRepo;
+			_distCache = distCache;
 		}
 
 		[HttpGet]
 		public async Task<IEnumerable<Shared.Models.ComicListItemViewModel>> Index()
 		{
-			Services.ModelMapper modelMapper = new Services.ModelMapper();
-			var comics = await _context.Comics
-				.OrderBy(c => c.Id)
-				.ToListAsync();
+			return await _distCache.GetAsync("LACS.ComicIndex", async () => {
+				Services.ModelMapper modelMapper = new Services.ModelMapper();
+				var comics = await _context.Comics
+					.OrderBy(c => c.Id)
+					.ToListAsync();
 
-			return comics.Select(c => modelMapper.MapComicListItem(c));
+				var cacheEntryOptions = new DistributedCacheEntryOptions()
+				{
+					AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4),
+				};
+
+				return (comics.Select(c => modelMapper.MapComicListItem(c)), cacheEntryOptions);
+			});
 		}
 
 		[HttpGet]

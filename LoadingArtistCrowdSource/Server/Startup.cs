@@ -87,6 +87,19 @@ namespace LoadingArtistCrowdSource.Server
 			services.AddScoped<Services.IRazorPartialToStringRenderer, Services.RazorPartialToStringRenderer>();
 			services.AddScoped<Services.HistoryLogger>();
 			services.AddScoped<Services.TagRepository>();
+
+			if (Configuration.GetValue<string>("LACS:DistributedCache") == "Redis")
+			{
+				services.AddDistributedRedisCache(option => 
+				{
+					option.Configuration = Configuration.GetValue<string>("Redis:Connection");
+				});
+			}
+			else
+			{
+				services.AddDistributedMemoryCache();
+			}
+			services.AddSingleton(typeof(Services.JsonDistributedCache<>));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
