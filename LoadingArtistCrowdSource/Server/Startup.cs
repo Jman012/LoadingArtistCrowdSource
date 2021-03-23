@@ -100,20 +100,18 @@ namespace LoadingArtistCrowdSource.Server
 				services.AddDistributedMemoryCache();
 			}
 			services.AddSingleton(typeof(Services.JsonDistributedCache<>));
-
-			/*
-			 * Apply migrations
-			 */
-			using (var serviceProvider = services.BuildServiceProvider())
-			using (var scope = serviceProvider.CreateScope())
-			{
-				scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
-			}
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 		{
+			// Apply migrations
+			using (var scope = app.ApplicationServices.CreateScope())
+			{
+				scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+			}
+
+			// LACS pre checks
 			Services.IdentitySeed.SeedData(userManager, roleManager);
 			Services.ServerConfig.AssertConfigAvailable(Configuration);
 
@@ -135,6 +133,15 @@ namespace LoadingArtistCrowdSource.Server
 			app.UseStaticFiles();
 
 			app.UseRouting();
+
+			// Needed for reverse proxying. Must be before UseIdentityServer.
+			var fordwardedHeaderOptions = new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All,
+			};
+			fordwardedHeaderOptions.KnownNetworks.Clear();
+			fordwardedHeaderOptions.KnownProxies.Clear();
+			app.UseForwardedHeaders(fordwardedHeaderOptions);
 
 			app.UseIdentityServer();
 			app.UseAuthentication();
