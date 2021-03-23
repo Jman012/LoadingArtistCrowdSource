@@ -100,6 +100,15 @@ namespace LoadingArtistCrowdSource.Server
 				services.AddDistributedMemoryCache();
 			}
 			services.AddSingleton(typeof(Services.JsonDistributedCache<>));
+
+			/*
+			 * Apply migrations
+			 */
+			using (var serviceProvider = services.BuildServiceProvider())
+			using (var scope = serviceProvider.CreateScope())
+			{
+				scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+			}
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
