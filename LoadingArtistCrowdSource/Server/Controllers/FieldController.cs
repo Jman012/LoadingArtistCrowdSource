@@ -26,13 +26,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly ILogger<FieldController> _logger;
 		private readonly Services.HistoryLogger _historyLogger;
-		private readonly Services.JsonDistributedCache<ComicController> _distCache;
+		private readonly Services.JsonDistributedCache<FieldController> _distCache;
 		public FieldController(
 			ApplicationDbContext context, 
 			UserManager<Models.ApplicationUser> userManager, 
 			ILogger<FieldController> logger,
 			Services.HistoryLogger historyLogger,
-			Services.JsonDistributedCache<ComicController> distCache)
+			Services.JsonDistributedCache<FieldController> distCache)
 		{
 			_context = context;
 			_userManager = userManager;

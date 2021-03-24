@@ -23,12 +23,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly Services.TagRepository _tagRepo;
-		private readonly Services.JsonDistributedCache<ComicController> _distCache;
+		private readonly Services.JsonDistributedCache<TagController> _distCache;
 
 		public TagController(
 			ApplicationDbContext context, 
 			Services.TagRepository tagRepo,
-			Services.JsonDistributedCache<ComicController> distCache)
+			Services.JsonDistributedCache<TagController> distCache)
 		{
 			_context = context;
 			_tagRepo = tagRepo;

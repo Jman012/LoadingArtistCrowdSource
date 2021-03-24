@@ -30,19 +30,22 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly ILogger<AdminController> _logger;
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly Services.HistoryLogger _historyLogger;
+		private readonly Services.JsonDistributedCache<AdminController> _distCache;
 
 		public AdminController(
 			ApplicationDbContext context, 
 			IHttpClientFactory httpClientFactory, 
 			ILogger<AdminController> logger, 
 			UserManager<Models.ApplicationUser> userManager,
-			Services.HistoryLogger historyLogger)
+			Services.HistoryLogger historyLogger,
+			Services.JsonDistributedCache<AdminController> distCache)
 		{
 			_context = context;
 			_httpClient = httpClientFactory.CreateClient();
 			_logger = logger;
 			_userManager = userManager;
 			_historyLogger = historyLogger;
+			_distCache = distCache;
 		}
 
 		[HttpPost]
@@ -82,6 +85,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					throw;
 				}
 			}
+
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.ComicIndex);
 			
 			_logger.LogInformation($"Importing and saving comics completed.");
 			return Ok($"Imported {importableComicsCount} comic(s)");

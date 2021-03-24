@@ -23,12 +23,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly ILogger<StatisticsController> _logger;
-		private readonly Services.JsonDistributedCache<ComicController> _distCache;
+		private readonly Services.JsonDistributedCache<StatisticsController> _distCache;
 
 		public StatisticsController(
 			ApplicationDbContext context, 
 			ILogger<StatisticsController> logger,
-			Services.JsonDistributedCache<ComicController> distCache)
+			Services.JsonDistributedCache<StatisticsController> distCache)
 		{
 			_context = context;
 			_logger = logger;
