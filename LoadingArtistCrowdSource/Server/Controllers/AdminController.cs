@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.ServiceModel.Syndication;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -129,11 +131,108 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok($"Removed: {string.Join(", ", rolesRemoved)}; Added: {string.Join(", ", rolesAdded)}; Unchanged: {string.Join(", ", rolesUnchanged)}");
 		}
 
+		[HttpGet]
+		[Route("export_fields")]
+		public async Task<IActionResult> ExportFieldDefinitions()
+		{
+			Services.ModelMapper modelMapper = new Services.ModelMapper();
+			List<Models.CrowdSourcedFieldDefinition> fieldDefs = await _context.CrowdSourcedFieldDefinitions
+				.Include(csdf => csdf.CreatedByUser)
+				.Include(csdf => csdf.LastUpdatedByUser)
+				.Include(csdf => csdf.CrowdSourcedFieldDefinitionOptions)
+				.ToListAsync();
+
+			foreach (var fieldDef in fieldDefs)
+			{
+				fieldDef.CrowdSourcedFieldDefinitionOptions = fieldDef.CrowdSourcedFieldDefinitionOptions
+					.OrderBy(csfdo => csfdo.DisplayOrder).ToList();
+			}
+
+			List<Shared.Models.FieldDefinitionFormViewModel> fieldVms = fieldDefs
+				.Select(fd => modelMapper.MapFieldDefinitionForm(fd, mapOptions: true))
+				.ToList();
+
+			var serializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General);
+			string json = JsonSerializer.Serialize(fieldVms, serializerOptions);
+
+			// return File(Encoding.UTF8.GetBytes(json), "application/json", "LACSFields.json");
+			return Content(json);
+		}
+
 		[HttpPost]
 		[Route("import_fields")]
-		public async Task<IActionResult> ImportFieldDefinitions([FromBody] string json)
+		public async Task<IActionResult> ImportFieldDefinitions()
 		{
-			return Ok();
+			string json;
+			using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+			{
+				json = await reader.ReadToEndAsync();
+			}
+
+			var userId = _userManager.GetUserId(User);
+			if (await _context.CrowdSourcedFieldDefinitions.AnyAsync())
+			{
+				return BadRequest("Can not import fields into a site where fields already exist");
+			}
+
+			var serializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General);
+			var lstFieldViewModels = JsonSerializer.Deserialize<List<Shared.Models.FieldDefinitionFormViewModel>>(json, serializerOptions);
+
+			if (lstFieldViewModels == null)
+			{
+				return BadRequest("Unable to parse import JSON");
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					foreach (var field in lstFieldViewModels.Select((fieldVm, index) => new { fieldVm, index }))
+					{
+						var fieldVm = field.fieldVm;
+						var fieldDef = new Models.CrowdSourcedFieldDefinition()
+						{
+							Code = fieldVm.Code,
+							CreatedDate = DateTimeOffset.Now,
+							CreatedBy = userId,
+							IsActive = fieldVm.IsActive,
+							Type = fieldVm.Type,
+							Name = fieldVm.Name,
+							ShortDescription = fieldVm.ShortDescription,
+							LongDescription = fieldVm.LongDescription,
+							DisplayOrder = field.index,
+						};
+						_context.CrowdSourcedFieldDefinitions.AddRange(fieldDef);
+						await _context.CrowdSourcedFieldDefinitionHistoryLogs.AddAsync(_historyLogger.CreateAddFieldDefinitionLog(fieldDef));
+
+						fieldDef.CrowdSourcedFieldDefinitionOptions.AddRange(fieldVm.Options.Select((optionVM, index) => new Models.CrowdSourcedFieldDefinitionOption()
+						{
+							Code = optionVM.Code,
+							Text = optionVM.Text,
+							Description = optionVM.Description,
+							URL = optionVM.URL,
+							DisplayOrder = index,
+						}));
+					}
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing fields");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			// Clear all comics from cache
+			foreach (string comicCode in _context.Comics.Select(c => c.Code))
+			{
+				await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+			}
+
+			return Ok($"Imported {lstFieldViewModels.Count} fields");
 		}
 
 		#region Private Methods

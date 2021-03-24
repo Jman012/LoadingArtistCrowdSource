@@ -46,11 +46,47 @@
 		</Column>
 	</Row>
 
+	<Row Class="mb-3">
+		<Column>
+			<h3>Field Export/Import</h3>
+			<Button Type="ButtonType.Button" Color="Color.Primary" Clicked="HandleExportFields" Disabled="_isExportFieldsLoading">
+				Export Fields 
+				@if (_isExportFieldsLoading)
+				{
+					<Spinner Small="true" Inline="true" />
+				}
+				else
+				{
+					<HelperIcon Name="arrow-down" />
+				}
+			</Button>
+			<br />
+			<EditForm Model="@_exportImportJson">
+				<InputTextArea @bind-Value="@_exportImportJson"></InputTextArea>
+			</EditForm>
+			<br />
+			<Button Type="ButtonType.Button" Color="Color.Primary" Clicked="HandleImportFields" Disabled="_isImportFieldsLoading">
+				Import Fields
+				@if (_isImportFieldsLoading)
+				{
+					<Spinner Small="true" Inline="true" />
+				}
+				else
+				{
+					<HelperIcon Name="arrow-up" />
+				}
+			</Button>
+		</Column>
+	</Row>
+
 </Container>
 
 @code {
 	private IBrowserFile? _importFeedFile;
 	private bool _isLoadingImportNewComics;
+	private string _exportImportJson = "";
+	private bool _isExportFieldsLoading;
+	private bool _isImportFieldsLoading;
 
 	private AdminSetUserRolesViewModel _setUserRolesVm = new AdminSetUserRolesViewModel();
 
@@ -93,6 +129,36 @@
 		try
 		{
 			ToastService.ShowInfo(await Api.SetUserRoles(_setUserRolesVm));
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			_isLoadingImportNewComics = false;
+			ex.Redirect();
+		}
+	}
+
+	private async Task HandleExportFields()
+	{
+		try
+		{
+			_isExportFieldsLoading = true;
+			_exportImportJson = await Api.ExportFields();
+			_isExportFieldsLoading = false;
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			_isLoadingImportNewComics = false;
+			ex.Redirect();
+		}
+	}
+
+	private async Task HandleImportFields()
+	{
+		try
+		{
+			_isImportFieldsLoading = true;
+			ToastService.ShowInfo(await Api.ImportFields(_exportImportJson));
+			_isImportFieldsLoading = false;
 		}
 		catch (AccessTokenNotAvailableException ex)
 		{

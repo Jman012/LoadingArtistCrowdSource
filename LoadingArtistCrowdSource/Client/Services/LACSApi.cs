@@ -154,6 +154,17 @@ namespace LoadingArtistCrowdSource.Client.Services
 			var response = await _authClient.PutAsJsonAsync($"api/admin/user/{Uri.EscapeDataString(vm.Username)}/roles", vm.UserRoles, _serializationOptions);
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<string> ExportFields()
+		{
+			var response = await _authClient.GetAsync("api/admin/export_fields");
+			response.EnsureSuccessStatusCode();
+			return await response.Content.ReadAsStringAsync();
+		}
+		public async Task<string> ImportFields(string json)
+		{
+			var response = await _authClient.PostAsync("api/admin/import_fields", new StringContent(json));
+			return await response.Content.ReadAsStringAsync();
+		}
 		#endregion AdminController
 
 		#region FeedbackController
