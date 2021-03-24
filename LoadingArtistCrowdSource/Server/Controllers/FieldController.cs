@@ -108,6 +108,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							Code = vm.Code,
 							CreatedDate = DateTimeOffset.Now,
 							CreatedBy = userId,
+							DisplayOrder = 999,
 						};
 						_context.CrowdSourcedFieldDefinitions.Add(fieldDef);
 						await _context.CrowdSourcedFieldDefinitionHistoryLogs.AddAsync(_historyLogger.CreateAddFieldDefinitionLog(fieldDef));
