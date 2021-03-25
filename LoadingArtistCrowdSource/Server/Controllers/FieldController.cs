@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
 {
-	[Authorize(Roles = Roles.Administrator)]
+	[Authorize(Roles = Roles.AdminMod)]
 	[ApiController]
 	[Route("api/field")]
 	[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
