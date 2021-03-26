@@ -126,7 +126,7 @@
 	}
 </Container>
 
-<FieldOptionEditModal @ref="_optionModal" OnSubmit="HandleFieldOptionModal"></FieldOptionEditModal>
+<FieldOptionEditModal @ref="_optionModal" ExistingOptions="_fieldDef.Options" OnSubmit="HandleFieldOptionModal"></FieldOptionEditModal>
 
 @code {
 

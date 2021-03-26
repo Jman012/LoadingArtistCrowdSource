@@ -6,10 +6,9 @@
 
 .main {
 	flex: 1;
-}
-
-.main .content {
-	padding-bottom: 60px;
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - 55px);
 }
 
 .sidebar {

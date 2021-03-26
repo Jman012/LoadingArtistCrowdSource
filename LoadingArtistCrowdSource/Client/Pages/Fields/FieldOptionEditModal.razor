@@ -11,6 +11,12 @@
 			<EditForm @ref="_form" Model="_optionVM">
 				<DataAnnotationsValidator />
 				<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+				@if (_hasDuplicateCodeError)
+				{
+					<ul class="text-danger">
+						<li>This Code is already being used in another option for this field</li>
+					</ul>
+				}
 
 				<FormTextfield NamePrefix="_namePrefix" @bind-Value="_optionVM.Code" Disabled="!_isNew"></FormTextfield>
 				<FormTextfield NamePrefix="_namePrefix" @bind-Value="_optionVM.Text"></FormTextfield>
@@ -34,6 +40,8 @@
 	}
 
 	[Parameter]
+	public IEnumerable<CrowdSourcedFieldDefinitionOptionViewModel> ExistingOptions { get; set; } = new CrowdSourcedFieldDefinitionOptionViewModel[] { };
+	[Parameter]
 	public EventCallback<State> OnSubmit { get; set; }
 
 	private CrowdSourcedFieldDefinitionOptionViewModel _optionVM = new CrowdSourcedFieldDefinitionOptionViewModel();
@@ -43,6 +51,7 @@
 	private Modal _modal = new Modal();
 	private EditForm _form = new EditForm();
 	private string _namePrefix => $"{(_isNew ? "Add" : "Edit")}_Option_";
+	private bool _hasDuplicateCodeError = false;
 
 	public void Open(State state)
 	{
@@ -62,6 +71,16 @@
 		if (!_form.EditContext!.Validate())
 		{
 			return;
+		}
+
+		if (_isNew && ExistingOptions.Any(o => o.Code == _optionVM.Code))
+		{
+			_hasDuplicateCodeError = true;
+			return;
+		}
+		else
+		{
+			_hasDuplicateCodeError = false;
 		}
 
 		await OnSubmit.InvokeAsync(new State()

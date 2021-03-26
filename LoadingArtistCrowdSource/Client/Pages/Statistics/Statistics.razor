@@ -24,11 +24,11 @@ else
 						<label class="text-bold">
 							2011 - 2021
 						</label>
-						<Progress Class="mb-3">
-							<ProgressBar Value="_overallIntegrity">
+						<div class="progress mb-3" style="width: 100%; height: 22px;">
+							<div class="progress-bar" role="progressbar" style="min-width: @(_overallIntegrity)%" aria-valuenow="@(_overallIntegrity)" aria-valuemin="0" aria-valuemax="100">
 								@(_overallIntegrity)%
-							</ProgressBar>
-						</Progress>
+							</div>
+						</div>
 						<p>
 							The overall webcomic integrity is a report on how helpful the data, 
 							accrued so far, is for reports and searches. A low percentage indicates 
@@ -53,13 +53,14 @@ else
 					<CardBody>
 						@foreach (var year in _stats.IntegrityByYear.Keys)
 						{
+							int integrity = (int)Math.Floor(_stats.IntegrityByYear[year] * 100.0);
 							<div class="d-flex flex-row flex-nowrap align-items-baseline">
 								<label for="@($"stat-integrity-{year}")" class="mb-0 mr-3 font-weight-bold">@year</label>
-								<Progress id="@($"stat-integrity-{year}")" Class="flex-grow-1">
-									<ProgressBar Value="(int)Math.Floor(_stats.IntegrityByYear[year] * 100.0)">
-										@((int)Math.Floor(_stats.IntegrityByYear[year] * 100.0))%
-									</ProgressBar>
-								</Progress>
+								<div class="progress flex-grow-1" style="width: 100%; height: 22px;">
+									<div class="progress-bar" role="progressbar" style="min-width: @(integrity)%" aria-valuenow="@(integrity)" aria-valuemin="0" aria-valuemax="100">
+										@(integrity)%
+									</div>
+								</div>
 							</div>
 						}
 					</CardBody>

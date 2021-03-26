@@ -129,9 +129,6 @@ a, .btn-link {
 
 
 .footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
 	overflow: scroll;
 	white-space: nowrap;
 	/* Set the fixed height of the footer here */
