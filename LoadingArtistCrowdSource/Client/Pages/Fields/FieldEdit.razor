@@ -194,7 +194,7 @@
 	{
 		_optionModal?.Open(new FieldOptionEditModal.State()
 		{
-			OptionVM = _fieldDef.Options[index],
+			OptionVM = _fieldDef.Options[index].Clone(),
 			Index = index,
 		});
 	}
@@ -208,11 +208,11 @@
 	{
 		if (state.Index.HasValue)
 		{
-			_fieldDef.Options[state.Index.Value] = state.OptionVM;
+			_fieldDef.Options[state.Index.Value] = state.OptionVM.Clone();
 		}
 		else
 		{
-			_fieldDef.Options.Add(state.OptionVM);
+			_fieldDef.Options.Add(state.OptionVM.Clone());
 		}
 	}
 	#endregion Options and Modal

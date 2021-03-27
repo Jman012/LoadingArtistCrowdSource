@@ -20,5 +20,10 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string Description { get; set; } = "";
 		[Url]
 		public string? URL { get; set; }
+
+		public CrowdSourcedFieldDefinitionOptionViewModel Clone()
+		{
+			return (CrowdSourcedFieldDefinitionOptionViewModel)this.MemberwiseClone();
+		}
 	}
 }

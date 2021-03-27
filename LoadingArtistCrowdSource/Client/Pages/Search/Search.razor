@@ -48,7 +48,7 @@ else
 						</Column>
 					</Row>
 
-					<div class="d-flex flex-wrap border rounded mb-3">
+					<div class="d-flex flex-wrap border rounded mb-3 p-3">
 						@for (int i = 0; i < _fields.Length; i++)
 						{
 							var index = i;
@@ -58,7 +58,7 @@ else
 							}
 							else
 							{
-								<div class="m-2">
+								<div class="mb-2 mr-2">
 									<FilterItem Field="_fields[index]" @bind-FilterData="_searchVM.SearchEntries[index]"></FilterItem>
 								</div>
 							}
