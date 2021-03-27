@@ -22,8 +22,8 @@
 	<AuthorizeView>
 		<Authorized>
 			<div class="form-check mr-sm-2">
-				<input type="checkbox" class="form-check-input" id="filterCheckAnswered" @bind="filterCheckAnswered">
-				<label class="form-check-label" for="filterCheckAnswered">Answered</label>
+				<input type="checkbox" class="form-check-input" id="filterCheckNotAnswered" @bind="filterCheckNotAnswered">
+				<label class="form-check-label" for="filterCheckNotAnswered">Not Answered</label>
 			</div>
 		</Authorized>
 	</AuthorizeView>
@@ -111,8 +111,8 @@
 	private IReadOnlyList<ComicFieldViewModel> _filteredFieldsWithoutSections = new List<ComicFieldViewModel>();
 	private bool _isFiltering = false;
 	private string? _filtertext;
-	private bool _filterCheckAnswered = false;
-	private bool filterCheckAnswered { get { return _filterCheckAnswered; } set { _filterCheckAnswered = value; performFilter(); } }
+	private bool _filterCheckNotAnswered = false;
+	private bool filterCheckNotAnswered { get { return _filterCheckNotAnswered; } set { _filterCheckNotAnswered = value; performFilter(); } }
 	private bool _filterCheckNoData = false;
 	private bool filterCheckNoData { get { return _filterCheckNoData; } set { _filterCheckNoData = value; performFilter(); } }
 	private bool _filterCheckCollectingData = false;
@@ -215,11 +215,11 @@
 		{
 			_isFiltering = false;
 		}
-		if (_filterCheckAnswered || _filterCheckNoData || _filterCheckCollectingData || _filterCheckAcceptedAnswer)
+		if (_filterCheckNotAnswered || _filterCheckNoData || _filterCheckCollectingData || _filterCheckAcceptedAnswer)
 		{
 			_filteredFields = _filteredFields.Where(f =>
 				f.Type == CrowdSourcedFieldType.Section ||
-				(_filterCheckAnswered && f.UserEntries.Any(ue => ue.CreatedByUser.UserName == _userName)) ||
+				(_filterCheckNotAnswered && !f.UserEntries.Any(ue => ue.CreatedByUser.UserName == _userName)) ||
 				(_filterCheckNoData && !f.UserEntries.Any()) ||
 				(_filterCheckCollectingData && f.UserEntries.Any() && f.VerifiedEntry == null) ||
 				(_filterCheckAcceptedAnswer && f.VerifiedEntry != null));

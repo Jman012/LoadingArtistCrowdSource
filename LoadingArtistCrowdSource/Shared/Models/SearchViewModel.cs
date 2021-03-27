@@ -84,7 +84,7 @@ namespace LoadingArtistCrowdSource.Shared.Models
 						Description = nvQuery.GetValues("desc")?.FirstOrDefault();
 						break;
 					case "trsc":
-						Description = nvQuery.GetValues("trsc")?.FirstOrDefault();
+						Transcript = nvQuery.GetValues("trsc")?.FirstOrDefault();
 						break;
 					default:
 						string[] values = nvQuery.GetValues(nv) ?? new string[] { };

@@ -84,6 +84,11 @@
 			}
 			return "";
 		}
+		window.ScrollToTop = function (selector) {
+			document.querySelectorAll(selector).forEach(function(el) {
+				el.scrollTo(0, 0);
+			});
+		}
 	</script>
 </body>
 

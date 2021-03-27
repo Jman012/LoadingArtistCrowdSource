@@ -11,7 +11,7 @@
 			<ModalTitle>@_comicField.Name</ModalTitle>
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
-		<ModalBody>
+		<ModalBody @ref="_modalBody">
 			<EditForm @ref="_form" Model="_userEntry" Context="editContext">
 				<DataAnnotationsValidator />
 
@@ -26,7 +26,16 @@
 									<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
 								</NotAuthorized>
 								<Authorized>
-									<h5>Your Response</h5>
+									<h5>@_comicField.Name</h5>
+									<p>@_comicField.ShortDescription</p>
+									@if (_userEntry.CreatedDate == default)
+									{
+										<p>Add Your Response:</p>
+									}
+									else
+									{
+										<p>Edit Your Response:</p>
+									}
 									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (_modal.Visible)
@@ -44,26 +53,36 @@
 																	name="@($"checkbox-{option.Code}")"
 																	class="form-check-input"
 																	@bind-Value="@valueWrapper.Value" />
-														<label for="@($"checkbox-{option.Code}")" class="form-check-label">@option.Text</label>
+														<label for="@($"checkbox-{option.Code}")" class="form-check-label">
+															@option.Text
+															<br />
+															<small class="text-muted">
+																@option.Description
+																@if (!string.IsNullOrEmpty(option.URL))
+																{
+																	<text>&nbsp;</text><NewTabLink Href="@option.URL">More</NewTabLink>
+																}
+															</small>	
+														</label>
 													</div>
 												}
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 												<div class="form-group">
-													<label for="select">@_comicField.Name</label>
+													<label for="select" class="sr-only">@_comicField.Name</label>
 
 													<InputSelect id="select" name="select" class="custom-select" @bind-Value="_stringAnswer">
 														<option value=""></option>
 														@foreach (var option in _comicField.Options)
-																	{
+														{
 															<option value="@option.Code">@option.Text</option>
-																	}
+														}
 													</InputSelect>
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 												<div class="form-group">
-													<label for="textarea">@_comicField.Name</label>
+													<label for="textarea" class="sr-only">@_comicField.Name</label>
 
 													<InputTextArea id="textarea"
 																name="textarea"
@@ -74,7 +93,7 @@
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 												<div class="form-group">
-													<label for="textfield">@_comicField.Name</label>
+													<label for="textfield" class="sr-only">@_comicField.Name</label>
 
 													<InputText id="textfield"
 															name="textfield"
@@ -84,7 +103,7 @@
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 												<div class="form-group">
-													<label for="textfield">@_comicField.Name</label>
+													<label for="textfield" class="sr-only">@_comicField.Name</label>
 
 													<InputNumber id="textfield"
 																name="textfield"
@@ -94,7 +113,7 @@
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
 												<div class="form-group">
-													<label for="select">@_comicField.Name</label>
+													<label for="select" class="sr-only">@_comicField.Name</label>
 
 													<InputMultiSelect id="select"
 																	name="select"
@@ -107,16 +126,25 @@
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 												<InputRadioGroup @bind-Value="_stringAnswer" Name="radio">
 													@foreach (var option in _comicField.Options)
-																{
+													{
 														<div class="form-check">
 															<InputRadio id="@($"radio-{option.Code}")"
 																		Name="radio"
-																		Value="option.Code" />
+																		Value="option.Code"
+																		class="form-check-input" />
 															<label class="form-check-label" for="@($"radio-{option.Code}")">
 																@option.Text
+																<br />
+																<small class="text-muted">
+																	@option.Description
+																	@if (!string.IsNullOrEmpty(option.URL))
+																	{
+																		<text>&nbsp;</text><NewTabLink Href="@option.URL">More</NewTabLink>
+																	}
+																</small>
 															</label>
 														</div>
-																}
+													}
 												</InputRadioGroup>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
@@ -128,12 +156,7 @@
 							
 							<hr />
 							<h5>Description</h5>
-							<p>
-								@_comicField.ShortDescription
-							</p>
-							<p>
-								@_comicField.LongDescription
-							</p>
+							<p>@_comicField.LongDescription</p>
 							<Table Narrow="true">
 								<TableBody>
 									<TableRow>
@@ -147,7 +170,9 @@
 								</TableBody>
 							</Table>
 							
-							@if (_comicField.Options.Any())
+							@if (_comicField.Options.Any() && 
+								_comicField.Type != LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes && 
+								_comicField.Type != LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons)
 							{
 								<hr />
 								<h5>Option Descriptions</h5>
@@ -254,6 +279,7 @@
 	public IReadOnlyList<ComicFieldViewModel> Fields { get; set; } = new List<ComicFieldViewModel>();
 
 	private Modal _modal = new Modal();
+	private ModalBody _modalBody = new ModalBody();
 	private EditForm _form = new EditForm();
 	private string? _userName;
 	private ComicFieldViewModel _comicField = new ComicFieldViewModel();
@@ -410,6 +436,7 @@
 			Type = CompletionType.SubmitAndNext,
 			Field = _comicField,
 		});
+		await ScrollModalBodyToTop();
 	}
 
 	private async Task HandleBack()
@@ -419,6 +446,7 @@
 			Type = CompletionType.Back,
 			Field = _comicField,
 		});
+		await ScrollModalBodyToTop();
 	}
 
 	private async Task HandleSkip()
@@ -428,14 +456,21 @@
 			Type = CompletionType.SkipNext,
 			Field = _comicField,
 		});
+		await ScrollModalBodyToTop();
 	}
 
 	public async Task HandleCancel()
 	{
+		await ScrollModalBodyToTop();
 		await OnSubmit.InvokeAsync(new Completion()
 		{
 			Type = CompletionType.Cancel,
 			Field = _comicField,
 		});
+	}
+
+	private async Task ScrollModalBodyToTop()
+	{
+		await JsRuntime.InvokeVoidAsync("ScrollToTop", ".modal-body");
 	}
 }

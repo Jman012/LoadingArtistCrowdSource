@@ -213,9 +213,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							URL = optionVM.URL,
 							DisplayOrder = index,
 						}));
+
+						// Save per field to get the correct order.
+						await _context.SaveChangesAsync();
 					}
 
-					await _context.SaveChangesAsync();
 					await transaction.CommitAsync();
 				}
 				catch (Exception ex)
