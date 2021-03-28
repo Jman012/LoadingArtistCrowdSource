@@ -147,3 +147,11 @@ a, .btn-link {
 .blazored-typeahead.valid.valid {
 	border: 1px solid #ced4da
 }
+
+/* .text-muted_ {
+	color: #6c757d;
+}
+*:focus > .text-muted_,
+*:hover > .text-muted_ {
+	color: white;
+} */

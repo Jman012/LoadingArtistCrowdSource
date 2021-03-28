@@ -4,7 +4,7 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
 
-<Modal @ref="_modal" Class="custom-modal-dialog-scrollable custom-modal-dialog-scrollable-nooverflow">
+<Modal @ref="_modal" Class="custom-modal-dialog-scrollable custom-modal-dialog-scrollable-nooverflow fade">
 	<ModalBackdrop />
 	<ModalContent Size="ModalSize.Large">
 		<ModalHeader>
@@ -71,13 +71,29 @@
 												<div class="form-group">
 													<label for="select" class="sr-only">@_comicField.Name</label>
 
-													<InputSelect id="select" name="select" class="custom-select" @bind-Value="_stringAnswer">
-														<option value=""></option>
-														@foreach (var option in _comicField.Options)
-														{
-															<option value="@option.Code">@option.Text</option>
-														}
-													</InputSelect>
+													<BlazoredTypeahead @bind-Value="_stringAnswer"
+																	   SearchMethod="HandleOptionsSearch"
+																	   ConvertMethod="HandleOptionsConvert"
+																	   Debounce="100"
+																	   MaximumSuggestions="1000"
+																	   EnableDropDown="true"
+																	   ShowDropDownOnFocus="true">
+														<NotFoundTemplate Context="option">No options with that text exist</NotFoundTemplate>
+														<ResultTemplate Context="option">
+															@option.Text
+															<br />
+															<small>
+																@option.Description
+																@if (!string.IsNullOrEmpty(option.URL))
+																{
+																	<text>&nbsp;</text><NewTabLink Href="@option.URL" StopPropagation="true">More</NewTabLink>
+																}
+															</small>
+														</ResultTemplate>
+														<SelectedTemplate Context="optionText">
+															@_comicField.Options.FirstOrDefault(o => o.Code == optionText)?.Text
+														</SelectedTemplate>
+													</BlazoredTypeahead>
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
@@ -115,12 +131,29 @@
 												<div class="form-group">
 													<label for="select" class="sr-only">@_comicField.Name</label>
 
-													<InputMultiSelect id="select"
-																	name="select"
-																	class="form-control custom-select"
-																	size="10"
-																	@bind-Value="_stringAnswers2"
-																	Options="_comicField.Options.Select(o => KeyValuePair.Create(o.Code, o.Text)).ToArray()" />
+													<BlazoredTypeahead @bind-Values="_stringAnswers2"
+																	   SearchMethod="HandleOptionsSearch"
+																	   ConvertMethod="HandleOptionsConvert"
+																	   Debounce="100"
+																	   MaximumSuggestions="1000"
+																	   EnableDropDown="true"
+																	   ShowDropDownOnFocus="true">
+														<NotFoundTemplate Context="option">No options with that text exist</NotFoundTemplate>
+														<ResultTemplate Context="option">
+															@option.Text
+															<br />
+															<small>
+																@option.Description
+																@if (!string.IsNullOrEmpty(option.URL))
+																{
+																	<text>&nbsp;</text><NewTabLink Href="@option.URL" StopPropagation="true">More</NewTabLink>
+																}
+															</small>
+														</ResultTemplate>
+														<SelectedTemplate Context="optionText">
+															@_comicField.Options.FirstOrDefault(o => o.Code == optionText)?.Text
+														</SelectedTemplate>
+													</BlazoredTypeahead>
 												</div>
 												break;
 											case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
@@ -170,7 +203,7 @@
 								</TableBody>
 							</Table>
 							
-							@if (_comicField.Options.Any() && 
+							@* @if (_comicField.Options.Any() && 
 								_comicField.Type != LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Checkboxes && 
 								_comicField.Type != LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons)
 							{
@@ -191,7 +224,7 @@
 										</ListGroupItem>
 									}
 								</ListGroup>
-							}
+							} *@
 
 							<div>
 								Missing an option, or want to help correct something?
@@ -296,7 +329,7 @@
 	private List<ValueWrapper<bool>> _boolAnswers = new List<ValueWrapper<bool>>();
 	private string _stringAnswer = "";
 	private List<ValueWrapper<string>> _stringAnswers = new List<ValueWrapper<string>>();
-	private string[] _stringAnswers2 = new string[] { };
+	private IList<string> _stringAnswers2 = new List<string>();
 	private int? _intAnswer;
 	#endregion Answer Variables
 
@@ -341,7 +374,7 @@
 				_intAnswer = first != null && int.TryParse(first!, out num) ? num : null;
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.MultiDropdown:
-				_stringAnswers2 = _userEntry.Values.ToArray();
+				_stringAnswers2 = _userEntry.Values.ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
 				_stringAnswers = _userEntry.Values.Select(v => new ValueWrapper<string>(v)).ToList();
@@ -472,5 +505,19 @@
 	private async Task ScrollModalBodyToTop()
 	{
 		await JsRuntime.InvokeVoidAsync("ScrollToTop", ".modal-body");
+	}
+
+	private Task<IEnumerable<CrowdSourcedFieldDefinitionOptionViewModel>> HandleOptionsSearch(string searchString)
+	{
+		var results = _comicField.Options
+			.Where(o => o.Text.Contains(searchString, StringComparison.OrdinalIgnoreCase) 
+						|| o.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			.ToList();
+		return Task.FromResult<IEnumerable<CrowdSourcedFieldDefinitionOptionViewModel>>(results);
+	}
+	
+	private string HandleOptionsConvert(CrowdSourcedFieldDefinitionOptionViewModel option)
+	{
+		return option.Code;
 	}
 }

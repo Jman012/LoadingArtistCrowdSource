@@ -1,4 +1,4 @@
-﻿<a href="@Href" target="_blank" class="new-tab-link">
+﻿<a href="@Href" target="_blank" class="new-tab-link" @onclick:stopPropagation="StopPropagation">
 	@ChildContent
 	<HelperIcon Name="external-link" class="mb-1"></HelperIcon>
 </a>
@@ -9,4 +9,7 @@
 
 	[Parameter]
 	public RenderFragment ChildContent { get; set; } = null!;
+
+	[Parameter]
+	public bool StopPropagation { get; set; } = false;
 }
