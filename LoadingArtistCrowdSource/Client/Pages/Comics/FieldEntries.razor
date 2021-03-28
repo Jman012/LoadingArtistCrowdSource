@@ -67,21 +67,7 @@
 				<div class="d-flex w-100 justify-content-between">
 					<span>@field.Name</span>
 					<div class="h6 mb-1">
-						@if (field.VerifiedEntry != null)
-						{
-							foreach (var ve in field.VerifiedEntry.Values)
-							{
-								<span class="badge badge-secondary">@ve</span><text>&nbsp;</text>
-							}
-						}
-						else if (field.UserEntries.Any())
-						{
-							<span class="badge badge-info">Collecting</span>
-						}
-						else
-						{
-							<span class="badge badge-warning">No Data</span>
-						}
+						<FieldBadge Field="field" />
 					</div>
 				</div>
 				<small class="text-muted">@field.ShortDescription</small>

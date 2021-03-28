@@ -29,21 +29,7 @@
 									<div class="d-flex flex-row justify-content-between">
 										<h5>@_comicField.Name</h5>
 										<div>
-											@if (_comicField.VerifiedEntry != null)
-											{
-												@foreach (var valueText in _comicField.VerifiedEntry.Values.Select(v => _comicField.Options.FirstOrDefault(o => o.Code == v)?.Text ?? v))
-												{
-													<Badge Color="Color.Secondary">@valueText</Badge>
-												}
-											}
-											else if (_comicField.UserEntries.Any())
-											{
-												<Badge Color="Color.Info">Collecting</Badge>
-											}
-											else
-											{
-												<Badge Color="Color.Warning">No Data</Badge>
-											}
+											<FieldBadge Field="_comicField" />
 										</div>
 									</div>
 									<p>@_comicField.ShortDescription</p>

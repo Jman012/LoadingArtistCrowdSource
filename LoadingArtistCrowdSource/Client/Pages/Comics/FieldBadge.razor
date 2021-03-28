@@ -1,0 +1,20 @@
+﻿@if (Field.VerifiedEntry != null)
+{
+	@foreach (var valueText in Field.VerifiedEntry.Values.Select(v => Field.Options.FirstOrDefault(o => o.Code == v)?.Text ?? v))
+	{
+		<Badge Color="Color.Secondary">@valueText</Badge>
+	}
+}
+else if (Field.UserEntries.Any())
+{
+	<Badge Color="Color.Info">Collecting</Badge>
+}
+else
+{
+	<Badge Color="Color.Warning">No Data</Badge>
+}
+
+@code {
+	[Parameter]
+	public ComicFieldViewModel Field { get; set; } = new ComicFieldViewModel();
+}
