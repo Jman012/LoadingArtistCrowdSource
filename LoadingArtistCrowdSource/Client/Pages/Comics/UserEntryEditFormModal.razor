@@ -233,15 +233,18 @@
 								{
 									int progress = (int)Math.Round((decimal)grouping.Count() / (decimal)totalEntries) * 100;
 									bool isChosen = _comicField.VerifiedEntry != null && grouping.Key.SequenceEqual(_comicField.VerifiedEntry.Values);
-									<div class="lacs-progress">
-										<div class="@($"lacs-progress-bar {(isChosen ? "chosen" : "")}")" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress%"></div>
-										<div class="lacs-progress-bar-text">
-											@string.Join(", ", grouping.Key.Select(v => _comicField.Options.FirstOrDefault(o => o.Code == v)?.Text ?? v))
+
+									<Tooltip Text="@(string.Join(", ", grouping.Select(ue => ue.CreatedByUser.UserName)))">
+										<div class="lacs-progress">
+											<div class="@($"lacs-progress-bar {(isChosen ? "chosen" : "")}")" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress%"></div>
+											<div class="lacs-progress-bar-text">
+												@string.Join(", ", grouping.Key.Select(v => _comicField.Options.FirstOrDefault(o => o.Code == v)?.Text ?? v))
+											</div>
+											<div class="lacs-progress-bar-percentage">
+												@progress%
+											</div>
 										</div>
-										<div class="lacs-progress-bar-percentage">
-											@progress%
-										</div>
-									</div>
+									</Tooltip>
 								}
 							}
 						</Column>

@@ -196,7 +196,13 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				return BadRequest("Values is required");
 			}
-			values = values.OrderBy(v => fieldDefinition.CrowdSourcedFieldDefinitionOptions.FindIndex(csfdo => csfdo.Code == v)).ToList();
+			// Order by order of original option DisplayOrder
+			values = values.OrderBy(v => 
+				fieldDefinition
+					.CrowdSourcedFieldDefinitionOptions
+					.FirstOrDefault(csfdo => csfdo.Code == v)
+					?.DisplayOrder ?? -1
+			).ToList();
 
 			// Get the user's entry, if it exists.
 			var userEntry = await _context.CrowdSourcedFieldUserEntries
