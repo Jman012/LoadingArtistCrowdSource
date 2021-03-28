@@ -86,6 +86,26 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				query = query.Where(c => c.ComicTranscript != null && c.ComicTranscript.TranscriptContent.Contains(vm.Transcript));
 			}
+			if (vm.Tags.Any())
+			{
+				ISet<string> values = new HashSet<string>(vm.Tags.Select(t => t.TagValue));
+				switch (vm.TagsOperator)
+				{
+					case SearchEntryOperator.Any:
+						query = query.Where(c =>
+							c.ComicTags.Any(ct => 
+								values.Contains(ct.Value)));
+						break;
+					case SearchEntryOperator.All:
+						foreach (string value in vm.Tags.Select(t => t.TagValue))
+						{
+							query = query.Where(c => c.ComicTags.Any(ct => ct.Value == value));
+						}
+						break;
+					default:
+						throw new Exception($"Unhandled {nameof(SearchEntryOperator)} value '{vm.TagsOperator}'");
+				}
+			}
 			foreach (var searchEntry in vm.SearchEntries)
 			{
 				string[] values = searchEntry.FieldValues.Where(v => !string.IsNullOrEmpty(v.Code) && v.Filtered).Select(v => v.Code).ToArray();
@@ -103,10 +123,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								&& csfve.CrowdSourcedFieldVerifiedEntryValues.Any(csfvev => values.Contains(csfvev.Value))));
 						break;
 					case SearchEntryOperator.All:
-						query = query.Where(c =>
-							c.CrowdSourcedFieldVerifiedEntries.Any(csfve =>
+						foreach (string value in values)
+						{
+							query = query.Where(c => c.CrowdSourcedFieldVerifiedEntries.Any(csfve =>
 								csfve.CrowdSourcedFieldDefinition.Code == searchEntry.FieldCode
-								&& csfve.CrowdSourcedFieldVerifiedEntryValues.All(csfvev => values.Contains(csfvev.Value))));
+								&& csfve.CrowdSourcedFieldVerifiedEntryValues.Any(csfvev => csfvev.Value == value)));
+						}
 						break;
 					default:
 						throw new Exception($"Unhandled {nameof(SearchEntryOperator)} value '{searchEntry.Operator}'");

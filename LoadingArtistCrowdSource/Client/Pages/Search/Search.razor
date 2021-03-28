@@ -41,10 +41,7 @@ else
 					</Row>
 					<Row>
 						<Column>
-							<div class="d-flex">
-								<h4>Search Terms</h4>
-								<div class="flex-fill"></div>
-							</div>
+							<h4>Search Terms</h4>
 						</Column>
 					</Row>
 
@@ -64,6 +61,43 @@ else
 							}
 						}
 					</div>
+
+					<Row>
+						<Column>
+							<h4>Search Tags</h4>
+						</Column>
+					</Row>
+					<Row>
+						<Column>
+							<InputRadioGroup TValue="SearchEntryOperator" @bind-Value="_searchVM.TagsOperator">
+								@foreach (var op in System.Enum.GetValues(typeof(SearchEntryOperator)).Cast<SearchEntryOperator>())
+								{
+									<label class="mr-2">
+										<InputRadio Value="op"></InputRadio>
+										@op.ToString()
+									</label>
+								}
+							</InputRadioGroup>
+						</Column>
+					</Row>
+					<Row Class="mb-3">
+						<Column>
+							<BlazoredTypeahead @bind-Values="_searchVM.Tags"
+											   SearchMethod="HandleTagsSearch"
+											   Debounce="100"
+											   MaximumSuggestions="1000"
+											   EnableDropDown="true"
+											   ShowDropDownOnFocus="true">
+								<NotFoundTemplate Context="tag">No tags with that text exist</NotFoundTemplate>
+								<ResultTemplate Context="tag">
+									@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+								</ResultTemplate>
+								<SelectedTemplate Context="tag">
+									@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+								</SelectedTemplate>
+							</BlazoredTypeahead>
+						</Column>
+					</Row>
 
 					<p>
 						<Button Type="ButtonType.Submit" Color="Color.Primary">Search</Button>
@@ -93,12 +127,19 @@ else
 	private ComicFieldViewModel[]? _fields = null;
 	private SearchViewModel _searchVM = new SearchViewModel();
 	private ComicListItemViewModel[]? _comics = new ComicListItemViewModel[] { };
+	private ComicTagViewModel[] _systemTags = new ComicTagViewModel[] { };
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			_fields = await Api.GetSearchFields();
+			var fieldsTask = Api.GetSearchFields();
+			var tagsTask = Api.GetSystemTags();
+
+			await Task.WhenAll(fieldsTask, tagsTask);
+
+			_fields = await fieldsTask;
+			_systemTags = (await tagsTask).TagValues.ToArray();
 			Load();
 		}
 		catch (AccessTokenNotAvailableException exception)
@@ -139,7 +180,7 @@ else
 					break;
 				default:
 					searchEntry.FieldValues = f.Options.Select(o => new SearchEntryOptionViewModel() 
-					{ 
+					{
 						Code = o.Code, 
 						Filtered = false 
 					}).ToArray();
@@ -149,7 +190,7 @@ else
 			return searchEntry;
 		}).ToArray();
 
-		_searchVM.DecodeFromQueryString(new Uri(NavigationManager.Uri).Query);
+		_searchVM.DecodeFromQueryString(new Uri(NavigationManager.Uri).Query, _systemTags);
 		StateHasChanged();
 	}
 
@@ -175,6 +216,8 @@ else
 			Tooltip = _searchVM.Tooltip,
 			Description = _searchVM.Description,
 			Transcript = _searchVM.Transcript,
+			Tags = _searchVM.Tags.ToList(),
+			TagsOperator = _searchVM.TagsOperator,
 			SearchEntries = _searchVM.SearchEntries.Where(se => se.FieldValues.Any(fv => fv.Filtered)).ToArray(),
 		};
 
@@ -187,5 +230,12 @@ else
 			exception.Redirect();
 			return;
 		}
+	}
+
+	private Task<IEnumerable<ComicTagViewModel>> HandleTagsSearch(string searchText)
+	{
+		return Task.FromResult<IEnumerable<ComicTagViewModel>>(_systemTags
+			.Where(t => t.TagValue.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+			.ToList());
 	}
 }

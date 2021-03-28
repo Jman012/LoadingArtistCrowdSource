@@ -22,6 +22,8 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string? Tooltip { get; set; }
 		public string? Description { get; set; }
 		public string? Transcript { get; set; }
+		public SearchEntryOperator TagsOperator { get; set; }
+		public IList<ComicTagViewModel> Tags { get; set; } = new List<ComicTagViewModel>();
 		public SearchEntryViewModel[] SearchEntries { get; set; } = new SearchEntryViewModel[] { };
 
 		public string EncodeToQueryString()
@@ -52,15 +54,27 @@ namespace LoadingArtistCrowdSource.Shared.Models
 			{
 				queryItems.Add("trsc=" + Uri.EscapeDataString(Transcript));
 			}
+			if (TagsOperator != default)
+			{
+				queryItems.Add("tags.op=" + Uri.EscapeDataString(TagsOperator.ToString()));
+			}
+			if (Tags.Any())
+			{
+				foreach (var tag in Tags)
+				{
+					queryItems.Add("tag=" + Uri.EscapeDataString(tag.TagValue));
+				}
+			}
 
 			queryItems.AddRange(SearchEntries.SelectMany(se => se.EncodeToQueryItems()));
 
 			return string.Join("&", queryItems);
 		}
 
-		public void DecodeFromQueryString(string query)
+		public void DecodeFromQueryString(string query, IEnumerable<ComicTagViewModel> systemTags)
 		{
 			NameValueCollection nvQuery = HttpUtility.ParseQueryString(query);
+			var dctSystemTags = systemTags.ToDictionary(st => st.TagValue);
 
 			foreach (var nv in nvQuery.AllKeys)
 			{
@@ -85,6 +99,19 @@ namespace LoadingArtistCrowdSource.Shared.Models
 						break;
 					case "trsc":
 						Transcript = nvQuery.GetValues("trsc")?.FirstOrDefault();
+						break;
+					case "tags.op":
+						string tagsOp = nvQuery.GetValues("tags.op")?.FirstOrDefault() ?? "";
+						TagsOperator = Enum.TryParse(tagsOp, out SearchEntryOperator tagOp) ? tagOp : default;
+						break;
+					case "tag":
+						foreach (string value in nvQuery.GetValues("tag")!)
+						{
+							if (dctSystemTags.TryGetValue(value, out ComicTagViewModel? tagVm))
+							{
+								Tags.Add(tagVm);
+							}
+						}
 						break;
 					default:
 						string[] values = nvQuery.GetValues(nv) ?? new string[] { };
