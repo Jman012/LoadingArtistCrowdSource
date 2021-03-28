@@ -1,0 +1,35 @@
+﻿.lacs-progress {
+	position: relative;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.5em;
+}
+
+	.lacs-progress .lacs-progress-bar {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		background-color: #e3e3e8;
+		border-radius: 0.25rem;
+	}
+
+	.lacs-progress.chosen .lacs-progress-bar {
+		background-color: #7db2e8;
+	}
+
+	.lacs-progress .lacs-progress-bar-text,
+	.lacs-progress .lacs-progress-bar-percentage {
+		padding: 0.5em;
+		z-index: 1;
+	}
+
+	.lacs-progress.chosen .lacs-progress-bar-text {
+		font-weight: bold;
+	}
+
+	.lacs-progress.chosen .lacs-progress-bar-percentage {
+		font-weight: bold;
+	}

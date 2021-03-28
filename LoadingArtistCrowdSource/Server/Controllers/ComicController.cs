@@ -183,11 +183,21 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			{
 				return NotFound();
 			}
-			var fieldDefinition = await _context.CrowdSourcedFieldDefinitions.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
+			var fieldDefinition = await _context.CrowdSourcedFieldDefinitions
+				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
+				.FirstOrDefaultAsync(csfd => csfd.Code == fieldCode);
 			if (fieldDefinition == null)
 			{
 				return NotFound();
 			}
+
+			/* Validate and fix Values */
+			if (values == null || !values.Any())
+			{
+				return BadRequest("Values is required");
+			}
+			values = values.OrderBy(v => fieldDefinition.CrowdSourcedFieldDefinitionOptions.FindIndex(csfdo => csfdo.Code == v)).ToList();
+
 			// Get the user's entry, if it exists.
 			var userEntry = await _context.CrowdSourcedFieldUserEntries
 				.Include(csfue => csfue.CrowdSourcedFieldUserEntryValues)
