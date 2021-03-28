@@ -89,7 +89,14 @@ a, .btn-link {
 }
 
 .modal.custom-modal-dialog-scrollable>.modal-dialog .modal-body {
-	overflow-y: auto
+	overflow-y: auto;
+}
+.modal.custom-modal-dialog-scrollable.custom-modal-dialog-scrollable-nooverflow>.modal-dialog .modal-body {
+	overflow-y: initial;
+}
+.modal-body .scrollable-col {
+	overflow-y: auto;
+	max-height: calc(100vh - 15.5rem);
 }
 
 @media (min-width:576px) {

@@ -4,7 +4,7 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
 
-<Modal @ref="_modal" Class="custom-modal-dialog-scrollable">
+<Modal @ref="_modal" Class="custom-modal-dialog-scrollable custom-modal-dialog-scrollable-nooverflow">
 	<ModalBackdrop />
 	<ModalContent Size="ModalSize.Large">
 		<ModalHeader>
@@ -17,10 +17,10 @@
 
 				<Container Fluid="false">
 					<Row>
-						<Column Display="Display.None.Block.OnWidescreen" Class="border-right">
+						<Column Display="Display.None.Block.OnWidescreen" Class="border-right scrollable-col">
 							<img src="@_comicImgSrc" class="img-fluid" />
 						</Column>
-						<Column>
+						<Column Class="scrollable-col">
 							<AuthorizeView>
 								<NotAuthorized>
 									<a href="authentication/login">Log in</a> to help crowd source information for LoadingArtist comics!
