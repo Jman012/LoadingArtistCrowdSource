@@ -2,7 +2,9 @@
 {
 	@foreach (var valueText in Field.VerifiedEntry.Values.Select(v => Field.Options.FirstOrDefault(o => o.Code == v)?.Text ?? v))
 	{
-		<Badge Color="Color.Secondary">@valueText</Badge>
+		<span class="mr-1 mb-1">
+			<Badge Color="Color.Secondary">@valueText</Badge>
+		</span>
 	}
 }
 else if (Field.UserEntries.Any())

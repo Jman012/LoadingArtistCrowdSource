@@ -279,7 +279,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								new Shared.Utilities.ArrayEqualityComparer<string>()); // Use a proper comparer for arrays of strings.
 						// Order the above lookup by number of entries for each overall value
 						List<IGrouping<string[], Models.CrowdSourcedFieldUserEntry>> userEntriesForFieldRanked = lkpUserEntriesForField
-							.OrderBy(lkpCsfue => lkpCsfue.Key.Length)
+							.OrderByDescending(lkpCsfue => lkpCsfue.Key.Length)
 							.ToList();
 						// Pick the top and second to top entry value sets, which will
 						// be compared against below.
@@ -316,6 +316,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 									CrowdSourcedFieldDefinitionId = fieldDefinition.Id,
 									FirstCreatedBy = firstUserEntry.CreatedBy,
 									VerificationDate = DateTimeOffset.Now,
+									CrowdSourcedFieldVerifiedEntryValues = new List<Models.CrowdSourcedFieldVerifiedEntryValue>(),
 								};
 								_context.CrowdSourcedFieldVerifiedEntries.Add(verifiedEntry);
 								await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateAddVerifiedEntryLog(comic, verifiedEntry));
@@ -341,8 +342,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							// Threshold not met, remove any VerifiedEntry previously added.
 							if (verifiedEntry != null)
 							{
-								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
 								_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(verifiedEntry.CrowdSourcedFieldVerifiedEntryValues);
+								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
 								await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateRemoveVerifiedEntryLog(comic, verifiedEntry));
 
 								await _context.SaveChangesAsync();
