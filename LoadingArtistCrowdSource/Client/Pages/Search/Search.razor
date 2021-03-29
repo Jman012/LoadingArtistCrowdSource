@@ -90,10 +90,14 @@ else
 											   ShowDropDownOnFocus="true">
 								<NotFoundTemplate Context="tag">No tags with that text exist</NotFoundTemplate>
 								<ResultTemplate Context="tag">
-									@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+									<div class="typeahead-tag">
+										@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+									</div>
 								</ResultTemplate>
 								<SelectedTemplate Context="tag">
-									@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+									<div class="typeahead-tag">
+										@tag.TagValue <Badge Color="Color.Info">@tag.TagSystemCount</Badge>
+									</div>
 								</SelectedTemplate>
 							</BlazoredTypeahead>
 						</Column>

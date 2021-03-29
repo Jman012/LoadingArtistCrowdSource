@@ -4,3 +4,6 @@
 	background-color: #f8f9fa;
 }
 
+::deep.typeahead-tag .badge {
+	vertical-align: text-bottom;
+}

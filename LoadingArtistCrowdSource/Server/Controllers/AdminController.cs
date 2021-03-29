@@ -140,6 +140,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Include(csdf => csdf.CreatedByUser)
 				.Include(csdf => csdf.LastUpdatedByUser)
 				.Include(csdf => csdf.CrowdSourcedFieldDefinitionOptions)
+				.OrderBy(csdf => csdf.DisplayOrder)
 				.ToListAsync();
 
 			foreach (var fieldDef in fieldDefs)
