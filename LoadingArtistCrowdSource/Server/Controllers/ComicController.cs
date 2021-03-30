@@ -248,7 +248,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 						// First, remove all values
 						var currentValues = await _context
 							.CrowdSourcedFieldUserEntryValues
-							.Where(csfuev => csfuev.ComicId == csfuev.ComicId && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
+							.Where(csfuev => csfuev.ComicId == comic.Id && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
 							.ToListAsync();
 						_context.CrowdSourcedFieldUserEntryValues.RemoveRange(currentValues);
 						// await _context.SaveChangesAsync();
