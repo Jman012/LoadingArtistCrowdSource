@@ -17,5 +17,6 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public string Title { get; set; } = "";
 
 		public string ImageThumbnailUrlSrc { get; set; } = "";
+		public int Integrity { get; set; }
 	}
 }

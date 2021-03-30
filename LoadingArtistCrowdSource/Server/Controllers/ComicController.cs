@@ -138,12 +138,15 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			// Calculate comic completion percentage.
 			// Each field = 0, 1, or 2 points.
-			// Verified = 2 points, Collecting = 1 points, No Data = 0 points
+			// Verified = 2 points, Collecting = 1 points, No Data = 0 points.
+			// Transcript = 1 point, Tag(s) = 1 point.
 			// Which is implemented by: (CountUserEntries + CountVerifiedEntries) / (TotalCountFields * 2)
 			// Ignore fields where type is Section.
 			var nonSectionFields = comicVM.ComicFields.Where(cf => cf.Type != CrowdSourcedFieldType.Section);
-			var totalPoints = nonSectionFields.Count() * 2;
-			var accruedPoints = nonSectionFields.Sum(cf => cf.VerifiedEntry != null ? 2 : (cf.UserEntries.Any() ? 1 : 0));
+			var totalPoints = (nonSectionFields.Count() * 2) + 2;
+			var accruedPoints = nonSectionFields.Sum(cf => cf.VerifiedEntry != null ? 2 : (cf.UserEntries.Any() ? 1 : 0)) + 
+				(!string.IsNullOrEmpty(comicVM.Transcript.TranscriptContent) ? 1 : 0) +
+				(comicVM.Tags.TagValues.Any() ? 1 : 0);
 			var progress = totalPoints == 0 ? 0.0 : (totalPoints == accruedPoints ? 1.0 : ((double)accruedPoints / (double)totalPoints));
 
 			// Wrap in comic page view model for navigation
@@ -731,6 +734,42 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			await _distCache.RemoveAsync(Services.CacheKeys.LACS.Tags.Index);
 
 			return Ok();
+		}
+
+		[HttpGet]
+		[Route("integrity_queue")]
+		public async Task<IEnumerable<Shared.Models.ComicListItemViewModel>> GetLowIntegrityComics()
+		{
+			var modelMapper = new Services.ModelMapper();
+			var comicsQuery = _context.Comics
+				.Include(c => c.CrowdSourcedFieldUserEntries)
+				.Include(c => c.CrowdSourcedFieldVerifiedEntries)
+				.Include(c => c.ComicTranscript)
+				.Include(c => c.ComicTags)
+				.OrderBy(c => 
+					c.CrowdSourcedFieldUserEntries.Count() + 
+					c.CrowdSourcedFieldVerifiedEntries.Count() + 
+					(c.ComicTranscript != null ? 1 : 0) +
+					(c.ComicTags.Any() ? 1 : 0))
+				.Take(10);
+			// _logger.LogInformation(comicsQuery.ToQueryString());
+			var comics = await comicsQuery.ToListAsync();
+
+			var fieldDefinitionCount = _context.CrowdSourcedFieldDefinitions
+				.Where(csfd => csfd.IsActive && !csfd.IsDeleted && csfd.Type != CrowdSourcedFieldType.Section)
+				.Count();
+			var totalPoints = (fieldDefinitionCount * 2) + 2;
+
+			return comics
+				.Select(c => {
+					var cli = modelMapper.MapComicListItem(c);
+					cli.Integrity = c.CrowdSourcedFieldUserEntries.Count() + 
+						c.CrowdSourcedFieldVerifiedEntries.Count() + 
+						(!string.IsNullOrEmpty(c.ComicTranscript?.TranscriptContent) ? 1 : 0) +
+						(c.ComicTags.Any() ? 1 : 0);
+					return cli;
+				})
+				.Where(c => c.Integrity < totalPoints);
 		}
 	}
 }

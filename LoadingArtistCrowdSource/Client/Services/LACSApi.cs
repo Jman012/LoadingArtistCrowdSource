@@ -87,6 +87,10 @@ namespace LoadingArtistCrowdSource.Client.Services
 
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task<ComicListItemViewModel[]> GetComicIntegrityQueue()
+		{
+			return await _publicClient.GetFromJsonAsync<ComicListItemViewModel[]>("api/comic/integrity_queue", _serializationOptions) ?? new ComicListItemViewModel[] { };
+		}
 		#endregion ComicController
 
 		#region FieldController

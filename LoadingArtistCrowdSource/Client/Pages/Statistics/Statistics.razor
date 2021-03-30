@@ -67,12 +67,42 @@ else
 				</Card>
 			</Column>
 		</Row>
+		<Row>
+			<Column>
+				<Card>
+					<CardHeader>
+						Comic Integrity Queue
+					</CardHeader>
+					<CardBody>
+						<p>
+							These are the next comics that need some love and attention. Click on a comic and answer some fields to help contribute!
+						</p>
+						<div class="row">
+							@foreach (var comic in _comicIntegrityQueue)
+							{
+								<div class="col-lg-2 col-md-3 col-sm-4 col-6 d-flex flex-column justify-content-end">
+									<label class="w-100">
+										<NavLink href="@($"/comic/{Uri.EscapeDataString(@comic.Code)}")" class="text-wrap">@comic.Title</NavLink>
+										<div class="progress w-100">
+											<div class="progress-bar" role="progressbar" style="min-width: @(comic.Integrity)%" aria-valuenow="@(comic.Integrity)" aria-valuemin="0" aria-valuemax="100">
+												@(comic.Integrity)%
+											</div>
+										</div>
+									</label>
+								</div>
+							}
+						</div>
+					</CardBody>
+				</Card>
+			</Column>
+		</Row>
 	</Container>
 }
 
 @code {
 	private bool _isLoading;
 	private StatisticsViewModel _stats = new StatisticsViewModel();
+	private ComicListItemViewModel[] _comicIntegrityQueue { get; set; } = new ComicListItemViewModel[] { };
 
 	private int _overallIntegrity => (int)Math.Floor(_stats.OverallIntegrity * 100.0);
 
@@ -81,7 +111,12 @@ else
 		try
 		{
 			_isLoading = true;
-			_stats = await Api.GetStatistics();
+			var statsTask = Api.GetStatistics();
+			var integrityQueueTask = Api.GetComicIntegrityQueue();
+			await Task.WhenAll(statsTask, integrityQueueTask);
+
+			_stats = await statsTask;
+			_comicIntegrityQueue = await integrityQueueTask;
 			_isLoading = false;
 		}
 		catch (AccessTokenNotAvailableException ex)
