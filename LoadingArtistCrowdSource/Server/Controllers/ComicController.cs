@@ -235,14 +235,14 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							};
 							_context.CrowdSourcedFieldUserEntries.Add(userEntry);
 							await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateAddUserEntryLog(comic, userEntry, newValues: values.ToArray()));
-							// await _context.SaveChangesAsync();
+							await _context.SaveChangesAsync();
 						}
 						else
 						{
 							result = UserEntrySubmissionResult.ExistingEntryEdited;
 							userEntry.LastUpdatedDate = DateTimeOffset.Now;
 							await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateEditUserEntryLog(comic, userEntry, newValues: values.ToArray()));
-							// await _context.SaveChangesAsync();
+							await _context.SaveChangesAsync();
 						}
 
 						// First, remove all values
@@ -251,7 +251,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 							.Where(csfuev => csfuev.ComicId == comic.Id && csfuev.CrowdSourcedFieldDefinitionId == fieldDefinition.Id && csfuev.CreatedBy == userId)
 							.ToListAsync();
 						_context.CrowdSourcedFieldUserEntryValues.RemoveRange(currentValues);
-						// await _context.SaveChangesAsync();
+						await _context.SaveChangesAsync();
 
 						// Next, re-add them as new rows.
 						// This is easier than attempting to edit in place.
@@ -266,22 +266,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 						// Finally, save these to storage.
 						_context.CrowdSourcedFieldUserEntryValues.AddRange(newUserEntryValues);
-						// await _context.SaveChangesAsync();
+						await _context.SaveChangesAsync();
 					}
-					await _context.SaveChangesAsync();
-					await transaction.CommitAsync();
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex, "Error");
-					await transaction.RollbackAsync();
-					throw;
-				}
-			}
-			using (var transaction = await _context.Database.BeginTransactionAsync())
-			{
-				try
-				{
+				
 					/* Perform Verification */
 					{
 						// Retrieve all user entries for this comic's field.
@@ -350,7 +337,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								_context.CrowdSourcedFieldVerifiedEntryValues.AddRange(verifiedEntryValues);
 
 								// Save changes
-								// await _context.SaveChangesAsync();
+								await _context.SaveChangesAsync();
 							}
 						}
 						else
@@ -362,7 +349,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 								_context.CrowdSourcedFieldVerifiedEntries.Remove(verifiedEntry);
 								await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateRemoveVerifiedEntryLog(comic, verifiedEntry));
 
-								// await _context.SaveChangesAsync();
+								await _context.SaveChangesAsync();
 							}
 						}
 					}
