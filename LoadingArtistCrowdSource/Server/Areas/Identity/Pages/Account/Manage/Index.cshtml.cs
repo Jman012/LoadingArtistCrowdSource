@@ -35,9 +35,14 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account.Manage
 
 		public class InputModel
 		{
-			[Phone]
-			[Display(Name = "Phone number")]
-			public string PhoneNumber { get; set; } = "";
+			[Required]
+			[StringLength(maximumLength: 20, MinimumLength = 3, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.")]
+			[Display(Name = "Display Name")]
+			public string Username { get; set; } = "";
+			
+			// [Phone]
+			// [Display(Name = "Phone number")]
+			// public string PhoneNumber { get; set; } = "";
 		}
 
 		private async Task LoadAsync(ApplicationUser user)
@@ -49,7 +54,8 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account.Manage
 
 			Input = new InputModel
 			{
-				PhoneNumber = phoneNumber
+				// PhoneNumber = phoneNumber,
+				Username = userName,
 			};
 		}
 
@@ -79,13 +85,24 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account.Manage
 				return Page();
 			}
 
-			var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-			if (Input.PhoneNumber != phoneNumber)
+			// var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+			// if (Input.PhoneNumber != phoneNumber)
+			// {
+			// 	var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+			// 	if (!setPhoneResult.Succeeded)
+			// 	{
+			// 		StatusMessage = "Unexpected error when trying to set phone number.";
+			// 		return RedirectToPage();
+			// 	}
+			// }
+
+			var userName = await _userManager.GetUserNameAsync(user);
+			if (Input.Username != userName)
 			{
-				var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-				if (!setPhoneResult.Succeeded)
+				var setUsernameResult = await _userManager.SetUserNameAsync(user, Input.Username);
+				if (!setUsernameResult.Succeeded)
 				{
-					StatusMessage = "Unexpected error when trying to set phone number.";
+					StatusMessage = "Unexpected error when trying to set username.";
 					return RedirectToPage();
 				}
 			}

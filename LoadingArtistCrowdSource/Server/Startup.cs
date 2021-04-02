@@ -67,6 +67,7 @@ namespace LoadingArtistCrowdSource.Server
 				{
 					options.ClientId = Configuration.GetValue<string>("Discord:ClientId");
 					options.ClientSecret = Configuration.GetValue<string>("Discord:ClientSecret");
+					options.Prompt = "none";
 				});
 
 			services.AddControllersWithViews()

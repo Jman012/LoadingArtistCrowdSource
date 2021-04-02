@@ -7,3 +7,16 @@
 <h1>@ViewData["Title"]</h1>
 
 <p>@Model.StatusMessage</p>
+
+<p>If you registered via an external login, you will have to complete the login again:</p>
+
+<form id="external-account" asp-page="./ExternalLogin" method="post" class="form-horizontal">
+	<div>
+		<p>
+			@foreach (var provider in Model.ExternalLogins!)
+			{
+				<button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+			}
+		</p>
+	</div>
+</form>

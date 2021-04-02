@@ -149,7 +149,7 @@ namespace LoadingArtistCrowdSource.Server.Areas.Identity.Pages.Account.Manage
 		{
 			return string.Format(
 				AuthenticatorUriFormat,
-				_urlEncoder.Encode("LoadingArtistCrowdSource.Server"),
+				_urlEncoder.Encode("Loading Artist Crowd Source"),
 				_urlEncoder.Encode(email),
 				unformattedKey);
 		}
