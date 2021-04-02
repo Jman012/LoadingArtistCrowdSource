@@ -5,7 +5,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta name="robots" content="noindex">
-	<title>LoadingArtistCrowdSource</title>
+	<title>Loading Artist Crowd Source</title>
 	<base href="/" />
 
 	<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
@@ -30,7 +30,6 @@
 	</div>
 	<script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
 	<script src="_framework/blazor.webassembly.js"></script>
-	<!--<script>navigator.serviceWorker.register('service-worker.js');</script>-->
 	<script src="lib/jquery/dist/jquery.min.js"></script>
 	<script src="js/popper.min.js"></script>
 	<script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -40,6 +39,13 @@
 	<script src="_content/Blazorise.Bootstrap/blazorise.bootstrap.js"></script>
 
 	<script>
+		if (typeof navigator.serviceWorker !== "undefined") {
+			navigator.serviceWorker.getRegistrations().then(function(registrations) {
+				for(let registration of registrations) {
+				registration.unregister()
+				}
+			});
+		}
 		window.getSelectedValues = function (sel) {
 			var results = [];
 			var i;
