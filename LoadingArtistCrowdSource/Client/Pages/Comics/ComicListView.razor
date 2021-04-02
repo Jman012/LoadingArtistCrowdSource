@@ -93,7 +93,7 @@ else
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Id" Field="@(c => c.Id)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Published" Field="@(c => c.ComicPublishedDate)" Sortable="true" Filterable="true">
 			<Template>
-				@context.ComicPublishedDate.ToString("yyyy-MM-dd")
+				@context.ComicPublishedDate.ToString("yyyy-MM-dd HH:mm:ss K")
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="ComicListItemViewModel" Title="Title" Field="@(c => c.Title)" Sortable="true" Filterable="true"></BlazorTable.Column>

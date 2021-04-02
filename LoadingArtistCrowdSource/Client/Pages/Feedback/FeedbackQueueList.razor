@@ -24,7 +24,7 @@ else
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Field" Field="@(c => c.FieldCode)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Created Date" Field="@(c => c.CreatedDate)" Sortable="true" Filterable="true">
 			<Template>
-				@context.CreatedDate.ToString("yyyy-MM-dd")
+				@context.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss K")
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
@@ -50,13 +50,13 @@ else
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Field" Field="@(c => c.FieldCode)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Created Date" Field="@(c => c.CreatedDate)" Sortable="true" Filterable="true">
 			<Template>
-				@context.CreatedDate.ToString("yyyy-MM-dd")
+				@context.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss K")
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Comment" Field="@(c => c.Comment)" Sortable="true" Filterable="true"></BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completion Date" Field="@(c => c.CompletionDate)" Sortable="true" Filterable="true">
 			<Template>
-				@context.CompletionDate?.ToString("yyyy-MM-dd")
+				@context.CompletionDate?.ToString("yyyy-MM-dd HH:mm:ss K")
 			</Template>
 		</BlazorTable.Column>
 		<BlazorTable.Column TableItem="FeedbackViewModel" Title="Completed By" Field="@(c => c.CompletedByUser!.UserName)" Sortable="true" Filterable="true"></BlazorTable.Column>
