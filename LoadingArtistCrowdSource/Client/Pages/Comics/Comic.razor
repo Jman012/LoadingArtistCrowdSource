@@ -12,7 +12,8 @@
 			</Column>
 		</Row>
 	}
-	<div class="@(_loaded ? "" : "d-none")">
+	else
+	{
 		<Row>
 			<Column>
 				<ComicNavigation ComicPage="_comicPage"></ComicNavigation>
@@ -91,7 +92,7 @@
 				</Row>
 			</Column>
 		</Row>
-	</div>
+	}
 </Container>
 
 @code {
@@ -117,6 +118,7 @@
 	{
 		try
 		{
+			_loaded = false;
 			_comicPage = await Api.GetComic(Code);
 			_loaded = true;
 		}
@@ -129,11 +131,9 @@
 
 	private async Task HandleComicNedsRefresh()
 	{
-		//_loaded = false;
-		StateHasChanged();
-
 		try
 		{
+			//_loaded = false;
 			_comicPage = await Api.GetComic(Code);
 			//_loaded = true;
 			StateHasChanged();

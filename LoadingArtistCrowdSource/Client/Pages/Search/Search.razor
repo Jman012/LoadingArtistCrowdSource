@@ -85,7 +85,7 @@ else
 							<BlazoredTypeahead @bind-Values="_searchVM.Tags"
 											   SearchMethod="HandleTagsSearch"
 											   Debounce="100"
-											   MaximumSuggestions="1000"
+											   MaximumSuggestions="20"
 											   EnableDropDown="true"
 											   ShowDropDownOnFocus="true">
 								<NotFoundTemplate Context="tag">No tags with that text exist</NotFoundTemplate>
@@ -239,7 +239,6 @@ else
 	private Task<IEnumerable<ComicTagViewModel>> HandleTagsSearch(string searchText)
 	{
 		return Task.FromResult<IEnumerable<ComicTagViewModel>>(_systemTags
-			.Where(t => t.TagValue.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-			.ToList());
+			.Where(t => t.TagValue.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
 	}
 }
