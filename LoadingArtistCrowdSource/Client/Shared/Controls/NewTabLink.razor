@@ -1,4 +1,4 @@
-﻿<a href="@Href" target="_blank" class="new-tab-link" @onclick:stopPropagation="StopPropagation">
+﻿<a href="@Href" target="_blank" class="@($"{(NoWrapText ? "text-nowrap" : "new-tab-link")}")" @onclick:stopPropagation="StopPropagation">
 	@ChildContent
 	<HelperIcon Name="external-link" class="mb-1"></HelperIcon>
 </a>
@@ -12,4 +12,7 @@
 
 	[Parameter]
 	public bool StopPropagation { get; set; } = false;
+
+	[Parameter]
+	public bool NoWrapText { get; set; } = false;
 }

@@ -32,15 +32,7 @@
 											<FieldBadge Field="_comicField" />
 										</div>
 									</div>
-									<p>@_comicField.ShortDescription</p>
-									@if (_userEntry.CreatedDate == default)
-									{
-										<p>Add Your Response:</p>
-									}
-									else
-									{
-										<p>Edit Your Response:</p>
-									}
+									<p>@_comicField.ShortDescription Select all that apply.</p>
 									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (_modal.Visible)
@@ -192,34 +184,6 @@
 								</Authorized>
 							</AuthorizeView>
 
-							<hr />
-							<h5>Description</h5>
-							<p>@_comicField.LongDescription</p>
-							<Table Narrow="true">
-								<TableBody>
-									<TableRow>
-										<TableRowHeader>Date Verified</TableRowHeader>
-										<TableRowCell>@_comicField.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss K")</TableRowCell>
-									</TableRow>
-									<TableRow>
-										<TableRowHeader>Submitters</TableRowHeader>
-										<TableRowCell>@string.Join(", ", _comicField.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
-									</TableRow>
-								</TableBody>
-							</Table>
-
-							<div>
-								Missing an option, or want to help correct something?
-								<AuthorizeView>
-									<Authorized>
-										<NavLink href="@($"/feedback/{Uri.EscapeDataString(_comicCode)}/{Uri.EscapeDataString(_comicField.Code)}/create")">Submit Feedback</NavLink>
-									</Authorized>
-									<NotAuthorized>
-										<a href="authentication/login">Log in</a> to submit feedback
-									</NotAuthorized>
-								</AuthorizeView>
-							</div>
-
 							@if (_userEntry.CreatedDate != default)
 							{
 								var arrayEqualityComparer = new LoadingArtistCrowdSource.Shared.Utilities.ArrayEqualityComparer<string>();
@@ -247,13 +211,41 @@
 									</Tooltip>
 								}
 							}
+
+							<hr />
+							<h5>Instructions/Description</h5>
+							<p>@_comicField.LongDescription</p>
+							<Table Narrow="true">
+								<TableBody>
+									<TableRow>
+										<TableRowHeader>Date Verified</TableRowHeader>
+										<TableRowCell>@_comicField.VerifiedEntry?.VerificationDate.ToLocalTime().ToString("yyyy-MM-dd hh:mm:ss K")</TableRowCell>
+									</TableRow>
+									<TableRow>
+										<TableRowHeader>Submitters</TableRowHeader>
+										<TableRowCell>@string.Join(", ", _comicField.UserEntries.Select(ue => ue.CreatedByUser.UserName))</TableRowCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+
+							<div>
+								Missing an option, or want to help correct something?
+								<AuthorizeView>
+									<Authorized>
+										<NewTabLink Href="@($"/feedback/{Uri.EscapeDataString(_comicCode)}/{Uri.EscapeDataString(_comicField.Code)}/create")" NoWrapText="true">Submit Feedback</NewTabLink>
+									</Authorized>
+									<NotAuthorized>
+										<a href="authentication/login">Log in</a> to submit feedback
+									</NotAuthorized>
+								</AuthorizeView>
+							</div>
 						</Column>
 					</Row>
 				</Container>
 			</EditForm>
 		</ModalBody>
 		<ModalFooter>
-			<div class="w-100 d-flex flex-row justify-content-around flex-wrap">
+			<div class="w-100 d-flex flex-row flex-wrap">
 				<Button Type="ButtonType.Button" Color="Color.Light" Clicked="HandleBack" Disabled="_isFirstInFields" Class="mr-2 mb-2 text-nowrap">
 					<HelperIcon Name="chevron-left" />
 					Back
@@ -263,6 +255,8 @@
 					Next&nbsp;
 					<HelperIcon Name="chevron-right" />
 				</Button>
+
+				<div class="flex-fill"></div>
 
 				<Button Type="ButtonType.Submit" Color="Color.Primary" Disabled="@(_isSubmitting || _userName == null)" Clicked="HandleSubmit" Class="mr-2 mb-2 text-nowrap">
 					@if (_isSubmitting)
@@ -338,7 +332,6 @@
 	#region Answer Variables
 	private List<ValueWrapper<bool>> _boolAnswers = new List<ValueWrapper<bool>>();
 	private string _stringAnswer = "";
-	private List<ValueWrapper<string>> _stringAnswers = new List<ValueWrapper<string>>();
 	private IList<string> _stringAnswers2 = new List<string>();
 	private int? _intAnswer;
 	#endregion Answer Variables
@@ -387,7 +380,7 @@
 				_stringAnswers2 = _userEntry.Values.ToList();
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.RadioButtons:
-				_stringAnswers = _userEntry.Values.Select(v => new ValueWrapper<string>(v)).ToList();
+				_stringAnswer = _userEntry.Values.FirstOrDefault() ?? "";
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Section:
 
