@@ -105,6 +105,35 @@ namespace LoadingArtistCrowdSource.Server
 				services.AddDistributedMemoryCache();
 			}
 			services.AddSingleton(typeof(Services.JsonDistributedCache<>));
+
+			services.AddWebOptimizer(pipeline => {
+				pipeline.AddCssBundle("/vendor.css", 
+					"css/bootstrap/bootstrap.min.css",
+					"_content/Blazorise/blazorise.css",
+					"_content/Blazorise.Bootstrap/blazorise.bootstrap.css",
+					"_content/Blazored.Toast/blazored-toast.min.css",
+					"_content/Blazored.Typeahead/blazored-typeahead.css");
+				pipeline.AddCssBundle("/main.css", 
+					"css/app.css",
+					"css/diff.css",
+					"LoadingArtistCrowdSource.Client.styles.css");
+
+				pipeline.AddJavaScriptBundle("/vendor.js", new NUglify.JavaScript.CodeSettings() {
+					MinifyCode = false,
+					RemoveUnneededCode = false,
+				},
+					"_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js",
+					"_framework/blazor.webassembly.js",
+					"lib/jquery/dist/jquery.min.js",
+					"js/popper.min.js",
+					"lib/bootstrap/dist/js/bootstrap.min.js",
+					"_content/BlazorTable/BlazorTable.min.js",
+					"_content/Blazored.Typeahead/blazored-typeahead.js",
+					"_content/Blazorise/blazorise.js",
+					"_content/Blazorise.Bootstrap/blazorise.bootstrap.js");
+				pipeline.AddJavaScriptBundle("/main.js",
+					"js/app.js");
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -135,6 +164,7 @@ namespace LoadingArtistCrowdSource.Server
 
 			app.UseHttpsRedirection();
 			app.UseBlazorFrameworkFiles();
+			app.UseWebOptimizer();
 			app.UseStaticFiles();
 
 			app.UseRouting();

@@ -8,14 +8,9 @@
 	<title>Loading Artist Crowd Source</title>
 	<base href="/" />
 
-	<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-	<link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
-	<link href="_content/Blazorise.Bootstrap/blazorise.bootstrap.css" rel="stylesheet" />
-	<link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
-	<link href="_content/Blazored.Typeahead/blazored-typeahead.css" rel="stylesheet" />
+	<link href="vendor.css" rel="stylesheet" />
+	<link href="main.css" rel="stylesheet" />
 
-	<link href="css/app.css" rel="stylesheet" />
-	<link href="LoadingArtistCrowdSource.Client.styles.css" rel="stylesheet" />
 	<link href="manifest.json" rel="manifest" />
 	<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
 </head>
@@ -28,70 +23,8 @@
 		<a href="" class="reload">Reload</a>
 		<a class="dismiss">&times;</a>
 	</div>
-	<script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
-	<script src="_framework/blazor.webassembly.js"></script>
-	<script src="lib/jquery/dist/jquery.min.js"></script>
-	<script src="js/popper.min.js"></script>
-	<script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
-	<script src="_content/BlazorTable/BlazorTable.min.js"></script>
-	<script src="_content/Blazored.Typeahead/blazored-typeahead.js"></script>
-	<script src="_content/Blazorise/blazorise.js"></script>
-	<script src="_content/Blazorise.Bootstrap/blazorise.bootstrap.js"></script>
-
-	<script>
-		if (typeof navigator.serviceWorker !== "undefined") {
-			navigator.serviceWorker.getRegistrations().then(function(registrations) {
-				for(let registration of registrations) {
-				registration.unregister()
-				}
-			});
-		}
-		window.getSelectedValues = function (sel) {
-			var results = [];
-			var i;
-			for (i = 0; i < sel.options.length; i++) {
-				if (sel.options[i].selected) {
-					results[results.length] = sel.options[i].value;
-				}
-			}
-			return results;
-		};
-		$(document).on("click", ".allow-focus", function (e) {
-			e.stopPropagation();
-		});
-		window.WriteCookie = function (name, value, days) {
-			var expires;
-			if (days) {
-				var date = new Date();
-				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-				expires = "; expires=" + date.toGMTString();
-			}
-			else {
-				expires = "";
-			}
-			document.cookie = name + "=" + value + expires + "; path=/";
-		}
-		window.ReadCookie = function (cname) {
-			var name = cname + "=";
-			var decodedCookie = decodeURIComponent(document.cookie);
-			var ca = decodedCookie.split(';');
-			for (var i = 0; i < ca.length; i++) {
-				var c = ca[i];
-				while (c.charAt(0) == ' ') {
-					c = c.substring(1);
-				}
-				if (c.indexOf(name) == 0) {
-					return c.substring(name.length, c.length);
-				}
-			}
-			return "";
-		}
-		window.ScrollToTop = function (selector) {
-			document.querySelectorAll(selector).forEach(function(el) {
-				el.scrollTo(0, 0);
-			});
-		}
-	</script>
+	<script src="vendor.js"></script>
+	<script src="main.js"></script>
 </body>
 
 </html>
