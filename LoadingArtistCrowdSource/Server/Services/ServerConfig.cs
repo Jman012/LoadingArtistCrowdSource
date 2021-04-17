@@ -19,6 +19,8 @@ namespace LoadingArtistCrowdSource.Server.Services
 		public const string LACS_FromEmailAddress = "LACS:FromEmailAddress";
 		public const string LACS_FromEmailName = "LACS:FromEmailName";
 
+		public const string LACS_LoadingArtistDomain = "LACS:LoadingArtistDomain";
+
 		public static void AssertConfigAvailable(IConfiguration configuration)
 		{
 			var fields = typeof(ServerConfig).GetFields(BindingFlags.Public | BindingFlags.Static);

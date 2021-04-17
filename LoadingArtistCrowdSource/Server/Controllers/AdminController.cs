@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 using LoadingArtistCrowdSource.Server.Data;
 using LoadingArtistCrowdSource.Shared.Enums;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace LoadingArtistCrowdSource.Server.Controllers
@@ -33,6 +35,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly UserManager<Models.ApplicationUser> _userManager;
 		private readonly Services.HistoryLogger _historyLogger;
 		private readonly Services.JsonDistributedCache<AdminController> _distCache;
+		private readonly IConfiguration _configuration;
+
+		private string LADomain => _configuration.GetValue<string>(Services.ServerConfig.LACS_LoadingArtistDomain);
 
 		public AdminController(
 			ApplicationDbContext context, 
@@ -40,7 +45,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			ILogger<AdminController> logger, 
 			UserManager<Models.ApplicationUser> userManager,
 			Services.HistoryLogger historyLogger,
-			Services.JsonDistributedCache<AdminController> distCache)
+			Services.JsonDistributedCache<AdminController> distCache,
+			IConfiguration configuration)
 		{
 			_context = context;
 			_httpClient = httpClientFactory.CreateClient();
@@ -48,6 +54,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			_userManager = userManager;
 			_historyLogger = historyLogger;
 			_distCache = distCache;
+			_configuration = configuration;
 		}
 
 		[HttpPost]
@@ -291,7 +298,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		#region Private Methods
 		private async Task<SyndicationFeed> GetRssFeedPage(int page)
 		{
-			string sFeedUrl = "https://loadingartist.com/feed?post_type=comic&paged={0}";
+			string sFeedUrl = $"https://{LADomain}/feed?post_type=comic&paged={0}";
 
 			string url = string.Format(sFeedUrl, page);
 
@@ -354,6 +361,10 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' is new. Queueing for insertion.");
 					importableItemsNewestFirst.Add(comic);
 				}
+
+				// The old wordpress website supported paginated RSS feed. The new website does not.
+				// So, as a simple fix for now, always break here to never attempt to get the next page.
+				break;
 			}
 
 			return new Queue<Models.Comic>(importableItemsNewestFirst.Reverse<Models.Comic>());
@@ -420,13 +431,22 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var month = $"{feedItem.PublishDate.Month:00}";
 			var day = $"{feedItem.PublishDate.Day:00}";
 
+			XElement xEl = XElement.Parse(description);
+			string imageUrlSrc = xEl.Element("a")?.Element("img")?.Attribute("href")?.Value 
+				?? $"https://{LADomain}/comic/{code}/{code}.jpg";
+
+			// Attempt to use webp over gif.
+			if (imageUrlSrc.EndsWith(".gif"))
+			{
+				imageUrlSrc = imageUrlSrc.Replace(".gif", ".webp");
+			}
+
 			// Comics from Born (2011) to High Five (2014-08-15) are PNG,
 			// and from Drawn Back (2014-08-22) to current are JPG.
-			string imageUrlSrc = $"https://loadingartist.com/wp-content/uploads/{year}/{month}/{year}-{month}-{day}-{code}.jpg";
-			if (feedItem.PublishDate < new DateTime(2014, 08, 21))
-			{
-				imageUrlSrc = $"https://loadingartist.com/wp-content/uploads/{year}/{month}/{year}-{month}-{day}-{code}.png";
-			}
+			// if (feedItem.PublishDate < new DateTime(2014, 08, 21))
+			// {
+			// 	imageUrlSrc = $"https://{LADomain}/comic/{code}/{code}.png";
+			// }
 
 			var comic = new Models.Comic()
 			{
@@ -438,8 +458,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Tooltip = tooltip,
 				Description = description,
 				ImageUrlSrc = imageUrlSrc,
-				ImageThumbnailUrlSrc = $"https://loadingartist.com/comic-thumbs/{code}.png",
-				ImageWideThumbnailUrlSrc = $"https://loadingartist.com/comic-thumbs-wide/{code}.png",
+				ImageThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb.png",
+				ImageWideThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb-wide.png",
 				ImportedDate = DateTimeOffset.Now,
 				ImportedBy = userId,
 				LastUpdatedDate = null,
