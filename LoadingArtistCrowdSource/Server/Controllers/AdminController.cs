@@ -94,6 +94,56 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok($"Imported {importableComicsCount} comic(s)");
 		}
 
+		[HttpPost]
+		[Route("import_initial_comics")]
+		public async Task<IActionResult> ImportInitialComics()
+		{
+			var formFile = Request.Form.Files.FirstOrDefault();
+			if (formFile == null)
+			{
+				return BadRequest("No xml file uploaded.");
+			}
+
+			_logger.LogInformation($"User {User.Identity?.Name} initiated importing initial comics.");
+			Queue<Models.Comic> importableComics = await GetAllComics(formFile);
+			int importableComicsCount = importableComics.Count;
+
+			var latestComic = await _context.Comics.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
+			int latestComicId = latestComic?.Id ?? 0;
+			_logger.LogInformation($"Beginning import. Latest comic id = {latestComicId}");
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					int currentComicId = latestComicId + 1;
+					foreach (var comic in importableComics)
+					{
+						_logger.LogInformation($"Importing comic '{comic.Code}' '{comic.Permalink}' with a new id of '{currentComicId}'");
+						comic.Id = currentComicId;
+						currentComicId += 1;
+						_context.Comics.Add(comic);
+						await _context.ComicHistoryLogs.AddAsync(_historyLogger.CreateComicImportedLog(comic));
+					}
+
+					_logger.LogInformation($"Importing comics completed. Saving changes.");
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing comics");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.ComicIndex);
+			
+			_logger.LogInformation($"Importing and saving comics completed.");
+			return Ok($"Imported {importableComicsCount} comic(s)");
+		}
+
 		[HttpPut]
 		[Route("user/{username}/roles")]
 		public async Task<IActionResult> PutUserRole([FromRoute] string username, [FromBody] IEnumerable<Shared.Models.AdminSetUserRoleItemViewModel> userRoleItems)
@@ -304,6 +354,38 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' is new. Queueing for insertion.");
 					importableItemsNewestFirst.Add(comic);
 				}
+			}
+
+			return new Queue<Models.Comic>(importableItemsNewestFirst.Reverse<Models.Comic>());
+		}
+
+		private async Task<Queue<Models.Comic>> GetAllComics(IFormFile file)
+		{
+			SyndicationFeed syndicationFeed;
+
+			using (var stream = file.OpenReadStream())
+			using (var xmlReader = XmlReader.Create(stream))
+			{
+				syndicationFeed = SyndicationFeed.Load(xmlReader);
+			}
+
+			List<Models.Comic> importableItemsNewestFirst = new List<Models.Comic>();
+			var userId = _userManager.GetUserId(User);
+
+			var latestComic = await _context.Comics.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
+			_logger.LogInformation($"Latest comic: {latestComic?.Code} {latestComic?.Permalink}");
+
+			foreach (var feedItem in syndicationFeed.Items)
+			{
+				var comic = CreateComic(feedItem, id: 0, userId: userId);
+				if (latestComic?.Permalink == comic.Permalink)
+				{
+					_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' matches latest comic in system. Stopping.");
+					break;
+				}
+
+				_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' is new. Queueing for insertion.");
+				importableItemsNewestFirst.Add(comic);
 			}
 
 			return new Queue<Models.Comic>(importableItemsNewestFirst.Reverse<Models.Comic>());

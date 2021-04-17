@@ -11,6 +11,14 @@
 
 	<Row Class="mb-3">
 		<Column>
+			<h3>Import Feed</h3>
+			<InputFile OnChange="HandleImportFeedFile"></InputFile>
+			<Button Color="Color.Primary" Clicked="HandleImportFeed">Import Feed</Button>
+		</Column>
+	</Row>
+
+	<Row Class="mb-3">
+		<Column>
 			<h3>Import New Comics</h3>
 			<Button Color="Color.Primary" Clicked="HandleImportNewComics" Disabled="_isLoadingImportNewComics">
 				@if (_isLoadingImportNewComics)
@@ -100,6 +108,28 @@
 	private void HandleImportFeedFile(InputFileChangeEventArgs e)
 	{
 		_importFeedFile = e.File;
+	}
+
+	private async Task HandleImportFeed()
+	{
+		if (_importFeedFile == null)
+		{
+			ToastService.ShowWarning("No file selected");
+			return;
+		}
+
+		using (var readStream = _importFeedFile.OpenReadStream(maxAllowedSize: 512000 * 20))
+		{
+			try
+			{
+				await Api.ImportInitialComics(readStream);
+			}
+			catch (AccessTokenNotAvailableException ex)
+			{
+				ex.Redirect();
+				return;
+			}
+		}
 	}
 
 	private async Task HandleImportNewComics()
