@@ -89,7 +89,7 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// </summary>
 		public string? LastUpdatedBy { get; set; }
 
-		// TODO: Validations
+		public bool IsUsableForStatistics { get; private set; }
 
 
 		public List<ComicHistoryLog> ComicHistoryLogs { get; set; } = null!;

@@ -67,20 +67,27 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			foreach (var year in allYears)
 			{
 				var userEntryCount = await _context.CrowdSourcedFieldUserEntries
-					.Where(csfue => csfue.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && csfue.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.Where(csfue => csfue.CrowdSourcedFieldDefinition.IsUsableForStatistics && 
+						csfue.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
+						csfue.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
 					.CountAsync();
 				var verifiedEntryCount = await _context.CrowdSourcedFieldVerifiedEntries
-					.Where(csfve => csfve.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && csfve.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.Where(csfve => csfve.CrowdSourcedFieldDefinition.IsUsableForStatistics && 
+						csfve.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
+						csfve.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
 					.CountAsync();
 				var transcriptCount = await _context.ComicTranscripts
-					.Where(ct => ct.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && ct.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.Where(ct => ct.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
+						ct.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
 					.CountAsync();
 				var tagCount = await _context.ComicTags
-					.Where(ct => ct.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && ct.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.Where(ct => ct.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
+						ct.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
 					.GroupBy(ct => ct.ComicId)
 					.CountAsync();
 				var comicCount = await _context.Comics
-					.Where(c => c.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && c.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.Where(c => c.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
+						c.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
 					.CountAsync();
 					
 				userEntryCountsByYear.Add(year, userEntryCount);
@@ -92,7 +99,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			// Get field information
 			int totalCountFieldsNotSection = await _context.CrowdSourcedFieldDefinitions
-				.Where(csfd => csfd.Type != CrowdSourcedFieldType.Section && csfd.IsActive && !csfd.IsDeleted)
+				.Where(csfd => csfd.IsUsableForStatistics)
 				.CountAsync();
 			int totalFieldPoints = totalCountFieldsNotSection * 2;
 
