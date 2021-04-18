@@ -295,6 +295,102 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok($"Imported {lstFieldViewModels.Count} fields");
 		}
 
+		[HttpPost]
+		[Route("comic/{comicCode}/delete_all_field_data")]
+		public async Task<IActionResult> DeleteAllComicFieldData([FromRoute] string comicCode)
+		{
+			var comic = _context.Comics.FirstOrDefault(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound();
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					var csfvevs = await _context.CrowdSourcedFieldVerifiedEntryValues
+						.Where(csfvev => csfvev.ComicId == comic.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(csfvevs);
+
+					var csfves = await _context.CrowdSourcedFieldVerifiedEntries
+						.Where(csfve => csfve.ComicId == comic.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntries.RemoveRange(csfves);
+
+					var csfuevs = await _context.CrowdSourcedFieldUserEntryValues
+						.Where(csfuev => csfuev.ComicId == comic.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntryValues.RemoveRange(csfuevs);
+
+					var csfues = await _context.CrowdSourcedFieldUserEntries
+						.Where(csfue => csfue.ComicId == comic.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntries.RemoveRange(csfues);
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing fields");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			return Ok();
+		}
+
+		[HttpPost]
+		[Route("field/{fieldCode}/delete_all_field_data")]
+		public async Task<IActionResult> DeleteAllFieldDefinitionData([FromRoute] string fieldCode)
+		{
+			var fieldDef = _context.CrowdSourcedFieldDefinitions.FirstOrDefault(csfd => csfd.Code == fieldCode);
+			if (fieldDef == null)
+			{
+				return NotFound();
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					var csfvevs = await _context.CrowdSourcedFieldVerifiedEntryValues
+						.Where(csfvev => csfvev.CrowdSourcedFieldDefinitionId == fieldDef.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(csfvevs);
+
+					var csfves = await _context.CrowdSourcedFieldVerifiedEntries
+						.Where(csfve => csfve.CrowdSourcedFieldDefinitionId == fieldDef.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntries.RemoveRange(csfves);
+
+					var csfuevs = await _context.CrowdSourcedFieldUserEntryValues
+						.Where(csfuev => csfuev.CrowdSourcedFieldDefinitionId == fieldDef.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntryValues.RemoveRange(csfuevs);
+
+					var csfues = await _context.CrowdSourcedFieldUserEntries
+						.Where(csfue => csfue.CrowdSourcedFieldDefinitionId == fieldDef.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntries.RemoveRange(csfues);
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing fields");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			return Ok();
+		}
+
 		#region Private Methods
 		private async Task<SyndicationFeed> GetRssFeedPage(int page)
 		{

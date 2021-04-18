@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject Services.LACSApi Api
+@inject IToastService ToastService
 
 <Container Fluid="false">
 	@if (!_loaded)
@@ -30,19 +31,36 @@
 
 		<Row>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
+				<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
+					<Authorized>
+						<Row Class="mb-3">
+							<Column>
+								<h3>Moderator</h3>
+								
+								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")" class="btn btn-link">Edit Metadata</NavLink>
+								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/history")" class="btn btn-link">Comic History</NavLink>
+								<Button Type="ButtonType.Button" Color="Color.Danger" Class="btn-link" Clicked="() => _deleteAllFieldDataModal.Show()">Delete All Field Data</Button>
+
+								<Modal @ref="_deleteAllFieldDataModal">
+									<ModalBackdrop></ModalBackdrop>
+									<ModalBody>
+										Are you sure you want to delete all field data for this comic?
+									</ModalBody>
+									<ModalFooter>
+										<div class="d-flex justify-content-between">
+											<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteAllFieldData" Disabled="_deleteAllFieldDataLoading">Delete</Button>
+											<Button Type="ButtonType.Button" Color="Color.Light" Clicked="() => _deleteAllFieldDataModal.Hide()">Cancel</Button>
+										</div>
+									</ModalFooter>
+								</Modal>
+							</Column>
+						</Row>
+					</Authorized>
+				</AuthorizeView>
 				<Row Class="mb-3">
 					<Column>
 						<h3>Metadata</h3>
-						<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
-							<Authorized>
-								<div>
-									<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")">Edit Metadata</NavLink>
-								</div>
-								<div>
-									<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/history")">Comic History</NavLink>
-								</div>
-							</Authorized>
-						</AuthorizeView>
+						
 						<ComicMetadata Comic="_comic"></ComicMetadata>
 					</Column>
 				</Row>
@@ -103,6 +121,8 @@
 	private bool _loaded;
 	private ComicPageViewModel _comicPage = new ComicPageViewModel();
 	private ComicViewModel _comic => _comicPage.ComicViewModel;
+	private Modal _deleteAllFieldDataModal = new Modal();
+	private bool _deleteAllFieldDataLoading;
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -143,5 +163,22 @@
 			exception.Redirect();
 			return;
 		}
+	}
+
+	private async Task HandleDeleteAllFieldData()
+	{
+		try
+		{
+			_deleteAllFieldDataLoading = true;
+			await Api.DeleteAllComicFieldData(Code);
+			_deleteAllFieldDataLoading = false;
+			ToastService.ShowSuccess("Done.");
+		}
+		catch
+		{
+			ToastService.ShowError("There was a problem.");
+		}
+
+		_deleteAllFieldDataModal.Hide();
 	}
 }

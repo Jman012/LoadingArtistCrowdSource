@@ -179,6 +179,18 @@ namespace LoadingArtistCrowdSource.Client.Services
 			var response = await _authClient.PostAsync("api/admin/import_fields", new StringContent(json));
 			return await response.Content.ReadAsStringAsync();
 		}
+		public async Task DeleteAllComicFieldData(string comicCode)
+		{
+			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/delete_all_field_data", new StringContent(""));
+			response.EnsureSuccessStatusCode();
+			return;
+		}
+		public async Task DeleteAllFieldDefinitionData(string fieldCode)
+		{
+			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(fieldCode)}/delete_all_field_data", new StringContent(""));
+			response.EnsureSuccessStatusCode();
+			return;
+		}
 		#endregion AdminController
 
 		#region FeedbackController
