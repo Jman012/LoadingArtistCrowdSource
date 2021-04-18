@@ -350,7 +350,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				}
 				foreach (var feedItem in feedPage.Items)
 				{
-					var comic = CreateComic(feedItem, id: 0, userId: userId);
+					var comic = await CreateComic(feedItem, id: 0, userId: userId);
 					if (latestComic?.Permalink == comic.Permalink)
 					{
 						_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' matches latest comic in system. Stopping.");
@@ -388,7 +388,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			foreach (var feedItem in syndicationFeed.Items)
 			{
-				var comic = CreateComic(feedItem, id: 0, userId: userId);
+				if (feedItem.Categories.FirstOrDefault()?.Name != "comic")
+				{
+					continue;
+				}
+
+				var comic = await CreateComic(feedItem, id: 0, userId: userId);
 				if (latestComic?.Permalink == comic.Permalink)
 				{
 					_logger.LogInformation($"RSS Comic '{comic.Code}' '{comic.Permalink}' matches latest comic in system. Stopping.");
@@ -402,7 +407,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return new Queue<Models.Comic>(importableItemsNewestFirst.Reverse<Models.Comic>());
 		}
 
-		private Models.Comic CreateComic(SyndicationItem feedItem, int id, string userId)
+		private async Task<Models.Comic> CreateComic(SyndicationItem feedItem, int id, string userId)
 		{
 			Uri? link = feedItem.Links.FirstOrDefault(l => l.RelationshipType == "alternate")?.Uri;
 			if (link == null)
@@ -431,22 +436,17 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var month = $"{feedItem.PublishDate.Month:00}";
 			var day = $"{feedItem.PublishDate.Day:00}";
 
-			XElement xEl = XElement.Parse(description);
-			string imageUrlSrc = xEl.Element("a")?.Element("img")?.Attribute("href")?.Value 
-				?? $"https://{LADomain}/comic/{code}/{code}.jpg";
+			var asContext = AngleSharp.BrowsingContext.New(AngleSharp.Configuration.Default);
+			var document = await AngleSharp.BrowsingContextExtensions.OpenAsync(asContext, req => req.Content(description));
+			var sourceSrc = document.QuerySelector("picture>source")?.GetAttribute("src");
+			var imgSrc = document.QuerySelector("picture>img")?.GetAttribute("src");
+			string imageUrlSrc = sourceSrc ?? imgSrc ?? $"https://{LADomain}/comic/{code}/{code}.jpg";
 
 			// Attempt to use webp over gif.
 			if (imageUrlSrc.EndsWith(".gif"))
 			{
 				imageUrlSrc = imageUrlSrc.Replace(".gif", ".webp");
 			}
-
-			// Comics from Born (2011) to High Five (2014-08-15) are PNG,
-			// and from Drawn Back (2014-08-22) to current are JPG.
-			// if (feedItem.PublishDate < new DateTime(2014, 08, 21))
-			// {
-			// 	imageUrlSrc = $"https://{LADomain}/comic/{code}/{code}.png";
-			// }
 
 			var comic = new Models.Comic()
 			{

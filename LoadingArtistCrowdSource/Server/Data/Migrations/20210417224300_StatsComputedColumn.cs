@@ -11,7 +11,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                 table: "CrowdSourcedFieldDefinition",
                 type: "bit",
                 nullable: false,
-                computedColumnSql: "IsActive AND NOT IsDeleted AND Type <> 'Section'",
+                computedColumnSql: "CAST(CASE WHEN [IsActive] = 1 AND [IsDeleted] <> 1 AND [Type] <> 'Section' THEN 1 ELSE 0 END AS BIT)",
                 stored: false);
         }
 

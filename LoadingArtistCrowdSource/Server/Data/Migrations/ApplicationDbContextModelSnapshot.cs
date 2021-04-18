@@ -408,7 +408,7 @@ namespace LoadingArtistCrowdSource.Server.Data.Migrations
                     b.Property<bool>("IsUsableForStatistics")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bit")
-                        .HasComputedColumnSql("IsActive AND NOT IsDeleted AND Type <> 'Section'", false);
+                        .HasComputedColumnSql("CAST(CASE WHEN [IsActive] = 1 AND [IsDeleted] <> 1 AND [Type] <> 'Section' THEN 1 ELSE 0 END AS BIT)", false);
 
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(450)");

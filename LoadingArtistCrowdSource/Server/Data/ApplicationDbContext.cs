@@ -181,7 +181,7 @@ namespace LoadingArtistCrowdSource.Server.Data
 				.HasConversion(new EnumToStringConverter<CrowdSourcedFieldType>());
 			builder.Entity<CrowdSourcedFieldDefinition>()
 				.Property(csfd => csfd.IsUsableForStatistics)
-				.HasComputedColumnSql($"{nameof(CrowdSourcedFieldDefinition.IsActive)} AND NOT {nameof(CrowdSourcedFieldDefinition.IsDeleted)} AND {nameof(CrowdSourcedFieldDefinition.Type)} <> '{CrowdSourcedFieldType.Section.ToString()}'", stored: false);
+				.HasComputedColumnSql($"CAST(CASE WHEN [{nameof(CrowdSourcedFieldDefinition.IsActive)}] = 1 AND [{nameof(CrowdSourcedFieldDefinition.IsDeleted)}] <> 1 AND [{nameof(CrowdSourcedFieldDefinition.Type)}] <> '{CrowdSourcedFieldType.Section.ToString()}' THEN 1 ELSE 0 END AS BIT)", stored: false);
 			#endregion CrowdSourcedFieldDefinition
 
 			#region CrowdSourcedFieldDefinitionFeedback
