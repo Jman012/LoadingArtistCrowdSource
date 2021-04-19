@@ -181,13 +181,13 @@ namespace LoadingArtistCrowdSource.Client.Services
 		}
 		public async Task DeleteAllComicFieldData(string comicCode)
 		{
-			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(comicCode)}/delete_all_field_data", new StringContent(""));
+			var response = await _authClient.PostAsync($"api/admin/comic/{Uri.EscapeDataString(comicCode)}/delete_all_field_data", new StringContent(""));
 			response.EnsureSuccessStatusCode();
 			return;
 		}
 		public async Task DeleteAllFieldDefinitionData(string fieldCode)
 		{
-			var response = await _authClient.PostAsync($"api/comic/{Uri.EscapeDataString(fieldCode)}/delete_all_field_data", new StringContent(""));
+			var response = await _authClient.PostAsync($"api/admin/field/{Uri.EscapeDataString(fieldCode)}/delete_all_field_data", new StringContent(""));
 			response.EnsureSuccessStatusCode();
 			return;
 		}

@@ -340,6 +340,9 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				}
 			}
 
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+
 			return Ok();
 		}
 
@@ -386,6 +389,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					await transaction.RollbackAsync();
 					throw;
 				}
+			}
+
+			// Clear all comics from cache
+			foreach (string comicCode in _context.Comics.Select(c => c.Code))
+			{
+				await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
 			}
 
 			return Ok();

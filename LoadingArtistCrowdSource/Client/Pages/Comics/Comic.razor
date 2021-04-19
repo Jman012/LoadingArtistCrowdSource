@@ -31,36 +31,10 @@
 
 		<Row>
 			<Column ColumnSize="ColumnSize.IsHalf.OnFullHD">
-				<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
-					<Authorized>
-						<Row Class="mb-3">
-							<Column>
-								<h3>Moderator</h3>
-								
-								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")" class="btn btn-link">Edit Metadata</NavLink>
-								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/history")" class="btn btn-link">Comic History</NavLink>
-								<Button Type="ButtonType.Button" Color="Color.Danger" Class="btn-link" Clicked="() => _deleteAllFieldDataModal.Show()">Delete All Field Data</Button>
-
-								<Modal @ref="_deleteAllFieldDataModal">
-									<ModalBackdrop></ModalBackdrop>
-									<ModalBody>
-										Are you sure you want to delete all field data for this comic?
-									</ModalBody>
-									<ModalFooter>
-										<div class="d-flex justify-content-between">
-											<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteAllFieldData" Disabled="_deleteAllFieldDataLoading">Delete</Button>
-											<Button Type="ButtonType.Button" Color="Color.Light" Clicked="() => _deleteAllFieldDataModal.Hide()">Cancel</Button>
-										</div>
-									</ModalFooter>
-								</Modal>
-							</Column>
-						</Row>
-					</Authorized>
-				</AuthorizeView>
 				<Row Class="mb-3">
 					<Column>
 						<h3>Metadata</h3>
-						
+
 						<ComicMetadata Comic="_comic"></ComicMetadata>
 					</Column>
 				</Row>
@@ -82,10 +56,10 @@
 					<Column>
 						<h3>Crowd Sourced Data</h3>
 						<div class="entry-list">
-							<FieldEntries ComicCode="@_comic.Code" 
-										  ComicImgSrc="@_comic.ImageUrlSrc" 
-										  ComicProgress="@_comicPage.Progress" 
-										  Fields="_comic.ComicFields" 
+							<FieldEntries ComicCode="@_comic.Code"
+										  ComicImgSrc="@_comic.ImageUrlSrc"
+										  ComicProgress="@_comicPage.Progress"
+										  Fields="_comic.ComicFields"
 										  OnComicNeedsRefresh="HandleComicNedsRefresh" />
 						</div>
 					</Column>
@@ -108,6 +82,34 @@
 									   OnComicNeedsRefresh="HandleComicNedsRefresh" />
 					</Column>
 				</Row>
+				<AuthorizeView Roles="@LoadingArtistCrowdSource.Shared.Enums.Roles.AdminMod">
+					<Authorized>
+						<Row Class="mb-3">
+							<Column>
+								<h3>Moderator</h3>
+
+								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/edit")" class="btn btn-light">Edit Metadata</NavLink>
+								<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}/history")" class="btn btn-light">Comic History</NavLink>
+								<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => _deleteAllFieldDataModal.Show()">Delete All Field Data</Button>
+
+								<Modal @ref="_deleteAllFieldDataModal">
+									<ModalBackdrop></ModalBackdrop>
+									<ModalContent>
+										<ModalBody>
+											Are you sure you want to delete all field data for this comic?
+										</ModalBody>
+										<ModalFooter>
+											<div class="d-flex justify-content-between">
+												<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteAllFieldData" Disabled="_deleteAllFieldDataLoading">Delete</Button>
+												<Button Type="ButtonType.Button" Color="Color.Light" Clicked="() => _deleteAllFieldDataModal.Hide()">Cancel</Button>
+											</div>
+										</ModalFooter>
+									</ModalContent>
+								</Modal>
+							</Column>
+						</Row>
+					</Authorized>
+				</AuthorizeView>
 			</Column>
 		</Row>
 	}
@@ -176,6 +178,7 @@
 		}
 		catch
 		{
+			_deleteAllFieldDataLoading = false;
 			ToastService.ShowError("There was a problem.");
 		}
 

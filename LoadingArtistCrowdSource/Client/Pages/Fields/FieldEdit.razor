@@ -92,7 +92,7 @@
 										}
 									</div>
 								</div>
-								
+
 							</ListGroupItem>
 						}
 					</ListGroup>
@@ -124,14 +124,16 @@
 			<Modal @ref="_deleteAllFieldDataModal">
 				<ModalBackdrop></ModalBackdrop>
 				<ModalContent>
-					This will delete all submitted values on all comics for this field. Continue?
+					<ModalBody>
+						This will delete all submitted values on all comics for this field. Continue?
+					</ModalBody>
+					<ModalFooter>
+						<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteAllFieldData" Disabled="_deleteAllFieldDataLoading">Delete</Button>
+						<Button Type="ButtonType.Button" Color="Color.Light" Clicked="() => _deleteAllFieldDataModal.Hide()">Cancel</Button>
+					</ModalFooter>
 				</ModalContent>
-				<ModalFooter>
-					<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteAllFieldData" Disabled="_deleteAllFieldDataLoading">Delete</Button>
-					<Button Type="ButtonType.Button" Color="Color.Light" Clicked="() => _deleteAllFieldDataLoading.Hide()">Cancel</Button>
-				</ModalFooter>
 			</Modal>
-			
+
 
 			@if (!_isNew)
 			{
@@ -308,6 +310,7 @@
 		}
 		catch
 		{
+			_deleteAllFieldDataLoading = false;
 			ToastService.ShowError("There was a problem.");
 		}
 
