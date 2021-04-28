@@ -564,7 +564,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Description = description,
 				ImageUrlSrc = imageUrlSrc,
 				ImageThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb.png",
-				ImageWideThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb-wide.png",
+				ImageWideThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb_wide.png",
 				ImportedDate = DateTimeOffset.Now,
 				ImportedBy = userId,
 				LastUpdatedDate = null,

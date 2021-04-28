@@ -9,6 +9,12 @@
 <Container Fluid="false">
 	<Row>
 		<Column>
+			<div>
+				<NavLink href="@($"/comic/{Uri.EscapeDataString(Code)}")">
+					<HelperIcon Name="chevron-left" /> Back to Comic
+				</NavLink>
+			</div>
+
 			<h3>Edit: </h3>
 
 			@if (_comic.Code == "")
