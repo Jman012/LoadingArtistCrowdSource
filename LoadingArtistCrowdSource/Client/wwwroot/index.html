@@ -8,6 +8,29 @@
 	<title>Loading Artist Crowd Source</title>
 	<base href="/" />
 
+	<style>
+		.root-loading-container {
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		.root-loading {
+			animation: spin 2s linear infinite;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+
 	<link href="vendor.css" rel="stylesheet" />
 	<link href="main.css" rel="stylesheet" />
 
@@ -16,7 +39,11 @@
 </head>
 
 <body>
-	<div id="app">Loading...</div>
+	<div id="app">
+		<div class="root-loading-container">
+			<img src="img/loadSpider_112.png" class="root-loading" />
+		</div>
+	</div>
 
 	<div id="blazor-error-ui">
 		An unhandled error has occurred.
