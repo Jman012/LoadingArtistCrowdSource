@@ -22,6 +22,11 @@ namespace LoadingArtistCrowdSource.Shared.Models
 		public List<CrowdSourcedFieldDefinitionOptionViewModel> Options { get; set; } = new List<CrowdSourcedFieldDefinitionOptionViewModel>();
 		public List<CrowdSourcedFieldUserEntryViewModel> UserEntries { get; set; } = new List<CrowdSourcedFieldUserEntryViewModel>();
 		public CrowdSourcedFieldVerifiedEntryViewModel? VerifiedEntry { get; set; }
+		
+		/// <summary>
+		/// Used for Search, to show possible values for some field types.
+		/// </summary>
+		public List<string> UniqueVerifiedValues { get; set; } = new List<string>();
 
 	}
 }

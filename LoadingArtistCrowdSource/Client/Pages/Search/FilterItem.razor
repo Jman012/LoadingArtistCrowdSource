@@ -73,7 +73,6 @@
 			switch (Field.Type)
 			{
 				case CrowdSourcedFieldType.IntegerNumber:
-				case CrowdSourcedFieldType.FreeformTextfield:
 				case CrowdSourcedFieldType.FreeformTextarea:
 					var fieldValue = FilterData.FieldValues.FirstOrDefault() ?? new SearchEntryOptionViewModel();
 					if (!string.IsNullOrEmpty(fieldValue.Code) && fieldValue.Filtered)
@@ -84,10 +83,24 @@
 					{
 						return "Any " + Field.Name;
 					}
+				case CrowdSourcedFieldType.FreeformTextfield:
+					if (FilterData.FieldValues.Any(o => o.Filtered))
+					{
+						string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues
+							.Where(o => o.Filtered)
+							.Select(o => o.Code));
+						return $"{Field.Name}: {values}";
+					}
+					else
+					{
+						return "Any " + Field.Name;
+					}
 				default:
 					if (FilterData.FieldValues.Zip(Field.Options).Any(o => o.First.Filtered))
 					{
-						string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(Field.Options).Where(o => o.First.Filtered).Select(o => o.Second.Text));
+						string values = string.Join(FilterData.Operator.Separator(), FilterData.FieldValues.Zip(Field.Options)
+							.Where(o => o.First.Filtered)
+							.Select(o => o.Second.Text));
 						return $"{Field.Name}: {values}";
 					}
 					else
@@ -127,9 +140,23 @@
 	{
 		if (string.IsNullOrEmpty(_searchText))
 		{
-			_searchedOptions = FilterData.FieldValues
-				.Zip(Field.Options)
-				.ToArray();
+			switch (Field.Type)
+			{
+				case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
+					_searchedOptions = FilterData.FieldValues
+						.Zip(Field.UniqueVerifiedValues.Select(v => new CrowdSourcedFieldDefinitionOptionViewModel()
+						{
+							Code = v,
+							Text = v,
+						}))
+						.ToArray();
+					break;
+				default:
+					_searchedOptions = FilterData.FieldValues
+						.Zip(Field.Options)
+						.ToArray();
+					break;
+			}
 		}
 		else
 		{
@@ -157,10 +184,10 @@
 		switch (Field.Type)
 		{
 			case CrowdSourcedFieldType.IntegerNumber:
-			case CrowdSourcedFieldType.FreeformTextfield:
 			case CrowdSourcedFieldType.FreeformTextarea:
 				FilterData.FieldValues[0].Filtered = !string.IsNullOrEmpty(FilterData.FieldValues[0].Code);
 				break;
+			case CrowdSourcedFieldType.FreeformTextfield:
 			default:
 				break;
 		}

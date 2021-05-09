@@ -171,7 +171,6 @@ else
 			switch (f.Type)
 			{
 				case CrowdSourcedFieldType.IntegerNumber:
-				case CrowdSourcedFieldType.FreeformTextfield:
 				case CrowdSourcedFieldType.FreeformTextarea:
 					searchEntry.FieldValues = new SearchEntryOptionViewModel[]
 					{
@@ -182,11 +181,18 @@ else
 						},
 					};
 					break;
+				case CrowdSourcedFieldType.FreeformTextfield:
+					searchEntry.FieldValues = f.UniqueVerifiedValues.Select(v => new SearchEntryOptionViewModel()
+					{
+						Code = v,
+						Filtered = false,
+					}).ToArray();
+					break;
 				default:
 					searchEntry.FieldValues = f.Options.Select(o => new SearchEntryOptionViewModel() 
 					{
-						Code = o.Code, 
-						Filtered = false 
+						Code = o.Code,
+						Filtered = false,
 					}).ToArray();
 					break;
 			}

@@ -35,6 +35,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			List<Models.CrowdSourcedFieldDefinition> fields = await _context
 				.CrowdSourcedFieldDefinitions
 				.Include(csfd => csfd.CrowdSourcedFieldDefinitionOptions)
+				.Include(csfd => csfd.CrowdSourcedFieldVerifiedEntryValues)
 				.Where(csfd => csfd.IsActive && !csfd.IsDeleted)
 				.OrderBy(csfd => csfd.DisplayOrder)
 				.ToListAsync();
@@ -52,6 +53,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Options = csfd.CrowdSourcedFieldDefinitionOptions
 					.OrderBy(csfdo => csfdo.DisplayOrder)
 					.Select(modelMapper.MapCrowdSourcedFieldDefinitionOption).ToList(),
+				UniqueVerifiedValues = csfd.CrowdSourcedFieldVerifiedEntryValues.Select(csfvev => csfvev.Value).Distinct().ToList(),
 			}).ToList();
 		}
 
