@@ -493,7 +493,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 
 			foreach (var feedItem in syndicationFeed.Items)
 			{
-				if (feedItem.Categories.FirstOrDefault()?.Name != "comic" || feedItem.Categories.FirstOrDefault()?.Name != "art")
+				if (feedItem.Categories.FirstOrDefault()?.Name != "comic" && feedItem.Categories.FirstOrDefault()?.Name != "art")
 				{
 					continue;
 				}
