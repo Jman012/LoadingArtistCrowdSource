@@ -545,7 +545,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			var document = await AngleSharp.BrowsingContextExtensions.OpenAsync(asContext, req => req.Content(description));
 			var sourceSrc = document.QuerySelector("picture>source")?.GetAttribute("src");
 			var imgSrc = document.QuerySelector("picture>img")?.GetAttribute("src");
-			string imageUrlSrc = sourceSrc ?? imgSrc ?? $"https://{LADomain}/comic/{code}/{code}.jpg";
+			string category = feedItem.Categories.FirstOrDefault()?.Name ?? "comic";
+			string imageUrlSrc = sourceSrc ?? imgSrc ?? $"https://{LADomain}/{category}/{code}/{code}.jpg";
 
 			// Attempt to use webp over gif.
 			if (imageUrlSrc.EndsWith(".gif"))
@@ -563,8 +564,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				Tooltip = tooltip,
 				Description = description,
 				ImageUrlSrc = imageUrlSrc,
-				ImageThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb.png",
-				ImageWideThumbnailUrlSrc = $"https://{LADomain}/comic/{code}/thumb_wide.png",
+				ImageThumbnailUrlSrc = $"https://{LADomain}/{category}/{code}/thumb.png",
+				ImageWideThumbnailUrlSrc = $"https://{LADomain}/{category}/{code}/thumb_wide.png",
 				ImportedDate = DateTimeOffset.Now,
 				ImportedBy = userId,
 				LastUpdatedDate = null,
