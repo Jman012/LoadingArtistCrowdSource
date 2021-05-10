@@ -455,6 +455,11 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				}
 				foreach (var feedItem in feedPage.Items)
 				{
+					if (feedItem.Categories.FirstOrDefault()?.Name != "comic" && feedItem.Categories.FirstOrDefault()?.Name != "art")
+					{
+						continue;
+					}
+					
 					var comic = await CreateComic(feedItem, id: 0, userId: userId);
 					if (latestComic?.Permalink == comic.Permalink)
 					{
