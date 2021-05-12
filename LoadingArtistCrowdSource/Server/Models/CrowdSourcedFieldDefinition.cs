@@ -89,6 +89,10 @@ namespace LoadingArtistCrowdSource.Server.Models
 		/// </summary>
 		public string? LastUpdatedBy { get; set; }
 
+		/// <summary>
+		/// Computed column for field definitions suitable for statistics.
+		/// Essentially: not Section, not Deleted, Active.
+		/// </summary>
 		public bool IsUsableForStatistics { get; private set; }
 
 

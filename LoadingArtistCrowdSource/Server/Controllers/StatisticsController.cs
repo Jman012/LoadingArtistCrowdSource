@@ -70,6 +70,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 					.Where(csfue => csfue.CrowdSourcedFieldDefinition.IsUsableForStatistics && 
 						csfue.Comic.ComicPublishedDate >= EF.Functions.DateFromParts(year, 1, 1) && 
 						csfue.Comic.ComicPublishedDate < EF.Functions.DateFromParts(year + 1, 1, 1))
+					.GroupBy(csfue => new { csfue.ComicId, csfue.CrowdSourcedFieldDefinitionId })
 					.CountAsync();
 				var verifiedEntryCount = await _context.CrowdSourcedFieldVerifiedEntries
 					.Where(csfve => csfve.CrowdSourcedFieldDefinition.IsUsableForStatistics && 

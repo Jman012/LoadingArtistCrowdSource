@@ -748,7 +748,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 				.Include(c => c.ComicTranscript)
 				.Include(c => c.ComicTags)
 				.OrderBy(c => 
-					c.CrowdSourcedFieldUserEntries.Count() + 
+					c.CrowdSourcedFieldUserEntries.GroupBy(csfue => csfue.CrowdSourcedFieldDefinitionId).Count() + 
 					c.CrowdSourcedFieldVerifiedEntries.Count() + 
 					(c.ComicTranscript != null ? 1 : 0) +
 					(c.ComicTags.Any() ? 1 : 0))
@@ -764,10 +764,12 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return comics
 				.Select(c => {
 					var cli = modelMapper.MapComicListItem(c);
-					cli.Integrity = c.CrowdSourcedFieldUserEntries.Count() + 
+					cli.Integrity = (int)Math.Floor((double)(
+						c.CrowdSourcedFieldUserEntries.GroupBy(csfue => csfue.CrowdSourcedFieldDefinitionId).Count() + 
 						c.CrowdSourcedFieldVerifiedEntries.Count() + 
 						(!string.IsNullOrEmpty(c.ComicTranscript?.TranscriptContent) ? 1 : 0) +
-						(c.ComicTags.Any() ? 1 : 0);
+						(c.ComicTags.Any() ? 1 : 0)
+					) / (double)totalPoints * 100.0);
 					return cli;
 				})
 				.Where(c => c.Integrity < totalPoints);
