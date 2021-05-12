@@ -32,7 +32,13 @@
 											<FieldBadge Field="_comicField" />
 										</div>
 									</div>
-									<p>@_comicField.ShortDescription Select all that apply.</p>
+									<p>
+										@_comicField.ShortDescription 
+										@if (_comicField.Type == CrowdSourcedFieldType.Checkboxes || _comicField.Type == CrowdSourcedFieldType.MultiDropdown)
+										{
+											<text>&nbsp;Select all that apply.</text>
+										}
+									</p>
 									<Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 									@* Weird bug where multi select's UI and option[selected] become desynced. Force-redraw on modal open to fix. *@
 									@if (_modal.Visible)
