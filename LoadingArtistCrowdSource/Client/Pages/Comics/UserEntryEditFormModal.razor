@@ -247,6 +247,29 @@
 							</div>
 						</Column>
 					</Row>
+					<AuthorizeView Roles="@Roles.AdminMod">
+						<Authorized>
+							<Row>
+								<Column>
+									<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="@(() => _deleteComicFieldDataModal.Show())">Delete Data</Button>
+									<Modal @ref="_deleteComicFieldDataModal">
+										<ModalContent>
+											<ModalHeader>Are you sure?</ModalHeader>
+											<ModalFooter>
+												<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteComicFieldData" Disabled="_isLoadingDeleteComicFieldData">
+													@if (_isLoadingDeleteComicFieldData) {
+														<Spinner Inline="true" Small="true"></Spinner><text>&nbsp;</text>
+													}
+													Delete Data
+												</Button>
+												<Button Type="ButtonType.Button" Color="Color.Light" Clicked="@(() => _deleteComicFieldDataModal.Hide())">Cancel</Button>
+											</ModalFooter>
+										</ModalContent>
+									</Modal>
+								</Column>
+							</Row>
+						</Authorized>
+					</AuthorizeView>
 				</Container>
 			</EditForm>
 		</ModalBody>
@@ -334,6 +357,9 @@
 	private int _indexInFields => Fields.Select((item, index) => new { item, index }).FirstOrDefault(x => x.item.Code == _comicField.Code)?.index ?? 0;
 	private bool _isFirstInFields => _indexInFields == 0 && Fields.Count > 0;
 	private bool _isLastInFields => _indexInFields == Fields.Count - 1;
+
+	private Modal _deleteComicFieldDataModal = new Modal();
+	private bool _isLoadingDeleteComicFieldData = false;
 
 	#region Answer Variables
 	private List<ValueWrapper<bool>> _boolAnswers = new List<ValueWrapper<bool>>();
@@ -528,5 +554,35 @@
 	private string HandleOptionsConvert(CrowdSourcedFieldDefinitionOptionViewModel option)
 	{
 		return option.Code;
+	}
+
+	private async Task HandleDeleteComicFieldData()
+	{
+		_isLoadingDeleteComicFieldData = true;
+		try
+		{
+			await Api.DeleteComicFieldData(_comicCode, _comicField.Code);
+		}
+		catch (AccessTokenNotAvailableException exception)
+		{
+			exception.Redirect();
+			return;
+		}
+		catch
+		{
+			ToastService.ShowError("There was an error deleting the comic field data");
+			return;
+		}
+		finally 
+		{
+			_isLoadingDeleteComicFieldData = false;
+		}
+
+		await OnSubmit.InvokeAsync(new Completion()
+		{
+			Type = CompletionType.Cancel,
+			Field = _comicField,
+		});
+		await ScrollModalBodyToTop();
 	}
 }

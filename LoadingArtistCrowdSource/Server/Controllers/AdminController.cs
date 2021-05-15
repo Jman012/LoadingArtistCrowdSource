@@ -400,6 +400,63 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			return Ok();
 		}
 
+		[HttpPost]
+		[Route("comic/{comicCode}/{fieldCode}/delete_comic_field_data")]
+		public async Task<IActionResult> DeleteComicFieldData([FromRoute] string comicCode, [FromRoute] string fieldCode)
+		{
+			var comic = _context.Comics.FirstOrDefault(c => c.Code == comicCode);
+			if (comic == null)
+			{
+				return NotFound();
+			}
+
+			var field = _context.CrowdSourcedFieldDefinitions.FirstOrDefault(csfd => csfd.Code == fieldCode);
+			if (field == null)
+			{
+				return NotFound();
+			}
+
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				try
+				{
+					var csfvevs = await _context.CrowdSourcedFieldVerifiedEntryValues
+						.Where(csfvev => csfvev.ComicId == comic.Id && csfvev.CrowdSourcedFieldDefinitionId == field.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntryValues.RemoveRange(csfvevs);
+
+					var csfves = await _context.CrowdSourcedFieldVerifiedEntries
+						.Where(csfve => csfve.ComicId == comic.Id && csfve.CrowdSourcedFieldDefinitionId == field.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldVerifiedEntries.RemoveRange(csfves);
+
+					var csfuevs = await _context.CrowdSourcedFieldUserEntryValues
+						.Where(csfuev => csfuev.ComicId == comic.Id && csfuev.CrowdSourcedFieldDefinitionId == field.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntryValues.RemoveRange(csfuevs);
+
+					var csfues = await _context.CrowdSourcedFieldUserEntries
+						.Where(csfue => csfue.ComicId == comic.Id && csfue.CrowdSourcedFieldDefinitionId == field.Id)
+						.ToListAsync();
+					_context.CrowdSourcedFieldUserEntries.RemoveRange(csfues);
+
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error importing fields");
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+
+			// Clear cache for this comic
+			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
+
+			return Ok();
+		}
+
 		#region Private Methods
 		private async Task<SyndicationFeed> GetRssFeedPage(int page)
 		{

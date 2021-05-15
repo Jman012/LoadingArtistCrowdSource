@@ -191,6 +191,12 @@ namespace LoadingArtistCrowdSource.Client.Services
 			response.EnsureSuccessStatusCode();
 			return;
 		}
+		public async Task DeleteComicFieldData(string comicCode, string fieldCode)
+		{
+			var response = await _authClient.PostAsync($"api/admin/comic/{Uri.EscapeDataString(comicCode)}/{Uri.EscapeDataString(fieldCode)}/delete_field_data", new StringContent(""));
+			response.EnsureSuccessStatusCode();
+			return;
+		}
 		#endregion AdminController
 
 		#region FeedbackController
