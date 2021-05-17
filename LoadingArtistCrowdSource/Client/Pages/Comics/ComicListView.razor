@@ -1,4 +1,4 @@
-﻿@inject IJSRuntime JsRuntime;
+﻿@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <div class="d-flex">
 	@HeaderContent
@@ -115,7 +115,7 @@ else
 		public IEnumerable<ComicListItemViewModel> Comics { get; set; } = new ComicListItemViewModel[] { };
 	}
 
-	private const string Cookie = "ComicListViewType";
+	private const string PreferenceKey = "ComicListViewType";
 
 	[Parameter]
 	public IEnumerable<ComicListItemViewModel> Comics { get; set; } = new ComicListItemViewModel[] { };
@@ -129,14 +129,9 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		string cookieValue = await JsRuntime.InvokeAsync<string>("ReadCookie", Cookie);
-		if (!string.IsNullOrEmpty(cookieValue))
-		{
-			if (System.Enum.TryParse(cookieValue, out ComicListViewType cookieView))
-			{
-				_view = cookieView;
-			}
-		}
+		bool containsPreference = await LocalStorage.ContainKeyAsync(PreferenceKey);
+		ComicListViewType preference = await LocalStorage.GetItemAsync<ComicListViewType>(PreferenceKey);
+		_view = containsPreference ? preference : ComicListViewType.GroupyByYear;
 
 		_comicsGroupedByYear = Comics.GroupBy(c => c.ComicPublishedDate.Year, c => c, (year, c) => new GroupedYear { Year = year, Comics = c });
 
@@ -146,19 +141,19 @@ else
 	private async Task GroupedByYear()
 	{
 		_view = ComicListViewType.GroupedByYear;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
+		await LocalStorage.SetItemAsync(PreferenceKey, _view);
 	}
 
 	private async Task Thumbnail()
 	{
 		_view = ComicListViewType.Thumbnail;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
+		await LocalStorage.SetItemAsync(PreferenceKey, _view);
 	}
 
 	private async Task Table()
 	{
 		_view = ComicListViewType.Table;
-		await JsRuntime.InvokeVoidAsync("WriteCookie", Cookie, _view.ToString());
+		await LocalStorage.SetItemAsync(PreferenceKey, _view);
 	}
 
 	private void ExpandAll()

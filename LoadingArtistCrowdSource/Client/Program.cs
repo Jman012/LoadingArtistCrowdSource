@@ -17,6 +17,8 @@ using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
+using Blazored.LocalStorage;
+
 namespace LoadingArtistCrowdSource.Client
 {
 	public class Program
@@ -57,6 +59,9 @@ namespace LoadingArtistCrowdSource.Client
 			host.Services
 				.UseBootstrapProviders()
 				.UseFontAwesomeIcons();
+
+			// Blazored.LocalStorage
+			builder.Services.AddBlazoredLocalStorage();
 
 			await host.RunAsync();
 		}
