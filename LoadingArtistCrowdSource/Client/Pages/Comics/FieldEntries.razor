@@ -84,6 +84,8 @@
 	[Parameter]
 	public string ComicImgSrc { get; set; } = "";
 	[Parameter]
+	public string ComicSrc { get; set; } = "";
+	[Parameter]
 	public double ComicProgress { get; set; }
 	[Parameter]
 	public IEnumerable<ComicFieldViewModel> Fields { get; set; } = new ComicFieldViewModel[] { };
@@ -131,6 +133,7 @@
 			ComicField = field,
 			ComicCode = ComicCode,
 			ComicImgSrc = ComicImgSrc,
+			ComicSrc = ComicSrc,
 		});
 	}
 
@@ -148,6 +151,7 @@
 					ComicField = previous ?? new ComicFieldViewModel(),
 					ComicCode = ComicCode,
 					ComicImgSrc = ComicImgSrc,
+					ComicSrc = ComicSrc,
 				});
 				break;
 			case UserEntryEditFormModal.CompletionType.SkipNext:
@@ -156,6 +160,7 @@
 					ComicField = next ?? new ComicFieldViewModel(),
 					ComicCode = ComicCode,
 					ComicImgSrc = ComicImgSrc,
+					ComicSrc = ComicSrc,
 				});
 				break;
 			case UserEntryEditFormModal.CompletionType.SubmitAndNext:
@@ -170,6 +175,7 @@
 						ComicField = next ?? new ComicFieldViewModel(),
 						ComicCode = ComicCode,
 						ComicImgSrc = ComicImgSrc,
+						ComicSrc = ComicSrc,
 					});
 				}
 				await OnComicNeedsRefresh.InvokeAsync();

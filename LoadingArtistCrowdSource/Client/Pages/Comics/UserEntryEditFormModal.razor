@@ -18,7 +18,9 @@
 				<Container Fluid="false">
 					<Row>
 						<Column Display="Display.None.Block.OnWidescreen" Class="border-right scrollable-col">
-							<img src="@_comicImgSrc" class="img-fluid" />
+							<a href="@_comicSrc" target="_blank">
+								<img src="@_comicImgSrc" class="img-fluid" />
+							</a>
 						</Column>
 						<Column Class="scrollable-col">
 							<AuthorizeView>
@@ -316,6 +318,7 @@
 		public ComicFieldViewModel ComicField { get; set; }
 		public string ComicCode { get; set; }
 		public string ComicImgSrc { get; set; }
+		public string ComicSrc { get; set; }
 	}
 
 	public enum CompletionType
@@ -353,6 +356,7 @@
 	private ComicFieldViewModel _comicField = new ComicFieldViewModel();
 	private string _comicCode = "";
 	private string _comicImgSrc = "";
+	private string _comicSrc = "";
 	private CrowdSourcedFieldUserEntryViewModel _userEntry = new CrowdSourcedFieldUserEntryViewModel();
 	private bool _isSubmitting = false;
 
@@ -385,6 +389,7 @@
 		_comicField = state.ComicField;
 		_comicCode = state.ComicCode;
 		_comicImgSrc = state.ComicImgSrc;
+		_comicSrc = state.ComicSrc;
 
 		if (_userName != null)
 		{
@@ -403,7 +408,7 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.Dropdown:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextarea:
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
-				_stringAnswer = _userEntry.Values.FirstOrDefault() ?? "";
+				_stringAnswer = _userEntry.Values.FirstOrDefault()?.Trim() ?? "";
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
 				var first = _userEntry.Values.FirstOrDefault();
@@ -443,7 +448,7 @@
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.FreeformTextfield:
 				values = new List<string>()
 				{
-					_stringAnswer,
+					_stringAnswer.Trim(),
 				};
 				break;
 			case LoadingArtistCrowdSource.Shared.Enums.CrowdSourcedFieldType.IntegerNumber:
@@ -547,12 +552,12 @@
 	private Task<IEnumerable<CrowdSourcedFieldDefinitionOptionViewModel>> HandleOptionsSearch(string searchString)
 	{
 		var results = _comicField.Options
-			.Where(o => o.Text.Contains(searchString, StringComparison.OrdinalIgnoreCase) 
+			.Where(o => o.Text.Contains(searchString, StringComparison.OrdinalIgnoreCase)
 						|| o.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
 			.ToList();
 		return Task.FromResult<IEnumerable<CrowdSourcedFieldDefinitionOptionViewModel>>(results);
 	}
-	
+
 	private string HandleOptionsConvert(CrowdSourcedFieldDefinitionOptionViewModel option)
 	{
 		return option.Code;
@@ -575,7 +580,7 @@
 			ToastService.ShowError("There was an error deleting the comic field data");
 			return;
 		}
-		finally 
+		finally
 		{
 			_isLoadingDeleteComicFieldData = false;
 		}
