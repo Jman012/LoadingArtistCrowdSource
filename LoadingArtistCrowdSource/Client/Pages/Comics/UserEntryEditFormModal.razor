@@ -12,7 +12,7 @@
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
 		<ModalBody @ref="_modalBody">
-			<EditForm @ref="_form" Model="_userEntry" Context="editContext">
+			<EditForm @ref="_form" Model="_userEntry" Context="editContext" OnSubmit="HandleSubmit">
 				<DataAnnotationsValidator />
 
 				<Container Fluid="false">
@@ -35,7 +35,7 @@
 										</div>
 									</div>
 									<p>
-										@_comicField.ShortDescription 
+										@_comicField.ShortDescription
 										@if (_comicField.Type == CrowdSourcedFieldType.Checkboxes || _comicField.Type == CrowdSourcedFieldType.MultiDropdown)
 										{
 											<text>&nbsp;Select all that apply.</text>
@@ -90,9 +90,9 @@
 															<small>
 																@option.Description
 																@if (!string.IsNullOrEmpty(option.URL))
-																	{
+																			{
 																	<text>&nbsp;</text><NewTabLink Href="@option.URL" StopPropagation="true">More</NewTabLink>
-																	}
+																			}
 															</small>
 														</ResultTemplate>
 														<SelectedTemplate Context="optionText">
@@ -150,9 +150,9 @@
 															<small>
 																@option.Description
 																@if (!string.IsNullOrEmpty(option.URL))
-																{
+																			{
 																	<text>&nbsp;</text><NewTabLink Href="@option.URL" StopPropagation="true">More</NewTabLink>
-																}
+																			}
 															</small>
 														</ResultTemplate>
 														<SelectedTemplate Context="optionText">
@@ -249,6 +249,7 @@
 							</div>
 
 							<div>
+								<hr />
 								<AuthorizeView Roles="@Roles.Administrator">
 									<Authorized>
 										<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="@(() => _deleteComicFieldDataModal.Show())">Delete Data</Button>
