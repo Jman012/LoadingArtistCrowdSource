@@ -92,6 +92,7 @@ namespace LoadingArtistCrowdSource.Server
 			services.AddScoped<Services.IRazorPartialToStringRenderer, Services.RazorPartialToStringRenderer>();
 			services.AddScoped<Services.HistoryLogger>();
 			services.AddScoped<Services.TagRepository>();
+			services.AddScoped<Services.ComicEntryVerifier>();
 
 			if (Configuration.GetValue<string>("LACS:DistributedCache") == "Redis")
 			{

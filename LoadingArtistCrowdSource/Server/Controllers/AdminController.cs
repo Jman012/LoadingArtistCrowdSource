@@ -36,6 +36,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		private readonly Services.HistoryLogger _historyLogger;
 		private readonly Services.JsonDistributedCache<AdminController> _distCache;
 		private readonly IConfiguration _configuration;
+		private readonly Services.ComicEntryVerifier _comicEntryVerifier;
 
 		private string LADomain => _configuration.GetValue<string>(Services.ServerConfig.LACS_LoadingArtistDomain);
 
@@ -46,7 +47,8 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			UserManager<Models.ApplicationUser> userManager,
 			Services.HistoryLogger historyLogger,
 			Services.JsonDistributedCache<AdminController> distCache,
-			IConfiguration configuration)
+			IConfiguration configuration,
+			Services.ComicEntryVerifier comicEntryVerifier)
 		{
 			_context = context;
 			_httpClient = httpClientFactory.CreateClient();
@@ -55,7 +57,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			_historyLogger = historyLogger;
 			_distCache = distCache;
 			_configuration = configuration;
-		}
+			_comicEntryVerifier = comicEntryVerifier;}
 
 		[HttpPost]
 		[Route("import_comics")]
@@ -401,7 +403,7 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 		}
 
 		[HttpPost]
-		[Route("comic/{comicCode}/{fieldCode}/delete_comic_field_data")]
+		[Route("delete_comic_field_data/{comicCode}/{fieldCode}")]
 		public async Task<IActionResult> DeleteComicFieldData([FromRoute] string comicCode, [FromRoute] string fieldCode)
 		{
 			var comic = _context.Comics.FirstOrDefault(c => c.Code == comicCode);
@@ -455,6 +457,53 @@ namespace LoadingArtistCrowdSource.Server.Controllers
 			await _distCache.RemoveAsync(Services.CacheKeys.LACS.GetComic(comicCode));
 
 			return Ok();
+		}
+
+		[HttpPost]
+		[Route("recalculate_verified_entries")]
+		public async Task<IActionResult> RecalculateVerifiedEntries()
+		{
+			using (var transaction = await _context.Database.BeginTransactionAsync())
+			{
+				var vm = new Shared.Models.RecalculateVerifiedEntriesResultViewModel();
+
+				try
+				{
+					var fieldDefinitions = await _context.CrowdSourcedFieldDefinitions
+						.Where(csfd => csfd.IsUsableForStatistics)
+						.ToListAsync();
+
+					foreach (var comic in await _context.Comics.ToListAsync())
+					{
+						foreach (var fieldDefinition in fieldDefinitions)
+						{
+							bool? verification = await _comicEntryVerifier.Verify(comic, fieldDefinition);
+							if (verification == true)
+							{
+								vm.CountVerified += 1;
+							}
+							else if (verification == false)
+							{
+								vm.CountUnverified += 1;
+							}
+							else
+							{
+								vm.CountUnchanged += 1;
+							}
+						}
+					}
+					await _context.SaveChangesAsync();
+					await transaction.CommitAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error");
+					await transaction.RollbackAsync();
+					throw;
+				}
+
+				return Json(vm);
+			}
 		}
 
 		#region Private Methods

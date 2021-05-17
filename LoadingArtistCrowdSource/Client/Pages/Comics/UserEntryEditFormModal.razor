@@ -204,7 +204,7 @@
 									int progress = (int)Math.Round((decimal)grouping.Count() / (decimal)totalEntries * 100);
 									bool isChosen = _comicField.VerifiedEntry != null && grouping.Key.SequenceEqual(_comicField.VerifiedEntry.Values);
 
-									<Tooltip Text="@(string.Join(", ", grouping.Select(ue => ue.CreatedByUser.UserName)))">
+									<Tooltip Text="@(string.Join(", ", grouping.Select(ue => ue.CreatedByUser.UserName)))" tabindex="0">
 										<div class="@($"lacs-progress {(isChosen ? "chosen" : "")}")">
 											<div class="lacs-progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress%"></div>
 											<div class="lacs-progress-bar-text">
@@ -245,31 +245,16 @@
 									</NotAuthorized>
 								</AuthorizeView>
 							</div>
+
+							<div>
+								<AuthorizeView Roles="@Roles.Administrator">
+									<Authorized>
+										<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="@(() => _deleteComicFieldDataModal.Show())">Delete Data</Button>
+									</Authorized>
+								</AuthorizeView>
+							</div>
 						</Column>
 					</Row>
-					<AuthorizeView Roles="@Roles.AdminMod">
-						<Authorized>
-							<Row>
-								<Column>
-									<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="@(() => _deleteComicFieldDataModal.Show())">Delete Data</Button>
-									<Modal @ref="_deleteComicFieldDataModal">
-										<ModalContent>
-											<ModalHeader>Are you sure?</ModalHeader>
-											<ModalFooter>
-												<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteComicFieldData" Disabled="_isLoadingDeleteComicFieldData">
-													@if (_isLoadingDeleteComicFieldData) {
-														<Spinner Inline="true" Small="true"></Spinner><text>&nbsp;</text>
-													}
-													Delete Data
-												</Button>
-												<Button Type="ButtonType.Button" Color="Color.Light" Clicked="@(() => _deleteComicFieldDataModal.Hide())">Cancel</Button>
-											</ModalFooter>
-										</ModalContent>
-									</Modal>
-								</Column>
-							</Row>
-						</Authorized>
-					</AuthorizeView>
 				</Container>
 			</EditForm>
 		</ModalBody>
@@ -303,6 +288,23 @@
 					&nbsp;<HelperIcon Name="chevron-right" />
 				</Button>
 			</div>
+		</ModalFooter>
+	</ModalContent>
+</Modal>
+
+<Modal @ref="_deleteComicFieldDataModal">
+	<ModalContent>
+		<ModalHeader>Are you sure?</ModalHeader>
+		<ModalBody></ModalBody>
+		<ModalFooter>
+			<Button Type="ButtonType.Button" Color="Color.Danger" Clicked="HandleDeleteComicFieldData" Disabled="_isLoadingDeleteComicFieldData">
+				@if (_isLoadingDeleteComicFieldData)
+				{
+					<Spinner Inline="true" Small="true"></Spinner><text>&nbsp;</text>
+				}
+				Delete Data
+			</Button>
+			<Button Type="ButtonType.Button" Color="Color.Light" Clicked="@(() => _deleteComicFieldDataModal.Hide())">Cancel</Button>
 		</ModalFooter>
 	</ModalContent>
 </Modal>

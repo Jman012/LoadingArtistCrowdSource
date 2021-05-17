@@ -41,7 +41,7 @@
 				@foreach (var userRoleItem in _setUserRolesVm.UserRoles)
 				{
 					<div class="form-group form-check">
-						<InputCheckbox id="@userRoleItem.Role" 
+						<InputCheckbox id="@userRoleItem.Role"
 									   name="@userRoleItem.Role"
 									   class="form-check-input"
 									   @bind-Value="userRoleItem.Include" />
@@ -58,7 +58,7 @@
 		<Column>
 			<h3>Field Export/Import</h3>
 			<Button Type="ButtonType.Button" Color="Color.Primary" Clicked="HandleExportFields" Disabled="_isExportFieldsLoading">
-				Export Fields 
+				Export Fields
 				@if (_isExportFieldsLoading)
 				{
 					<Spinner Small="true" Inline="true" />
@@ -87,6 +87,18 @@
 		</Column>
 	</Row>
 
+	<Row>
+		<Column>
+			<Button Type="ButtonType.Button" Color="Color.Primary" Disabled="_isRecalculateVerifiedEntriesLoading" Clicked="HandleRecalculateVerifiedEntries">
+				@if (_isRecalculateVerifiedEntriesLoading)
+				{
+					<Spinner Small="true" Inline="true" /><text>&nbsp;</text>
+				}
+				Recalculate Verified Entries
+			</Button>
+		</Column>
+	</Row>
+
 </Container>
 
 @code {
@@ -95,6 +107,7 @@
 	private string _exportImportJson = "";
 	private bool _isExportFieldsLoading;
 	private bool _isImportFieldsLoading;
+	private bool _isRecalculateVerifiedEntriesLoading;
 
 	private AdminSetUserRolesViewModel _setUserRolesVm = new AdminSetUserRolesViewModel();
 
@@ -194,6 +207,27 @@
 		{
 			_isLoadingImportNewComics = false;
 			ex.Redirect();
+		}
+	}
+
+	private async Task HandleRecalculateVerifiedEntries()
+	{
+		try
+		{
+			_isRecalculateVerifiedEntriesLoading = true;
+			var result = await Api.RecalculateVerifiedEntries();
+			ToastService.ShowInfo($"Successfully recalculated verified entries. Verified: {result.CountVerified}. Unverified: {result.CountUnverified}. Unchanged: {result.CountUnchanged}");
+			_isRecalculateVerifiedEntriesLoading = false;
+		}
+		catch (AccessTokenNotAvailableException ex)
+		{
+			_isRecalculateVerifiedEntriesLoading = false;
+			ex.Redirect();
+		}
+		catch
+		{
+			_isRecalculateVerifiedEntriesLoading = false;
+			ToastService.ShowError("An error occurred");
 		}
 	}
 }
