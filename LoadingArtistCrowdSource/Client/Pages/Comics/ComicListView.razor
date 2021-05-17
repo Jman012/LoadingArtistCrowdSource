@@ -131,7 +131,7 @@ else
 	{
 		bool containsPreference = await LocalStorage.ContainKeyAsync(PreferenceKey);
 		ComicListViewType preference = await LocalStorage.GetItemAsync<ComicListViewType>(PreferenceKey);
-		_view = containsPreference ? preference : ComicListViewType.GroupyByYear;
+		_view = containsPreference ? preference : ComicListViewType.GroupedByYear;
 
 		_comicsGroupedByYear = Comics.GroupBy(c => c.ComicPublishedDate.Year, c => c, (year, c) => new GroupedYear { Year = year, Comics = c });
 

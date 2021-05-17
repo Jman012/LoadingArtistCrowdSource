@@ -53,15 +53,15 @@ namespace LoadingArtistCrowdSource.Client
 			// Toast
 			builder.Services.AddBlazoredToast();
 
+			// Blazored.LocalStorage
+			builder.Services.AddBlazoredLocalStorage();
+
 			var host = builder.Build();
 
 			// Blazorise
 			host.Services
 				.UseBootstrapProviders()
 				.UseFontAwesomeIcons();
-
-			// Blazored.LocalStorage
-			builder.Services.AddBlazoredLocalStorage();
 
 			await host.RunAsync();
 		}
