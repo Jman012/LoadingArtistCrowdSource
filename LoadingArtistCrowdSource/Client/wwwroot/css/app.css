@@ -152,3 +152,7 @@ a, .btn-link {
 	color: white;
 	text-decoration: underline;
 }
+
+.blazored-typeahead__results {
+	max-height: 45vh;
+}
