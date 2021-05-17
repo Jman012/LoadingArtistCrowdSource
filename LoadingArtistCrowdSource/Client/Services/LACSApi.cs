@@ -191,6 +191,17 @@ namespace LoadingArtistCrowdSource.Client.Services
 			response.EnsureSuccessStatusCode();
 			return;
 		}
+		public async Task DeleteComicFieldData(string comicCode, string fieldCode)
+		{
+			var response = await _authClient.PostAsync($"api/admin/delete_comic_field_data/{Uri.EscapeDataString(comicCode)}/{Uri.EscapeDataString(fieldCode)}", new StringContent(""));
+			response.EnsureSuccessStatusCode();
+			return;
+		}
+		public async Task<RecalculateVerifiedEntriesResultViewModel> RecalculateVerifiedEntries()
+		{
+			var result = await _authClient.PostAsJsonAsync<string, RecalculateVerifiedEntriesResultViewModel>("api/admin/recalculate_verified_entries", "", _serializationOptions) ?? new RecalculateVerifiedEntriesResultViewModel();
+			return result;
+		}
 		#endregion AdminController
 
 		#region FeedbackController
