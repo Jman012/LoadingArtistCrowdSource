@@ -12,7 +12,7 @@
 			<CloseButton Clicked="Close"></CloseButton>
 		</ModalHeader>
 		<ModalBody @ref="_modalBody">
-			<EditForm @ref="_form" Model="_userEntry" Context="editContext" OnSubmit="HandleSubmit">
+			<EditForm @ref="_form" id="userEntryEditForm" Model="_userEntry" Context="editContext" OnSubmit="HandleSubmit">
 				<DataAnnotationsValidator />
 
 				<Container Fluid="false">
@@ -360,6 +360,7 @@
 	private string _comicSrc = "";
 	private CrowdSourcedFieldUserEntryViewModel _userEntry = new CrowdSourcedFieldUserEntryViewModel();
 	private bool _isSubmitting = false;
+	private bool _needsFocus = false;
 
 	private int _indexInFields => Fields.Select((item, index) => new { item, index }).FirstOrDefault(x => x.item.Code == _comicField.Code)?.index ?? 0;
 	private bool _isFirstInFields => _indexInFields == 0 && Fields.Count > 0;
@@ -383,6 +384,16 @@
 			_userName = user.Identity!.Name;
 		}
 		await base.OnInitializedAsync();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (_needsFocus)
+		{
+			await JsRuntime.InvokeVoidAsync("FocusSelector", "#userEntryEditForm input");
+			_needsFocus = false;
+		}
+		await base.OnAfterRenderAsync(firstRender);
 	}
 
 	public void Open(State state)
@@ -429,6 +440,8 @@
 
 		StateHasChanged();
 		_modal.Show();
+
+		_needsFocus = true;
 	}
 
 	public void Close()

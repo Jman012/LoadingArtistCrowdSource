@@ -50,3 +50,9 @@ window.ScrollToTop = function (selector) {
 		el.scrollTo(0, 0);
 	});
 }
+window.FocusSelector = function (selector) {
+	const el = document.querySelector(selector);
+	if (el != null) {
+		el.focus();
+	}
+}
