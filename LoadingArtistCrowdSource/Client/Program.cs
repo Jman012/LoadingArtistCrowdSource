@@ -56,6 +56,9 @@ namespace LoadingArtistCrowdSource.Client
 			// Blazored.LocalStorage
 			builder.Services.AddBlazoredLocalStorage();
 
+			// Filter console logs
+			builder.Logging.SetMinimumLevel(LogLevel.Warning);
+
 			var host = builder.Build();
 
 			// Blazorise

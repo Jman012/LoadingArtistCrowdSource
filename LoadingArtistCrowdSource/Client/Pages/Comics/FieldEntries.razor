@@ -1,4 +1,5 @@
 ﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <div class="input-group mb-2">
 	<input type="text" class="form-control" placeholder="Search Fields" aria-label="Search" value="@_filtertext" @oninput="HandleSearchInput">
@@ -18,28 +19,30 @@
 	</div>
 </div>
 
-<div class="form-inline mb-2">
-	<AuthorizeView>
-		<Authorized>
-			<div class="form-check mr-sm-2">
-				<input type="checkbox" class="form-check-input" id="filterCheckNotAnswered" @bind="filterCheckNotAnswered">
-				<label class="form-check-label" for="filterCheckNotAnswered">Not Answered</label>
-			</div>
-		</Authorized>
-	</AuthorizeView>
-	<div class="form-check mr-sm-2">
-		<input type="checkbox" class="form-check-input" id="filterCheckNoData" @bind-value="filterCheckNoData">
-		<label class="form-check-label" for="filterCheckNoData">No Data</label>
+<EditForm Model="filterCheckNotAnswered" Context="formContext">
+	<div class="form-inline mb-2">
+		<AuthorizeView>
+			<Authorized>
+				<div class="form-check mr-sm-2">
+					<InputCheckbox class="form-check-input" id="filterCheckNotAnswered" @bind-Value="filterCheckNotAnswered" />
+					<label class="form-check-label" for="filterCheckNotAnswered">Not Answered</label>
+				</div>
+			</Authorized>
+		</AuthorizeView>
+		<div class="form-check mr-sm-2">
+			<InputCheckbox class="form-check-input" id="filterCheckNoData" @bind-Value="filterCheckNoData" />
+			<label class="form-check-label" for="filterCheckNoData">No Data</label>
+		</div>
+		<div class="form-check mr-sm-2">
+			<InputCheckbox class="form-check-input" id="filterCheckCollectingData" @bind-Value="filterCheckCollectingData" />
+			<label class="form-check-label" for="filterCheckCollectingData">Collecting Data</label>
+		</div>
+		<div class="form-check mr-sm-2">
+			<InputCheckbox class="form-check-input" id="filterCheckAcceptedAnswer" @bind-Value="filterCheckAcceptedAnswer" />
+			<label class="form-check-label" for="filterCheckAcceptedAnswer">Accepted Answer</label>
+		</div>
 	</div>
-	<div class="form-check mr-sm-2">
-		<input type="checkbox" class="form-check-input" id="filterCheckCollectingData" @bind-value="filterCheckCollectingData">
-		<label class="form-check-label" for="filterCheckCollectingData">Collecting Data</label>
-	</div>
-	<div class="form-check mr-sm-2">
-		<input type="checkbox" class="form-check-input" id="filterCheckAcceptedAnswer" @bind-value="filterCheckAcceptedAnswer">
-		<label class="form-check-label" for="filterCheckAcceptedAnswer">Accepted Answer</label>
-	</div>
-</div>
+</EditForm>
 
 <div class="d-flex mb-2 align-items-baseline">
 	<div class="progress" style="width: 100%; height: 22px;">
@@ -108,6 +111,11 @@
 	private bool _filterCheckAcceptedAnswer = false;
 	private bool filterCheckAcceptedAnswer { get { return _filterCheckAcceptedAnswer; } set { _filterCheckAcceptedAnswer = value; performFilter(); } }
 
+	private const string _filterCheckNotAnsweredKey = "FilterCheckNotAnswered";
+	private const string _filterCheckNoDataKey = "FilterCheckNoData";
+	private const string _filterCheckCollectingDataKey = "FilterCheckCollectingData";
+	private const string _filterCheckAcceptedAnswerKey = "FilterCheckAcceptedAnswer";
+
 	protected override async Task OnInitializedAsync()
 	{
 		var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
@@ -116,13 +124,14 @@
 			_userName = user.Identity!.Name;
 		}
 		HandleClearFilter();
+		await InitFilterChecksFromLocalStorage();
 		await base.OnInitializedAsync();
 	}
 
 	protected override async Task OnParametersSetAsync()
 	{
+		await InitFilterChecksFromLocalStorage();
 		performFilter();
-
 		await base.OnParametersSetAsync();
 	}
 
@@ -218,6 +227,8 @@
 		}
 		this._filteredFields = _filteredFields.ToList();
 		this._filteredFieldsWithoutSections = this._filteredFields.Where(f => f.Type != CrowdSourcedFieldType.Section).ToList();
+
+		Task.Run(() => SaveFilterChecksToLocalStorage());
 	}
 
 	private void HandleClearFilter()
@@ -228,4 +239,19 @@
 		_isFiltering = false;
 	}
 
+	private async Task InitFilterChecksFromLocalStorage()
+	{
+		_filterCheckNotAnswered = await LocalStorage.GetItemAsync<bool>(_filterCheckNotAnsweredKey);
+		_filterCheckNoData = await LocalStorage.GetItemAsync<bool>(_filterCheckNoDataKey);
+		_filterCheckCollectingData = await LocalStorage.GetItemAsync<bool>(_filterCheckCollectingDataKey);
+		_filterCheckAcceptedAnswer = await LocalStorage.GetItemAsync<bool>(_filterCheckAcceptedAnswerKey);
+	}
+
+	private async Task SaveFilterChecksToLocalStorage()
+	{
+		await LocalStorage.SetItemAsync(_filterCheckNotAnsweredKey, filterCheckNotAnswered);
+		await LocalStorage.SetItemAsync(_filterCheckNoDataKey, filterCheckNoData);
+		await LocalStorage.SetItemAsync(_filterCheckCollectingDataKey, filterCheckCollectingData);
+		await LocalStorage.SetItemAsync(_filterCheckAcceptedAnswerKey, filterCheckAcceptedAnswer);
+	}
 }
